@@ -1,35 +1,58 @@
 package pt.ipleiria.estg.dei.ei.dae.backend.entities;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class User {
+@Entity
+@Table(name = "users")
+@NamedQueries({
+        @NamedQuery(
+                name = "getAllUsers",
+                query = "SELECT u FROM User u ORDER BY u.username ASC"
+        )
+})
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+
+public class User implements Serializable {
     @Id
+    @Column(nullable = false, unique = true)
     private String username;
 
     @NotBlank
+    @Column(nullable = false)
     private String password;
 
     @Email
+    @NotBlank
+    @Column(nullable = false, unique = true)
     private String email;
 
     @NotBlank
+    @Column(nullable = false)
     private String name;
 
     @NotBlank
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private Role role;
+
+    @Column(nullable = false)
+    private boolean active = true;
 
     @OneToMany(mappedBy = "submitter",cascade = CascadeType.ALL)
     private List<Publication> posts;
 
     @ManyToMany
+    @JoinTable(
+            name = "user_tag_subscriptions",
+            joinColumns = @JoinColumn(name = "user_username"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id")
+    )
     private List<Tag> subscribed_tags;
 
     public User() {
@@ -99,5 +122,31 @@ public class User {
 
     public void setSubscribed_tags(List<Tag> subscribed_tags) {
         this.subscribed_tags = subscribed_tags;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+    }
+
+    public void addPublication(Publication publication) {
+        if (!posts.contains(publication)) {
+            posts.add(publication);
+        }
+    }
+
+    public void subscribeTag(Tag tag) {
+        if (!subscribed_tags.contains(tag)) {
+            subscribed_tags.add(tag);
+            //tag.getSubscribers().add(this);
+        }
+    }
+
+    public void unsubscribeTag(Tag tag) {
+        subscribed_tags.remove(tag);
+        //tag.getSubscribers().remove(this);
     }
 }
