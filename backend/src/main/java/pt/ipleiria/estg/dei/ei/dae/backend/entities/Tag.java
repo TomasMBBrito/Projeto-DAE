@@ -11,8 +11,12 @@ import java.util.List;
 @Table(name = "tags")
 @NamedQueries({
         @NamedQuery(
-                name = "getAllTags",
+                name = "getTags",
                 query = "SELECT t FROM Tag t WHERE t.visible = true ORDER BY t.name"
+        ),
+        @NamedQuery(
+                name = "getAllTags",
+                query = "SELECT t FROM Tag t ORDER BY t.name"
         ),
         @NamedQuery(
                 name = "getTagByName",
@@ -28,7 +32,6 @@ public class Tag implements Serializable {
     @Column(nullable = false, unique = true)
     private String name;
 
-    @NotBlank
     @Column(nullable = false)
     private boolean visible;
 
@@ -46,6 +49,8 @@ public class Tag implements Serializable {
     public Tag(String name) {
         this.name = name;
         this.visible = true;
+        this.publications = new ArrayList<>();
+        this.subscribers = new ArrayList<>();
     }
 
     public void setId(Long id) {

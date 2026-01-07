@@ -2,9 +2,11 @@ package pt.ipleiria.estg.dei.ei.dae.backend.entities;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import org.hibernate.usertype.UserType;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "history_logs")
@@ -16,14 +18,18 @@ import java.io.Serializable;
     @NamedQuery(
         name = "getHistoryLogsByUser",
         query = "SELECT h FROM History h WHERE h.user.username = :username"
-    )
+    ),
+        @NamedQuery(
+                name = "getHistoryLogsByEntity",
+                query = "SELECT h FROM History h WHERE h.entity = :entity AND h.entityId = :entityId ORDER BY h.entity DESC"
+        )
 })
 public class History implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank
+    @NotNull
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ActivityType activityType;
@@ -36,14 +42,18 @@ public class History implements Serializable {
     @Column(nullable = false)
     private String entity;
 
-    @NotBlank
+
     @Column(name = "entity_id")
     private Long entityId;
 
-    @NotBlank
+    @NotNull
     @ManyToOne
     @JoinColumn(name = "user_username", nullable = false)
     private User user;
+
+    @NotNull
+    @Column(nullable = false)
+    private LocalDateTime timestamp;
 
     public History() {
     }
@@ -54,6 +64,7 @@ public class History implements Serializable {
         this.entity = entity;
         this.entityId = entityId;
         this.user = user;
+        this.timestamp = LocalDateTime.now();
     }
 
     public Long getId() {
@@ -102,5 +113,13 @@ public class History implements Serializable {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public LocalDateTime getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(LocalDateTime timestamp) {
+        this.timestamp = timestamp;
     }
 }

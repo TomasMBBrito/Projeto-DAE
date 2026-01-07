@@ -2,6 +2,7 @@ package pt.ipleiria.estg.dei.ei.dae.backend.entities;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -14,6 +15,10 @@ import java.util.List;
         @NamedQuery(
                 name = "getAllPublications",
                 query = "SELECT p FROM Publication p ORDER BY p.scientificArea DESC"
+        ),
+        @NamedQuery(
+                name = "getVisiblePublications",
+                query = "SELECT p FROM Publication p WHERE p.visible = true ORDER BY p.publicationDate DESC"
         )
 })
 public class Publication implements Serializable {
@@ -26,35 +31,31 @@ public class Publication implements Serializable {
     private String title;
 
     @NotBlank
-    @Column(nullable = false)
+    @Column(nullable = false,length = 2000)
     private String description;
 
-    @NotBlank
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ScientificArea scientificArea;
 
-    private String filePath;
 
-    @NotBlank
-    @Column(nullable = false)
-    private String fileName;
+    @OneToOne(mappedBy = "publication", cascade = CascadeType.ALL)
+    private Document document;
 
-    @NotBlank
-    @Column(nullable = false)
-    private FileType fileType;
-
-    @NotBlank
+    @NotNull
     @Column(nullable = false)
     private LocalDate publicationDate;
 
-    @NotBlank
+    @Column(length = 1000)
+    private String authors;
+
     @Column(nullable = false)
-    private boolean visible;
+    private boolean visible = true;
 
     @OneToMany(mappedBy = "publication", cascade = CascadeType.ALL)
     private List<Rating> ratings;
 
-    @NotBlank
+    @NotNull
     @ManyToOne
     @JoinColumn(name = "submitter_username", nullable = false)
     private User author;
@@ -76,16 +77,20 @@ public class Publication implements Serializable {
         this.comments = new ArrayList<>();
     }
 
-    public Publication(String title, String description, ScientificArea scientificArea, String fileName, FileType fileType, LocalDate publicationDate, User author, List<Tag> tags) {
+    public Publication(String title, String description, ScientificArea scientificArea, Document document, LocalDate publicationDate, User author) {
         this.title = title;
         this.description = description;
         this.scientificArea = scientificArea;
-        this.fileName = fileName;
-        this.fileType = fileType;
+        this.document = document;
         this.publicationDate = publicationDate;
         this.visible = true;
         this.author = author;
+        this.tags = new ArrayList<>();
+        this.ratings = new ArrayList<>();
+        this.comments = new ArrayList<>();
     }
+
+
 
     public long getId() {
         return id;
@@ -119,28 +124,12 @@ public class Publication implements Serializable {
         this.scientificArea = scientificArea;
     }
 
-    public String getFilePath() {
-        return filePath;
+    public Document getDocument() {
+        return document;
     }
 
-    public void setFilePath(String filePath) {
-        this.filePath = filePath;
-    }
-
-    public String getFileName() {
-        return fileName;
-    }
-
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
-    }
-
-    public FileType getFileType() {
-        return fileType;
-    }
-
-    public void setFileType(FileType fileType) {
-        this.fileType = fileType;
+    public void setDocument(Document document) {
+        this.document = document;
     }
 
     public LocalDate getPublicationDate() {
@@ -191,6 +180,14 @@ public class Publication implements Serializable {
         this.comments = comments;
     }
 
+    public String getAuthors() {
+        return authors;
+    }
+
+    public void setAuthors(String authors) {
+        this.authors = authors;
+    }
+
     public void addTag(Tag tag) {
         if (!tags.contains(tag)) {
             tags.add(tag);
@@ -204,8 +201,10 @@ public class Publication implements Serializable {
     }
 
     public void addComment(Comment comment) {
-        comments.add(comment);
-        comment.setPublication(this);
+        if (!comments.contains(comment)) {
+            comments.add(comment);
+            comment.setPublication(this);
+        }
     }
 
     public void removeComment(Comment comment) {
@@ -214,8 +213,10 @@ public class Publication implements Serializable {
     }
 
     public void addRating(Rating rating) {
-        ratings.add(rating);
-        rating.setPublication(this);
+        if (!ratings.contains(rating)) {
+            ratings.add(rating);
+            rating.setPublication(this);
+        }
     }
 
     public Double getAverageRating() {

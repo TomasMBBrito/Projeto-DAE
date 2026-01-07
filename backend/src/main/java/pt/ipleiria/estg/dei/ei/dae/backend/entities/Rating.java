@@ -4,31 +4,37 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 import java.io.Serializable;
 
 @Entity
 @Table(
         name = "ratings",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "publication_id"})
+        uniqueConstraints = @UniqueConstraint(columnNames = {"user_username", "publication_id"})
 )
+@NamedQueries({
+        @NamedQuery(
+                name = "getRatingByUserAndPublication",
+                query = "SELECT r FROM Rating r WHERE r.user.username = :username AND r.publication.id = :publicationId"
+        )
+})
 public class Rating implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank
     @Column(nullable = false)
     @Min(1)
     @Max(5)
     private int value;
 
-    @NotBlank
+    @NotNull
     @ManyToOne
     @JoinColumn(name = "user_username", nullable = false)
     private User user;
 
-    @NotBlank
+    @NotNull
     @ManyToOne
     @JoinColumn(name = "publication_id", nullable = false)
     private Publication publication;

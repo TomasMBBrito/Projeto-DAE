@@ -2,13 +2,18 @@ package pt.ipleiria.estg.dei.ei.dae.backend.entities;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "comments")
 @NamedQueries({
         @NamedQuery(
                 name = "getCommentsByPublication",
-                query = "SELECT c FROM Comment c WHERE c.publication.id = :publicationId AND c.visible = true"
+                query = "SELECT c FROM Comment c WHERE c.publication.id = :publicationId AND c.visible = true ORDER BY c.user.name DESC"
+        ),
+        @NamedQuery(
+                name = "getAllCommentsByPublication",
+                query = "SELECT c FROM Comment c WHERE c.publication.id = :publicationId ORDER BY c.user.name DESC"
         )
 })
 public class Comment {
@@ -17,19 +22,20 @@ public class Comment {
     private Long id;
 
     @NotBlank
-    @Column(nullable = false)
+    @Column(nullable = false, length = 2000)
     private String text;
 
-    @NotBlank
+    @NotNull
     @ManyToOne
     @JoinColumn(name = "user_username", nullable = false)
     private User user;
 
+    @NotNull
     @ManyToOne
     @JoinColumn(name = "publication_id", nullable = false)
     private Publication publication;
 
-    @NotBlank
+
     @Column(nullable = false)
     private boolean visible;
 

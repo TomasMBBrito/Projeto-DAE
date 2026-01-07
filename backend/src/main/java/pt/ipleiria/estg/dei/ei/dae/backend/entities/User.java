@@ -36,7 +36,6 @@ public class User implements Serializable {
     @Column(nullable = false)
     private String name;
 
-    @NotBlank
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
@@ -44,7 +43,7 @@ public class User implements Serializable {
     @Column(nullable = false)
     private boolean active = true;
 
-    @OneToMany(mappedBy = "submitter",cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "author",cascade = CascadeType.ALL)
     private List<Publication> posts;
 
     @ManyToMany
@@ -66,6 +65,9 @@ public class User implements Serializable {
         this.email = email;
         this.name = name;
         this.role = role;
+        this.active = true;
+        this.posts = new ArrayList<>();
+        this.subscribed_tags = new ArrayList<>();
     }
 
     public String getUsername() {
@@ -141,12 +143,12 @@ public class User implements Serializable {
     public void subscribeTag(Tag tag) {
         if (!subscribed_tags.contains(tag)) {
             subscribed_tags.add(tag);
-            //tag.getSubscribers().add(this);
+            tag.getSubscribers().add(this);
         }
     }
 
     public void unsubscribeTag(Tag tag) {
         subscribed_tags.remove(tag);
-        //tag.getSubscribers().remove(this);
+        tag.getSubscribers().remove(this);
     }
 }
