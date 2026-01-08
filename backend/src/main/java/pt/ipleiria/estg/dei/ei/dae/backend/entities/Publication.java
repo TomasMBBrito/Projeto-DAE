@@ -47,7 +47,7 @@ public class Publication implements Serializable {
     private LocalDate publicationDate;
 
     @Column(length = 1000)
-    private String authors;
+    private List<String> authors;
 
     @Column(nullable = false)
     private boolean visible = true;
@@ -180,11 +180,11 @@ public class Publication implements Serializable {
         this.comments = comments;
     }
 
-    public String getAuthors() {
+    public List<String> getAuthors() {
         return authors;
     }
 
-    public void setAuthors(String authors) {
+    public void setAuthors(List<String> authors) {
         this.authors = authors;
     }
 

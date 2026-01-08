@@ -52,11 +52,11 @@ public class User implements Serializable {
             joinColumns = @JoinColumn(name = "user_username"),
             inverseJoinColumns = @JoinColumn(name = "tag_id")
     )
-    private List<Tag> subscribed_tags;
+    private List<Tag> subscribedTags;
 
     public User() {
         this.posts = new ArrayList<>();
-        this.subscribed_tags = new ArrayList<>();
+        this.subscribedTags = new ArrayList<>();
     }
 
     public User(String username, String password, String email, String name, Role role) {
@@ -67,7 +67,7 @@ public class User implements Serializable {
         this.role = role;
         this.active = true;
         this.posts = new ArrayList<>();
-        this.subscribed_tags = new ArrayList<>();
+        this.subscribedTags = new ArrayList<>();
     }
 
     public String getUsername() {
@@ -119,11 +119,11 @@ public class User implements Serializable {
     }
 
     public List<Tag> getSubscribed_tags() {
-        return subscribed_tags;
+        return subscribedTags;
     }
 
     public void setSubscribed_tags(List<Tag> subscribed_tags) {
-        this.subscribed_tags = subscribed_tags;
+        this.subscribedTags = subscribed_tags;
     }
 
     public boolean isActive() {
@@ -141,14 +141,14 @@ public class User implements Serializable {
     }
 
     public void subscribeTag(Tag tag) {
-        if (!subscribed_tags.contains(tag)) {
-            subscribed_tags.add(tag);
+        if (!subscribedTags.contains(tag)) {
+            subscribedTags.add(tag);
             tag.getSubscribers().add(this);
         }
     }
 
     public void unsubscribeTag(Tag tag) {
-        subscribed_tags.remove(tag);
+        subscribedTags.remove(tag);
         tag.getSubscribers().remove(this);
     }
 }

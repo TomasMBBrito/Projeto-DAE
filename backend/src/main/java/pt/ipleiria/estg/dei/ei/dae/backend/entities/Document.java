@@ -22,19 +22,17 @@ public class Document {
     @Enumerated(EnumType.STRING)
     private FileType fileType;
 
-    @NotNull
     @OneToOne
     @JoinColumn(name = "publication_id", nullable = false,unique = true)
-    private Publication post;
+    private Publication publication;
 
     public Document() {
     }
 
-    public Document(String fileName, String filePath,FileType fileType,Publication post) {
+    public Document(String fileName, String filePath,FileType fileType) {
         this.fileName = fileName;
         this.filePath = filePath;
         this.fileType = fileType;
-        this.post = post;
     }
 
     public Long getId() {
@@ -69,11 +67,11 @@ public class Document {
         this.fileType = fileType;
     }
 
-    public Publication getPost() {
-        return post;
+    public Publication getPublication() {
+        return publication;
     }
 
-    public void setPost(Publication post) {
-        this.post = post;
+    public void setPublication(Publication publication) {
+        this.publication = publication;
     }
 }

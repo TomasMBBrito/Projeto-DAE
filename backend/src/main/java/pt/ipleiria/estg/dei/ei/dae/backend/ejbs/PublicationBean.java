@@ -1,0 +1,293 @@
+package pt.ipleiria.estg.dei.ei.dae.backend.ejbs;
+
+import jakarta.ejb.EJB;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import pt.ipleiria.estg.dei.ei.dae.backend.entities.*;
+
+import java.io.InputStream;
+import java.time.LocalDate;
+import java.util.List;
+
+@Stateless
+public class PublicationBean {
+
+    @PersistenceContext
+    private EntityManager em;
+
+    @EJB
+    private HistoryBean historyBean;
+
+    @EJB
+    private EmailBean emailBean;
+
+    public Publication create(String title, String description, ScientificArea scientificArea,
+                              LocalDate publicationDate, List<String> authors, User submitter,
+                              String fileName, FileType fileType) {
+
+        Document document = new Document(fileName,"home" ,fileType);
+        // Create publication
+        Publication publication = new Publication(
+                title,
+                description,
+                scientificArea,
+                document,
+                publicationDate,
+                submitter
+        );
+
+        publication.setAuthors(authors);
+        publication.setDocument(document);
+        document.setPublication(publication);
+        em.persist(publication);
+        em.flush(); // Ensure publication gets an ID before creating document
+
+        // Log activity
+        historyBean.logActivity(
+                ActivityType.PUBLICATION_CREATED,
+                "Publication created: " + title + " with file: " + fileName,
+                "Publication",
+                publication.getId(),
+                submitter
+        );
+
+        return publication;
+    }
+
+
+    public Publication find(Long id) {
+        return em.find(Publication.class, id);
+    }
+
+    public List<Publication> getAll() {
+        return em.createNamedQuery("getAllPublications", Publication.class).getResultList();
+    }
+
+    public List<Publication> getAllVisible() {
+        return em.createNamedQuery("getVisiblePublications", Publication.class).getResultList();
+    }
+
+    public List<Publication> getByUser(String username) {
+        return em.createQuery(
+                        "SELECT p FROM Publication p WHERE p.author.username = :username ORDER BY p.publicationDate DESC",
+                        Publication.class
+                )
+                .setParameter("username", username)
+                .getResultList();
+    }
+
+    public List<Publication> getByTag(String tagName) {
+        return em.createQuery(
+                        "SELECT p FROM Publication p JOIN p.tags t WHERE t.name = :tagName AND p.visible = true ORDER BY p.publicationDate DESC",
+                        Publication.class
+                )
+                .setParameter("tagName", tagName)
+                .getResultList();
+    }
+
+    public List<Publication> search(String searchTerm) {
+        return em.createQuery(
+                        "SELECT p FROM Publication p WHERE (LOWER(p.title) LIKE LOWER(:search) OR LOWER(p.description) LIKE LOWER(:search)) AND p.visible = true ORDER BY p.publicationDate DESC",
+                        Publication.class
+                )
+                .setParameter("search", "%" + searchTerm + "%")
+                .getResultList();
+    }
+
+    public List<Publication> getByScientificArea(ScientificArea area) {
+        return em.createQuery(
+                        "SELECT p FROM Publication p WHERE p.scientificArea = :area AND p.visible = true ORDER BY p.publicationDate DESC",
+                        Publication.class
+                )
+                .setParameter("area", area)
+                .getResultList();
+    }
+
+
+    public void update(Long id, String title, String description, ScientificArea scientificArea,
+                       LocalDate publicationDate, List<String> authors, User performedBy) {
+        Publication publication = find(id);
+        if (publication == null) {
+            throw new IllegalArgumentException("Publication not found: " + id);
+        }
+
+        publication.setTitle(title);
+        publication.setDescription(description);
+        publication.setScientificArea(scientificArea);
+        publication.setPublicationDate(publicationDate);
+        publication.setAuthors(authors);
+
+        // Log activity
+        historyBean.logActivity(
+                ActivityType.PUBLICATION_UPDATED,
+                "Publication updated: " + title,
+                "Publication",
+                id,
+                performedBy
+        );
+    }
+
+
+    public void updateDocument(Long publicationId, String fileName, FileType fileType,
+                               InputStream fileContent, User performedBy) {
+        Publication publication = find(publicationId);
+        if (publication == null) {
+            throw new IllegalArgumentException("Publication not found: " + publicationId);
+        }
+
+        // Delete old document if exists
+        if (publication.getDocument() != null) {
+            Long oldDocId = publication.getDocument().getId();
+            //documentBean.delete(oldDocId);
+
+        }
+
+        // Create new document
+        Document newDocument = new Document(fileName, "home" ,fileType);
+        publication.setDocument(newDocument);
+
+        // Log activity
+        historyBean.logActivity(
+                ActivityType.PUBLICATION_UPDATED,
+                "Document replaced for publication: " + publication.getTitle(),
+                "Publication",
+                publicationId,
+                performedBy
+        );
+    }
+
+
+    public void hide(Long id, User performedBy) {
+        Publication publication = find(id);
+        if (publication == null) {
+            throw new IllegalArgumentException("Publication not found: " + id);
+        }
+
+        publication.setVisible(false);
+
+        // Log activity
+        historyBean.logActivity(
+                ActivityType.PUBLICATION_HIDDEN,
+                "Publication hidden: " + publication.getTitle(),
+                "Publication",
+                id,
+                performedBy
+        );
+    }
+
+    public void show(Long id, User performedBy) {
+        Publication publication = find(id);
+        if (publication == null) {
+            throw new IllegalArgumentException("Publication not found: " + id);
+        }
+
+        publication.setVisible(true);
+
+        // Log activity
+        historyBean.logActivity(
+                ActivityType.PUBLICATION_SHOWN,
+                "Publication shown: " + publication.getTitle(),
+                "Publication",
+                id,
+                performedBy
+        );
+    }
+
+
+    public void delete(Long id, User performedBy) {
+        Publication publication = find(id);
+        if (publication == null) {
+            throw new IllegalArgumentException("Publication not found: " + id);
+        }
+
+        String title = publication.getTitle();
+
+        // Delete document first (cascade will handle it, but we log it explicitly)
+        if (publication.getDocument() != null) {
+            //documentBean.delete(publication.getDocument().getId());
+        }
+
+        // Log activity BEFORE deletion
+        historyBean.logActivity(
+                ActivityType.PUBLICATION_DELETED,
+                "Publication deleted: " + title,
+                "Publication",
+                id,
+                performedBy
+        );
+
+        em.remove(publication);
+    }
+
+
+    public void addTag(Long publicationId, Tag tag, User performedBy) {
+        Publication publication = find(publicationId);
+        if (publication == null) {
+            throw new IllegalArgumentException("Publication not found: " + publicationId);
+        }
+
+        publication.addTag(tag);
+
+        // Log activity
+        historyBean.logActivity(
+                ActivityType.TAG_ADDED_TO_PUBLICATION,
+                "Tag '" + tag.getName() + "' added to publication: " + publication.getTitle(),
+                "Publication",
+                publicationId,
+                performedBy
+        );
+
+        // Notify subscribers of this tag
+        emailBean.notifyTagSubscribers(tag, publication, "New publication with tag: " + tag.getName());
+    }
+
+    public void removeTag(Long publicationId, Tag tag, User performedBy) {
+        Publication publication = find(publicationId);
+        if (publication == null) {
+            throw new IllegalArgumentException("Publication not found: " + publicationId);
+        }
+
+        publication.removeTag(tag);
+
+        // Log activity
+        historyBean.logActivity(
+                ActivityType.TAG_REMOVED_FROM_PUBLICATION,
+                "Tag '" + tag.getName() + "' removed from publication: " + publication.getTitle(),
+                "Publication",
+                publicationId,
+                performedBy
+        );
+    }
+
+
+    public boolean canEdit(Publication publication, User user) {
+
+        if (publication.getAuthor().getUsername().equals(user.getUsername())) {
+            return true;
+        }
+
+
+        return user.getRole() == Role.RESPONSAVEL || user.getRole() == Role.ADMINISTRADOR;
+    }
+
+    public boolean canDelete(Publication publication, User user) {
+        // Only RESPONSAVEL and ADMINISTRADOR can delete
+        return user.getRole() == Role.RESPONSAVEL || user.getRole() == Role.ADMINISTRADOR;
+    }
+
+    public boolean canView(Publication publication, User user) {
+        // If visible, anyone can view
+        if (publication.isVisible()) {
+            return true;
+        }
+
+        // If not visible, only submitter, RESPONSAVEL, and ADMINISTRADOR can view
+        if (publication.getAuthor().getUsername().equals(user.getUsername())) {
+            return true;
+        }
+
+        return user.getRole() == Role.RESPONSAVEL || user.getRole() == Role.ADMINISTRADOR;
+    }
+}

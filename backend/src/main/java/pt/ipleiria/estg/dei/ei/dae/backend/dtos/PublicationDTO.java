@@ -18,7 +18,7 @@ public class PublicationDTO implements Serializable {
 //    private String fileName;
 //    private FileType fileType;
     private LocalDate publicationDate;
-    private String authors;
+    private List<String> authors;
     private boolean visible;
 
     private String submitterUsername;
@@ -37,7 +37,7 @@ public class PublicationDTO implements Serializable {
 
     public PublicationDTO(long id, String title, String description, ScientificArea scientificArea,
                           LocalDate publicationDate,
-                          String authors, boolean visible) {
+                          List<String> authors, boolean visible) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -107,11 +107,11 @@ public class PublicationDTO implements Serializable {
         this.publicationDate = publicationDate;
     }
 
-    public String getAuthors() {
+    public List<String> getAuthors() {
         return authors;
     }
 
-    public void setAuthors(String authors) {
+    public void setAuthors(List<String> authors) {
         this.authors = authors;
     }
 
