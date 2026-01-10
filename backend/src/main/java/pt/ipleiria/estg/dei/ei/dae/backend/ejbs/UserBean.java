@@ -4,10 +4,13 @@ import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import jakarta.validation.ConstraintViolationException;
 import pt.ipleiria.estg.dei.ei.dae.backend.entities.ActivityType;
 import pt.ipleiria.estg.dei.ei.dae.backend.entities.Role;
 import pt.ipleiria.estg.dei.ei.dae.backend.entities.Tag;
 import pt.ipleiria.estg.dei.ei.dae.backend.entities.User;
+import pt.ipleiria.estg.dei.ei.dae.backend.exceptions.MyConstraintViolationException;
+import pt.ipleiria.estg.dei.ei.dae.backend.exceptions.MyEntityExistsException;
 import pt.ipleiria.estg.dei.ei.dae.backend.exceptions.MyEntityNotFoundException;
 import pt.ipleiria.estg.dei.ei.dae.backend.security.Hasher;
 
@@ -22,20 +25,27 @@ public class UserBean {
     @EJB
     private HistoryBean historyBean;
 
-    public User create(String username, String password, String email, String name, Role role) {
-        User user = new User(username, password, email, name, role);
-        em.persist(user);
+    public User create(String username, String password, String email, String name, Role role,User user_performing) throws MyEntityExistsException, MyConstraintViolationException {
+        if(em.find(User.class, username) != null) {
+            throw new MyEntityExistsException("User already exists: " + username);
+        }
+        try {
+            User user = new User(username, Hasher.hash(password), email, name, role);
+            em.persist(user);
+            em.flush();
+            // Log activity
+            historyBean.logActivity(
+                    ActivityType.USER_CREATED,
+                    "User created: " + username,
+                    "User",
+                    null,
+                    user_performing
+            );
 
-        // Log activity
-        historyBean.logActivity(
-                ActivityType.USER_CREATED,
-                "User created: " + username,
-                "User",
-                null,
-                user
-        );
-
-        return user;
+            return user;
+        }catch (ConstraintViolationException e){
+            throw new MyConstraintViolationException(e);
+        }
     }
 
     public User find(String username) throws MyEntityNotFoundException {
@@ -46,14 +56,17 @@ public class UserBean {
         return user;
     }
 
-    public List<User> getAll() {
-        return em.createNamedQuery("getAllUsers", User.class).getResultList();
+    public List<User> getAll(User user) {
+        if(user.getRole().equals(Role.ADMINISTRADOR)) {
+            return em.createNamedQuery("getAllUsers", User.class).getResultList();
+        }
+        return em.createNamedQuery("getAllVisibleUsers", User.class).getResultList();
     }
 
     public void update(String username, String email, String name) throws MyEntityNotFoundException {
         User user = find(username);
         if (user == null) {
-            throw new IllegalArgumentException("User not found: " + username);
+            throw new MyEntityNotFoundException("User not found: " + username);
         }
 
         user.setEmail(email);
@@ -72,7 +85,7 @@ public class UserBean {
     public void changePassword(String username, String newPassword) throws MyEntityNotFoundException {
         User user = find(username);
         if (user == null) {
-            throw new IllegalArgumentException("User not found: " + username);
+            throw new MyEntityNotFoundException("User not found: " + username);
         }
 
         user.setPassword(newPassword);
@@ -90,7 +103,7 @@ public class UserBean {
     public void changeRole(String username, Role newRole, User performedBy) throws MyEntityNotFoundException {
         User user = find(username);
         if (user == null) {
-            throw new IllegalArgumentException("User not found: " + username);
+            throw new MyEntityNotFoundException("User not found: " + username);
         }
 
         Role oldRole = user.getRole();
@@ -109,7 +122,7 @@ public class UserBean {
     public void activate(String username, User performedBy) throws MyEntityNotFoundException {
         User user = find(username);
         if (user == null) {
-            throw new IllegalArgumentException("User not found: " + username);
+            throw new MyEntityNotFoundException("User not found: " + username);
         }
 
         user.setActive(true);
@@ -127,7 +140,7 @@ public class UserBean {
     public void deactivate(String username, User performedBy) throws MyEntityNotFoundException {
         User user = find(username);
         if (user == null) {
-            throw new IllegalArgumentException("User not found: " + username);
+            throw new MyEntityNotFoundException("User not found: " + username);
         }
 
         user.setActive(false);
@@ -145,7 +158,7 @@ public class UserBean {
     public void delete(String username, User performedBy) throws MyEntityNotFoundException {
         User user = find(username);
         if (user == null) {
-            throw new IllegalArgumentException("User not found: " + username);
+            throw new MyEntityNotFoundException("User not found: " + username);
         }
 
         // Log activity BEFORE deletion
@@ -163,7 +176,7 @@ public class UserBean {
     public void subscribeTag(String username, Tag tag) throws MyEntityNotFoundException {
         User user = find(username);
         if (user == null) {
-            throw new IllegalArgumentException("User not found: " + username);
+
         }
 
         user.subscribeTag(tag);
@@ -181,7 +194,7 @@ public class UserBean {
     public void unsubscribeTag(String username, Tag tag) throws MyEntityNotFoundException {
         User user = find(username);
         if (user == null) {
-            throw new IllegalArgumentException("User not found: " + username);
+            throw new MyEntityNotFoundException("User not found: " + username);
         }
 
         user.unsubscribeTag(tag);

@@ -27,7 +27,7 @@ public class HistoryBean {
         }
     }
 
-    // READ
+
     public History find(Long id) {
         return em.find(History.class, id);
     }

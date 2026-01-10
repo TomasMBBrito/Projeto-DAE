@@ -12,10 +12,10 @@ import java.util.Date;
 
 public class TokenIssuer {
     protected static final byte[] SECRET_KEY =
-            "veRysup3rstr0nginv1ncible5ecretkeY@academics.dae.ipleiria".getBytes();
+            "veRysup3rstr0nginv1ncible5ecretkeY@backend.dae.ipleiria".getBytes();
     protected static final String ALGORITHM = "HMACSHA384";
     public static final long EXPIRY_MINS = 60L;
-    public static String issue(String username) {
+    public static String issue(String username,String role) {
         LocalDateTime expiryPeriod = LocalDateTime.now().plusMinutes(EXPIRY_MINS);
         Date expirationDateTime = Date.from(
                 expiryPeriod.atZone(ZoneId.systemDefault()).toInstant()
@@ -23,6 +23,7 @@ public class TokenIssuer {
         Key key = new SecretKeySpec(SECRET_KEY, ALGORITHM);
         return Jwts.builder()
                 .subject(username)
+                .claim("role",role)
                 .issuedAt(new Date())
                 .expiration(expirationDateTime)
                 .signWith(key)

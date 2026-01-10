@@ -53,9 +53,9 @@ public class UserDTO implements Serializable {
     }
 
 //    @JsonIgnore
-//    public String getPassword() {
-//        return password;
-//    }
+    public String getPassword() {
+        return password;
+    }
 
     public void setPassword(String password) {
         this.password = password;
@@ -116,4 +116,6 @@ public class UserDTO implements Serializable {
     public static List<UserDTO> from(List<User> users) {
         return users.stream().map(UserDTO::from).collect(Collectors.toList());
     }
+
+
 }

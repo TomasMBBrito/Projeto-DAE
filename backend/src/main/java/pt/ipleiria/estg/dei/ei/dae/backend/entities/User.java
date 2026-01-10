@@ -14,7 +14,12 @@ import java.util.List;
         @NamedQuery(
                 name = "getAllUsers",
                 query = "SELECT u FROM User u ORDER BY u.username ASC"
-        )
+        ),
+        @NamedQuery(
+                name = "getAllVisibleUsers",
+                query = "SELECT u FROM User u WHERE u.active = TRUE ORDER BY u.username ASC"
+        ),
+
 })
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 

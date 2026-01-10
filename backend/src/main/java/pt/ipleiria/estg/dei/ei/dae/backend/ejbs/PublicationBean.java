@@ -6,6 +6,7 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import pt.ipleiria.estg.dei.ei.dae.backend.entities.*;
+import pt.ipleiria.estg.dei.ei.dae.backend.exceptions.MyEntityNotFoundException;
 
 import java.io.InputStream;
 import java.time.LocalDate;
@@ -69,7 +70,11 @@ public class PublicationBean {
         return em.createNamedQuery("getVisiblePublications", Publication.class).getResultList();
     }
 
-    public List<Publication> getByUser(String username) {
+    public List<Publication> getByUser(String username) throws MyEntityNotFoundException {
+
+        if(em.find(User.class, username) == null){
+            throw new MyEntityNotFoundException("User not found: " + username);
+        }
         return em.createQuery(
                         "SELECT p FROM Publication p WHERE p.author.username = :username ORDER BY p.publicationDate DESC",
                         Publication.class
@@ -196,10 +201,14 @@ public class PublicationBean {
     }
 
 
-    public void delete(Long id, User performedBy) {
+    public void delete(Long id, User performedBy) throws MyEntityNotFoundException {
         Publication publication = find(id);
         if (publication == null) {
-            throw new IllegalArgumentException("Publication not found: " + id);
+            throw new MyEntityNotFoundException("Publication not found: " + id);
+        }
+
+        if(em.find(User.class, performedBy.getUsername()) == null) {
+            throw new MyEntityNotFoundException("User not found: " + performedBy.getUsername());
         }
 
         String title = publication.getTitle();
