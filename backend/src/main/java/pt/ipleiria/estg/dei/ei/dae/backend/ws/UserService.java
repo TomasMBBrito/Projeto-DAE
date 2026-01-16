@@ -161,9 +161,9 @@ public class UserService {
             User performingUser = userBean.find(currentUsername);
 
             if (userDTO.isBlocked()) {
-                userBean.activate(username, performingUser);
-            } else {
                 userBean.deactivate(username, performingUser);
+            } else {
+                userBean.activate(username, performingUser);
             }
 
             return Response.ok(Map.of("message", "Status do utilizador atualizado !!")).build();

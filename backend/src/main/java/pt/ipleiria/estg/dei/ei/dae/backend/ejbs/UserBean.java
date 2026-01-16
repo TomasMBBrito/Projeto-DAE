@@ -136,7 +136,7 @@ public class UserBean {
             throw new MyEntityNotFoundException("User not found: " + username);
         }
 
-        user.setActive(true);
+        user.setBlocked(false);
         em.merge(user);
 
         // Log activity
@@ -155,7 +155,7 @@ public class UserBean {
             throw new MyEntityNotFoundException("User not found: " + username);
         }
 
-        user.setActive(false);
+        user.setBlocked(true);
         em.merge(user);
 
         // Log activity
@@ -245,7 +245,7 @@ public class UserBean {
 
     public boolean canLogin(String username, String password) throws MyEntityNotFoundException {
         User user = find(username);
-        if (user == null || !user.isActive()) {
+        if (user == null || user.isBlocked()) {
             return false;
         }
 

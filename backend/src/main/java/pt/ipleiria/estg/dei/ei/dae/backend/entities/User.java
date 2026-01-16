@@ -17,7 +17,7 @@ import java.util.List;
         ),
         @NamedQuery(
                 name = "getAllVisibleUsers",
-                query = "SELECT u FROM User u WHERE u.active = TRUE ORDER BY u.username ASC"
+                query = "SELECT u FROM User u WHERE u.blocked= FALSE ORDER BY u.username ASC"
         ),
 
 })

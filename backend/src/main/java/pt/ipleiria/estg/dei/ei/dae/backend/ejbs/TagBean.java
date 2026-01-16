@@ -58,8 +58,8 @@ public class TagBean {
 
         User user = userbean.find(username);
 
-        Hibernate.initialize(user.getSubscribed_tags());
-        return user.getSubscribed_tags();
+        Hibernate.initialize(user.getSubscribedTags());
+        return user.getSubscribedTags();
     }
 
     public List<Tag> getAllVisible() {

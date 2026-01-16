@@ -13,16 +13,16 @@ import java.time.LocalDateTime;
 @NamedQueries({
     @NamedQuery(
         name = "getAllHistoryLogs",
-        query = "SELECT h FROM History h"
+        query = "SELECT h FROM History h ORDER BY h.timestamp DESC"
     ),
     @NamedQuery(
         name = "getHistoryLogsByUser",
-        query = "SELECT h FROM History h WHERE h.user.username = :username"
+        query = "SELECT h FROM History h WHERE h.user.username = :username ORDER BY h.timestamp DESC"
     ),
-        @NamedQuery(
-                name = "getHistoryLogsByEntity",
-                query = "SELECT h FROM History h WHERE h.entity = :entity AND h.entityId = :entityId ORDER BY h.entity DESC"
-        )
+    @NamedQuery(
+            name = "getPublicationActivities",
+            query = "SELECT h FROM History h WHERE h.entity = 'Publication' AND h.entityId = :publicationId ORDER BY h.timestamp DESC"
+    )
 })
 public class History implements Serializable {
     @Id
@@ -32,7 +32,7 @@ public class History implements Serializable {
     @NotNull
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private ActivityType activityType;
+    private ActivityType action;
 
     @NotBlank
     @Column(nullable = false, length = 1000)
@@ -59,7 +59,7 @@ public class History implements Serializable {
     }
 
     public History(ActivityType activityType, String description, String entity, Long entityId, User user) {
-        this.activityType = activityType;
+        this.action = activityType;
         this.description = description;
         this.entity = entity;
         this.entityId = entityId;
@@ -75,12 +75,12 @@ public class History implements Serializable {
         this.id = id;
     }
 
-    public ActivityType getActivityType() {
-        return activityType;
+    public ActivityType getAction() {
+        return action;
     }
 
-    public void setActivityType(ActivityType activityType) {
-        this.activityType = activityType;
+    public void setAction(ActivityType action) {
+        this.action = action;
     }
 
     public String getDescription() {

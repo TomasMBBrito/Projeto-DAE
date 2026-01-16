@@ -9,49 +9,33 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class HistoryDTO implements Serializable {
-    private Long id;
-    private ActivityType activityType;
+    private String action;
     private String description;
-    private String entity;
-    private Long entityId;
-
-
-    private String username;
-    private String userFullName;
-
+    private String user;
     private LocalDateTime timestamp;
 
     public HistoryDTO() {
     }
 
-    public HistoryDTO(Long id, ActivityType activityType, String description,
-                      String entity, Long entityId, String username,
-                      String userFullName, LocalDateTime timestamp) {
-        this.id = id;
-        this.activityType = activityType;
+    public HistoryDTO(String action, String description, LocalDateTime timestamp) {
+        this.action = action;
         this.description = description;
-        this.entity = entity;
-        this.entityId = entityId;
-        this.username = username;
-        this.userFullName = userFullName;
         this.timestamp = timestamp;
     }
 
-    // Getters and Setters
-    public Long getId() {
-        return id;
+    public HistoryDTO(String action, String description, LocalDateTime timestamp, String user) {
+        this.action = action;
+        this.description = description;
+        this.timestamp = timestamp;
+        this.user = user;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public String getAction() {
+        return action;
     }
 
-    public ActivityType getActivityType() {
-        return activityType;
-    }
-
-    public void setActivityType(ActivityType activityType) {
-        this.activityType = activityType;
+    public void setAction(String action) {
+        this.action = action;
     }
 
     public String getDescription() {
@@ -62,36 +46,12 @@ public class HistoryDTO implements Serializable {
         this.description = description;
     }
 
-    public String getEntity() {
-        return entity;
+    public String getUser() {
+        return user;
     }
 
-    public void setEntity(String entity) {
-        this.entity = entity;
-    }
-
-    public Long getEntityId() {
-        return entityId;
-    }
-
-    public void setEntityId(Long entityId) {
-        this.entityId = entityId;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getUserFullName() {
-        return userFullName;
-    }
-
-    public void setUserFullName(String userFullName) {
-        this.userFullName = userFullName;
+    public void setUser(String user) {
+        this.user = user;
     }
 
     public LocalDateTime getTimestamp() {
@@ -102,23 +62,32 @@ public class HistoryDTO implements Serializable {
         this.timestamp = timestamp;
     }
 
-
     public static HistoryDTO from(History history) {
         return new HistoryDTO(
-                history.getId(),
-                history.getActivityType(),
+                history.getAction().toString(),
                 history.getDescription(),
-                history.getEntity(),
-                history.getEntityId(),
-                history.getUser() != null ? history.getUser().getUsername() : null,
-                history.getUser() != null ? history.getUser().getName() : null,
                 history.getTimestamp()
+        );
+    }
+
+    public static HistoryDTO fromWithUser(History history) {
+        return new HistoryDTO(
+                history.getAction().toString(),
+                history.getDescription(),
+                history.getTimestamp(),
+                history.getUser() != null ? history.getUser().getUsername() : null
         );
     }
 
     public static List<HistoryDTO> from(List<History> histories) {
         return histories.stream()
                 .map(HistoryDTO::from)
+                .collect(Collectors.toList());
+    }
+
+    public static List<HistoryDTO> fromWithUser(List<History> histories) {
+        return histories.stream()
+                .map(HistoryDTO::fromWithUser)
                 .collect(Collectors.toList());
     }
 }

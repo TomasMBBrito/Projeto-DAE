@@ -34,7 +34,7 @@ public class SubscriptionService {
     @POST
     @Path("/")
     @RolesAllowed({"COLABORADOR", "RESPONSAVEL", "ADMINISTRADOR"})
-    public Response subscribeTag(TagDTO dto) throws MyEntityNotFoundException {
+    public Response subscribeTag(TagDTO dto) {
         String currentUsername = securityContext.getUserPrincipal().getName();
         try {
             userBean.subscribeTag(currentUsername, dto.getId());

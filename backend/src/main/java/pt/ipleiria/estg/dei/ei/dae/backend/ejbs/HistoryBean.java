@@ -32,20 +32,33 @@ public class HistoryBean {
         return em.find(History.class, id);
     }
 
-    public List<History> getAll() {
+    public List<History> getAllHistory() {
         return em.createNamedQuery("getAllHistoryLogs", History.class).getResultList();
     }
 
-    public List<History> getByUser(String username) {
+    public List<History> getRecentHistory(int limit){
+        return em.createQuery("SELECT h FROM History h ORDER BY h.timestamp DESC", History.class)
+                .setMaxResults(limit)
+                .getResultList();
+    }
+
+    public List<History> getHistoryByType(ActivityType activityType) {
+        return em.createQuery(
+                        "SELECT h FROM History h WHERE h.activityType = :type ORDER BY h.timestamp DESC",
+                        History.class)
+                .setParameter("type", activityType)
+                .getResultList();
+    }
+
+    public List<History> getUserHistory(String username) {
         return em.createNamedQuery("getHistoryLogsByUser", History.class)
                 .setParameter("username", username)
                 .getResultList();
     }
 
-    public List<History> getByEntity(String entity, Long entityId) {
-        return em.createNamedQuery("getHistoryLogsByEntity", History.class)
-                .setParameter("entity", entity)
-                .setParameter("entityId", entityId)
+    public List<History> getPublicationHistory(Long entityId) {
+        return em.createNamedQuery("getPublicationActivities", History.class)
+                .setParameter("publicationId", entityId)
                 .getResultList();
     }
 
