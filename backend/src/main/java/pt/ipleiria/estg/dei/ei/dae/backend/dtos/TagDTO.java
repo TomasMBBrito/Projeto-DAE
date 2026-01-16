@@ -18,6 +18,11 @@ public class TagDTO implements Serializable {
     public TagDTO() {
     }
 
+    public TagDTO(Long id, String name) {
+        this.id = id;
+        this.name = name;
+    }
+
     public TagDTO(Long id, String name, boolean visible, int publicationCount, int subscriberCount) {
         this.id = id;
         this.name = name;
@@ -65,6 +70,10 @@ public class TagDTO implements Serializable {
 
     public void setSubscriberCount(int subscriberCount) {
         this.subscriberCount = subscriberCount;
+    }
+
+    public static TagDTO fromSimple(Tag tag) {
+        return new TagDTO(tag.getId(), tag.getName());
     }
 
 

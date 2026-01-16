@@ -22,7 +22,6 @@ public class PublicationDTO implements Serializable {
     private boolean visible;
 
     private String submitterUsername;
-    private String submitterName;
 
     // Stats
     private Double averageRating;
@@ -33,6 +32,13 @@ public class PublicationDTO implements Serializable {
 
     public PublicationDTO() {
         this.tags = new ArrayList<>();
+    }
+
+    public PublicationDTO(Long id, String title, String author, boolean visible) {
+        this.id = id;
+        this.title = title;
+        this.submitterUsername = author;
+        this.visible = visible;
     }
 
     public PublicationDTO(long id, String title, String description, ScientificArea scientificArea,
@@ -131,14 +137,6 @@ public class PublicationDTO implements Serializable {
         this.submitterUsername = submitterUsername;
     }
 
-    public String getSubmitterName() {
-        return submitterName;
-    }
-
-    public void setSubmitterName(String submitterName) {
-        this.submitterName = submitterName;
-    }
-
     public Double getAverageRating() {
         return averageRating;
     }
@@ -188,7 +186,6 @@ public class PublicationDTO implements Serializable {
 
         if (publication.getAuthor() != null) {
             dto.setSubmitterUsername(publication.getAuthor().getUsername());
-            dto.setSubmitterName(publication.getAuthor().getName());
         }
 
         // Stats

@@ -4,7 +4,9 @@ import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import org.hibernate.Hibernate;
 import pt.ipleiria.estg.dei.ei.dae.backend.entities.*;
+import pt.ipleiria.estg.dei.ei.dae.backend.exceptions.MyEntityNotFoundException;
 
 import java.util.List;
 
@@ -16,6 +18,9 @@ public class TagBean {
 
     @EJB
     private HistoryBean historyBean;
+
+    @EJB
+    private UserBean userbean;
 
 
     public Tag create(String name, User performedBy) {
@@ -46,6 +51,15 @@ public class TagBean {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    public List<Tag> getSubscribedTags(String username)
+            throws MyEntityNotFoundException {
+
+        User user = userbean.find(username);
+
+        Hibernate.initialize(user.getSubscribed_tags());
+        return user.getSubscribed_tags();
     }
 
     public List<Tag> getAllVisible() {

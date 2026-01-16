@@ -13,29 +13,34 @@ public class UserDTO implements Serializable {
     private String username;
     private String email;
     private String password;
+
+
+    private String oldpassword;
+    private String newpassword;
+
+
     private String name;
     private Role role;
-    private boolean active;
+    private boolean blocked;
     private List<String> subscribedTags;
-    //private List<String> publications;
+    private List<String> publications;
 
     public UserDTO() {
         this.subscribedTags = new ArrayList<>();
-        //this.publications = new ArrayList<>();
+        this.publications = new ArrayList<>();
     }
 
-    public UserDTO(String username, String email, String name, Role role, boolean active) {
+    public UserDTO(String username, String email, String name, Role role, boolean blocked) {
         this.username = username;
         this.email = email;
-        //this.password = password;
         this.name = name;
         this.role = role;
-        this.active = active;
+        this.blocked = blocked;
         this.subscribedTags = new ArrayList<>();
-        //this.publications = new ArrayList<>();
+        this.publications = new ArrayList<>();
     }
 
-    // Getters and Setters
+
     public String getUsername() {
         return username;
     }
@@ -52,13 +57,20 @@ public class UserDTO implements Serializable {
         this.email = email;
     }
 
-//    @JsonIgnore
-    public String getPassword() {
-        return password;
+    public String getOldpassword() {
+        return oldpassword;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public void setOldpassword(String oldpassword) {
+        this.oldpassword = oldpassword;
+    }
+
+    public String getNewpassword() {
+        return newpassword;
+    }
+
+    public void setNewpassword(String newpassword) {
+        this.newpassword = newpassword;
     }
 
     public String getName() {
@@ -77,12 +89,20 @@ public class UserDTO implements Serializable {
         this.role = role;
     }
 
-    public boolean isActive() {
-        return active;
+    public String getPassword() {
+        return password;
     }
 
-    public void setActive(boolean active) {
-        this.active = active;
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public boolean isBlocked() {
+        return blocked;
+    }
+
+    public void setBlocked(boolean blocked) {
+        this.blocked = blocked;
     }
 
     public List<String> getSubscribedTags() {
@@ -93,18 +113,26 @@ public class UserDTO implements Serializable {
         this.subscribedTags = subscribedTags;
     }
 
+    public List<String> getPublications() {
+        return publications;
+    }
+
+    public void setPublications(List<String> publications) {
+        this.publications = publications;
+    }
+
     public static UserDTO from(User user) {
         UserDTO dto = new UserDTO(
                 user.getUsername(),
                 user.getEmail(),
                 user.getName(),
                 user.getRole(),
-                user.isActive()
+                user.isBlocked()
         );
 
-        if (user.getSubscribed_tags() != null) {
+        if (user.getSubscribedTags() != null) {
             dto.setSubscribedTags(
-                    user.getSubscribed_tags().stream()
+                    user.getSubscribedTags().stream()
                             .map(tag -> tag.getName())
                             .collect(Collectors.toList())
             );

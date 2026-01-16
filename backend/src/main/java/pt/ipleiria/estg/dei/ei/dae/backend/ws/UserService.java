@@ -37,121 +37,230 @@ public class UserService {
     @Context
     private SecurityContext securityContext;
 
-    private Principal principal = securityContext.getUserPrincipal();
 
     @GET
     @Path("/")
-    public List<UserDTO> getUsers() throws MyEntityNotFoundException {
-        String username = principal.getName();
-        User user = userBean.find(username);
-        return UserDTO.from(userBean.getAll(user));
+    @RolesAllowed({"COLABORADOR", "RESPONSAVEL", "ADMINISTRADOR"})
+    public Response getUsers() throws MyEntityNotFoundException {
+        try {
+            String username = securityContext.getUserPrincipal().getName();
+            User user = userBean.find(username);
+            return Response.ok(UserDTO.from(userBean.getAll(user))).build();
+        } catch (MyEntityNotFoundException e) {
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity(Map.of("message", e.getMessage()))
+                    .build();
+        }
     }
 
     @GET
-    @RolesAllowed({"Administrador"})
+    @RolesAllowed({"ADMINISTRADOR"})
     @Path("/{username}")
     public Response getUser(@PathParam("username") String username) throws MyEntityNotFoundException {
-//        if(!securityContext.isUserInRole("ADMINISTRADOR")){
-//            return Response.status(Response.Status.FORBIDDEN).build();
-//        }
-        User user = userBean.find(username);
-        UserDTO userDTO = UserDTO.from(user);
-        return Response.ok(userDTO).build();
+        try {
+            User user = userBean.find(username);
+            return Response.ok(UserDTO.from(user)).build();
+        } catch (MyEntityNotFoundException e) {
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity(Map.of("message", "User " + username + " not found"))
+                    .build();
+        }
     }
 
     @DELETE
     @RolesAllowed({"ADMINISTRADOR"})
     @Path("/{username}")
-    public Response deleteUser(@PathParam("username") String username) throws MyEntityNotFoundException {
-        User user_performing = userBean.find(principal.getName());
-        userBean.delete(username,user_performing);
-        return Response.ok("Utilizador " + username + " eliminado com sucesso").build();
+    public Response deleteUser(@PathParam("username") String username) {
+        try {
+            String currentUsername = securityContext.getUserPrincipal().getName();
+            User performingUser = userBean.find(currentUsername);
+
+            userBean.delete(username, performingUser);
+            return Response.ok(Map.of(
+                    "message", "O utilizador " + username + " foi eliminado com sucesso"
+            )).build();
+        } catch (MyEntityNotFoundException e) {
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity(Map.of("message", e.getMessage()))
+                    .build();
+        }
     }
 
     @PUT
     @Path("/{username}")
     @RolesAllowed({"ADMINISTRADOR"})
     public Response updateUser(@PathParam("username") String username,UserDTO userDTO) throws MyEntityNotFoundException {
-        userBean.update(username,userDTO.getEmail(),userDTO.getName());
-        return Response.ok("Dados de " + username + " atualizados com sucesso").build();
+        try {
+            userBean.update(username, userDTO.getEmail(), userDTO.getName());
+            return Response.ok(Map.of(
+                    "message", "Dados de " + username + " atualizados com sucesso"
+            )).build();
+        } catch (MyEntityNotFoundException e) {
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity(Map.of("message", e.getMessage()))
+                    .build();
+        }
     }
 
     @POST
     @RolesAllowed({"ADMINISTRADOR"})
     @Path("/")
-    public Response createUser(UserDTO userDTO) throws MyEntityNotFoundException, MyConstraintViolationException, MyEntityExistsException {
-        User user_performing = userBean.find(principal.getName());
-        User createdUser = userBean.create(userDTO.getUsername(), userDTO.getPassword(), userDTO.getEmail(), userDTO.getName(), userDTO.getRole(), user_performing);
-        return Response.status(Response.Status.CREATED)
-                .entity(Map.of(
-                        "message", "Utilizador criado com sucesso",
-                        "user", UserDTO.from(createdUser)
-                )).build();
+    public Response createUser(UserDTO userDTO) {
+        try {
+            String currentUsername = securityContext.getUserPrincipal().getName();
+            User performingUser = userBean.find(currentUsername);
+
+            User createdUser = userBean.create(
+                    userDTO.getUsername(),
+                    userDTO.getPassword(),
+                    userDTO.getEmail(),
+                    userDTO.getName(),
+                    userDTO.getRole(),
+                    performingUser
+            );
+
+            return Response.status(Response.Status.CREATED)
+                    .entity(Map.of(
+                            "message", "Utilizador com username " + createdUser.getUsername() + " criado com sucesso"
+                    ))
+                    .build();
+        } catch (MyEntityExistsException e) {
+            return Response.status(Response.Status.CONFLICT)
+                    .entity(Map.of("message", e.getMessage()))
+                    .build();
+        } catch (MyConstraintViolationException | MyEntityNotFoundException e) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(Map.of("message", e.getMessage()))
+                    .build();
+        }
     }
 
     @PUT
     @Path("/{username}/role")
     @RolesAllowed({"ADMINISTRADOR"})
     public Response changeUserRole(@PathParam("username") String username, UserDTO userDTO) throws MyEntityNotFoundException {
-        User user_performing = userBean.find(principal.getName());
-        userBean.changeRole(username, userDTO.getRole(), user_performing);
-        return Response.ok("Role atualizado").build();
+        try {
+            String currentUsername = securityContext.getUserPrincipal().getName();
+            User performingUser = userBean.find(currentUsername);
+
+            userBean.changeRole(username, userDTO.getRole(), performingUser);
+            return Response.ok(Map.of("message", "Role atualizado !!")).build();
+        } catch (MyEntityNotFoundException e) {
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity(Map.of("message", e.getMessage()))
+                    .build();
+        }
     }
 
     @PUT
     @Path("/{username}/status")
     @RolesAllowed({"ADMINISTRADOR"})
     public Response changeUserStatus(@PathParam("username") String username, UserDTO userDTO) throws MyEntityNotFoundException {
-        User user_performing = userBean.find(principal.getName());
-        if(userDTO.isActive()){
-            userBean.activate(username, user_performing);
-        } else {
-            userBean.deactivate(username, user_performing);
+        try {
+            String currentUsername = securityContext.getUserPrincipal().getName();
+            User performingUser = userBean.find(currentUsername);
+
+            if (userDTO.isBlocked()) {
+                userBean.activate(username, performingUser);
+            } else {
+                userBean.deactivate(username, performingUser);
+            }
+
+            return Response.ok(Map.of("message", "Status do utilizador atualizado !!")).build();
+        } catch (MyEntityNotFoundException e) {
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity(Map.of("message", e.getMessage()))
+                    .build();
         }
-        return Response.ok("Status atualizado").build();
     }
 
     @GET
-    @RolesAllowed({"ADMINISTRADOR", "RESPONSAVEL"})
+    @RolesAllowed({"RESPONSAVEL", "ADMINISTRADOR"})
     @Path("/{username}/posts")
     public Response getUserPosts(@PathParam("username") String username) throws MyEntityNotFoundException {
-        List<Publication> posts = publicationBean.getByUser(username);
-        return Response.ok(PublicationDTO.from(posts)).build();
+        try {
+            List<Publication> posts = publicationBean.getByUser(username);
+            return Response.ok(PublicationDTO.from(posts)).build();
+        } catch (MyEntityNotFoundException e) {
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity(Map.of("message", e.getMessage()))
+                    .build();
+        }
     }
 
     @GET
     @Path("/me/posts")
-    public Response getMyPosts() throws MyEntityNotFoundException {
-        String username = principal.getName();
-        List<Publication> posts = publicationBean.getByUser(username);
-        return Response.ok(PublicationDTO.from(posts)).build();
+    @RolesAllowed({"COLABORADOR", "RESPONSAVEL", "ADMINISTRADOR"})
+    public Response getMyPosts() {
+        try {
+            String username = securityContext.getUserPrincipal().getName();
+            List<Publication> posts = publicationBean.getByUser(username);
+            return Response.ok(PublicationDTO.from(posts)).build();
+        } catch (MyEntityNotFoundException e) {
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity(Map.of("message", e.getMessage()))
+                    .build();
+        }
     }
 
     @DELETE
     @Path("/me/posts/{postId}")
-    public Response deleteMyPost(@PathParam("postId") Long postId) throws MyEntityNotFoundException {
-        String username = principal.getName();
-        User MyUser = userBean.find(username);
-        publicationBean.delete(postId, MyUser);
-        return Response.ok().entity(Map.of(
-                "message", "Publicação eliminada com sucesso",
-                "id", postId
-        )).build();
+    @RolesAllowed({"COLABORADOR", "RESPONSAVEL", "ADMINISTRADOR"})
+    public Response deleteMyPost(@PathParam("postId") Long postId) {
+        try {
+            String username = securityContext.getUserPrincipal().getName();
+            User myUser = userBean.find(username);
+
+            publicationBean.delete(postId, myUser);
+            return Response.ok(Map.of(
+                    "message", "O seu post com id " + postId + " foi eliminado com sucesso!!"
+            )).build();
+        } catch (MyEntityNotFoundException e) {
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity(Map.of("message", e.getMessage()))
+                    .build();
+        } catch (IllegalArgumentException e) {
+            return Response.status(Response.Status.FORBIDDEN)
+                    .entity(Map.of("message", e.getMessage()))
+                    .build();
+        }
     }
 
     @PUT
     @Path("/me")
+    @RolesAllowed({"COLABORADOR", "RESPONSAVEL", "ADMINISTRADOR"})
     public Response updateMyUser(UserDTO userDTO) throws MyEntityNotFoundException {
-        String username = principal.getName();
-        userBean.update(username, userDTO.getEmail(), userDTO.getName());
-        return Response.ok("Os seus dados foram atualizados com sucesso").build();
+        try {
+            String username = securityContext.getUserPrincipal().getName();
+            userBean.update(username, userDTO.getEmail(), userDTO.getName());
+            return Response.ok(Map.of(
+                    "message", "Os seus dados foram atualizados com sucesso"
+            )).build();
+        } catch (MyEntityNotFoundException e) {
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity(Map.of("message", e.getMessage()))
+                    .build();
+        }
     }
 
     @PUT
     @Path("/me/password")
-    public Response updateMyPassword(UserDTO userDTO) throws MyEntityNotFoundException {
-        String username = principal.getName();
-        userBean.changePassword(username, userDTO.getPassword());
-        return Response.ok("A sua palavra-passe foi atualizada com sucesso").build();
+    @RolesAllowed({"COLABORADOR", "RESPONSAVEL", "ADMINISTRADOR"})
+    public Response updateMyPassword(UserDTO userDTO) {
+        try {
+            String username = securityContext.getUserPrincipal().getName();
+            userBean.changePassword(username, userDTO.getOldpassword(), userDTO.getNewpassword());
+            return Response.ok(Map.of(
+                    "message", "Password atualizada com sucesso !!"
+            )).build();
+        } catch (MyEntityNotFoundException e) {
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity(Map.of("message", e.getMessage()))
+                    .build();
+        } catch (IllegalArgumentException e) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(Map.of("message", e.getMessage()))
+                    .build();
+        }
     }
 }

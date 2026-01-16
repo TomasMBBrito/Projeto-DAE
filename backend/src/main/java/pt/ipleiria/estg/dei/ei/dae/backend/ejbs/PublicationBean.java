@@ -211,6 +211,10 @@ public class PublicationBean {
             throw new MyEntityNotFoundException("User not found: " + performedBy.getUsername());
         }
 
+        if(!canDelete(publication, performedBy)) {
+            throw new IllegalArgumentException("User " + performedBy.getUsername() + " does not have permission to delete this publication.");
+        }
+
         String title = publication.getTitle();
 
         // Delete document first (cascade will handle it, but we log it explicitly)
@@ -282,8 +286,12 @@ public class PublicationBean {
     }
 
     public boolean canDelete(Publication publication, User user) {
-        // Only RESPONSAVEL and ADMINISTRADOR can delete
-        return user.getRole() == Role.RESPONSAVEL || user.getRole() == Role.ADMINISTRADOR;
+        // Only RESPONSAVEL and ADMINISTRADOR can delete or the submitter
+        if (publication.getAuthor().getUsername().equals(user.getUsername())) {
+            return true;
+        }
+        return false;
+        //return user.getRole() == Role.RESPONSAVEL || user.getRole() == Role.ADMINISTRADOR;
     }
 
     public boolean canView(Publication publication, User user) {

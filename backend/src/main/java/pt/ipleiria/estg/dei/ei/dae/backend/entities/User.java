@@ -46,7 +46,7 @@ public class User implements Serializable {
     private Role role;
 
     @Column(nullable = false)
-    private boolean active = true;
+    private boolean blocked = true;
 
     @OneToMany(mappedBy = "author",cascade = CascadeType.ALL)
     private List<Publication> posts;
@@ -70,7 +70,7 @@ public class User implements Serializable {
         this.email = email;
         this.name = name;
         this.role = role;
-        this.active = true;
+        this.blocked = true;
         this.posts = new ArrayList<>();
         this.subscribedTags = new ArrayList<>();
     }
@@ -123,20 +123,20 @@ public class User implements Serializable {
         this.posts = posts;
     }
 
-    public List<Tag> getSubscribed_tags() {
+    public List<Tag> getSubscribedTags() {
         return subscribedTags;
     }
 
-    public void setSubscribed_tags(List<Tag> subscribed_tags) {
-        this.subscribedTags = subscribed_tags;
+    public void setSubscribedTags(List<Tag> subscribedTags) {
+        this.subscribedTags = subscribedTags;
     }
 
-    public boolean isActive() {
-        return active;
+    public boolean isBlocked() {
+        return blocked;
     }
 
-    public void setActive(boolean active) {
-        this.active = active;
+    public void setBlocked(boolean blocked) {
+        this.blocked = blocked;
     }
 
     public void addPublication(Publication publication) {
@@ -149,10 +149,15 @@ public class User implements Serializable {
         if (!subscribedTags.contains(tag)) {
             subscribedTags.add(tag);
             tag.getSubscribers().add(this);
+        }else{
+            throw new IllegalArgumentException("Já está subscrito a esta tag");
         }
     }
 
     public void unsubscribeTag(Tag tag) {
+        if(!subscribedTags.contains(tag)){
+            throw new IllegalArgumentException("Não está subscrito a esta tag");
+        }
         subscribedTags.remove(tag);
         tag.getSubscribers().remove(this);
     }

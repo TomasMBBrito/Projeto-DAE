@@ -5,6 +5,7 @@ import jakarta.ejb.Stateless;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.validation.ConstraintViolationException;
+import org.hibernate.Hibernate;
 import pt.ipleiria.estg.dei.ei.dae.backend.entities.ActivityType;
 import pt.ipleiria.estg.dei.ei.dae.backend.entities.Role;
 import pt.ipleiria.estg.dei.ei.dae.backend.entities.Tag;
@@ -24,6 +25,9 @@ public class UserBean {
 
     @EJB
     private HistoryBean historyBean;
+
+    @EJB
+    private TagBean tagBean;
 
     public User create(String username, String password, String email, String name, Role role,User user_performing) throws MyEntityExistsException, MyConstraintViolationException {
         if(em.find(User.class, username) != null) {
@@ -71,6 +75,7 @@ public class UserBean {
 
         user.setEmail(email);
         user.setName(name);
+        em.merge(user);
 
         // Log activity
         historyBean.logActivity(
@@ -82,13 +87,18 @@ public class UserBean {
         );
     }
 
-    public void changePassword(String username, String newPassword) throws MyEntityNotFoundException {
+    public void changePassword(String username,String oldPassword, String newPassword) throws MyEntityNotFoundException {
         User user = find(username);
         if (user == null) {
             throw new MyEntityNotFoundException("User not found: " + username);
         }
 
-        user.setPassword(newPassword);
+        if (!Hasher.verify(oldPassword, user.getPassword())) {
+            throw new IllegalArgumentException("Password antiga incorreta");
+        }
+
+        user.setPassword(Hasher.hash(newPassword));
+        em.merge(user);
 
         // Log activity
         historyBean.logActivity(
@@ -108,6 +118,7 @@ public class UserBean {
 
         Role oldRole = user.getRole();
         user.setRole(newRole);
+        em.merge(user);
 
         // Log activity
         historyBean.logActivity(
@@ -126,6 +137,7 @@ public class UserBean {
         }
 
         user.setActive(true);
+        em.merge(user);
 
         // Log activity
         historyBean.logActivity(
@@ -144,6 +156,7 @@ public class UserBean {
         }
 
         user.setActive(false);
+        em.merge(user);
 
         // Log activity
         historyBean.logActivity(
@@ -173,13 +186,19 @@ public class UserBean {
         em.remove(user);
     }
 
-    public void subscribeTag(String username, Tag tag) throws MyEntityNotFoundException {
+    public void subscribeTag(String username, Long tagId) throws MyEntityNotFoundException {
         User user = find(username);
         if (user == null) {
+            throw new MyEntityNotFoundException("User not found: " + username);
+        }
 
+        Tag tag = tagBean.find(tagId);
+        if(tag == null){
+            throw new MyEntityNotFoundException("Tag not found with id");
         }
 
         user.subscribeTag(tag);
+        em.merge(user);
 
         // Log activity
         historyBean.logActivity(
@@ -191,13 +210,19 @@ public class UserBean {
         );
     }
 
-    public void unsubscribeTag(String username, Tag tag) throws MyEntityNotFoundException {
+    public void unsubscribeTag(String username,Long tagId) throws MyEntityNotFoundException {
         User user = find(username);
         if (user == null) {
             throw new MyEntityNotFoundException("User not found: " + username);
         }
 
+        Tag tag = tagBean.find(tagId);
+        if(tag == null){
+            throw new MyEntityNotFoundException("Tag not found with id");
+        }
+
         user.unsubscribeTag(tag);
+        em.merge(user);
 
         // Log activity
         historyBean.logActivity(
