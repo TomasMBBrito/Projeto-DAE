@@ -145,7 +145,7 @@ public class PublicationService {
 
             Publication publication = publicationBean.create(
                     publicationDTO.getTitle(),
-                    publicationDTO.getDescription(),
+                    publicationDTO.getSummary(),
                     publicationDTO.getScientificArea(),
                     publicationDTO.getPublicationDate(),
                     publicationDTO.getAuthors(),
@@ -197,7 +197,7 @@ public class PublicationService {
             publicationBean.update(
                     id,
                     publication.getTitle(),
-                    publicationDTO.getDescription(), // Novo resumo
+                    publicationDTO.getSummary(),
                     publication.getScientificArea(),
                     publication.getPublicationDate(),
                     publication.getAuthors(),
@@ -328,7 +328,7 @@ public class PublicationService {
                         .build();
             }
 
-            commentBean.create(commentDTO.getText(), user, publication);
+            commentBean.create(commentDTO.getContent(), user, publication);
 
             return Response.status(Response.Status.CREATED)
                     .entity(Map.of("message", "Comentário criado com sucesso na publicação com id " + id + "."))
@@ -402,7 +402,7 @@ public class PublicationService {
                         .build();
             }
 
-            ratingBean.createOrUpdate(ratingDTO.getValue(), user, publication);
+            ratingBean.createOrUpdate(ratingDTO.getRating(), user, publication);
 
             return Response.status(Response.Status.CREATED)
                     .entity(Map.of("message", "Avaliação registada com sucesso na publicação com id " + id + "."))

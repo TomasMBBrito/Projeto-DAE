@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 
 public class CommentDTO implements Serializable {
     private Long id;
-    private String text;
+    private String content;
     private boolean visible;
     private String author;
     private LocalDateTime createdAt;
@@ -18,10 +18,10 @@ public class CommentDTO implements Serializable {
 
     public CommentDTO() {}
 
-    public CommentDTO(Long id, String author, String text, LocalDateTime createdAt) {
+    public CommentDTO(Long id, String author, String content, LocalDateTime createdAt) {
         this.id = id;
         this.author = author;
-        this.text = text;
+        this.content = content;
         this.createdAt = createdAt;
     }
 
@@ -38,12 +38,12 @@ public class CommentDTO implements Serializable {
         this.id = id;
     }
 
-    public String getText() {
-        return text;
+    public String getContent() {
+        return content;
     }
 
-    public void setText(String text) {
-        this.text = text;
+    public void setContent(String content) {
+        this.content = content;
     }
 
     public boolean isVisible() {

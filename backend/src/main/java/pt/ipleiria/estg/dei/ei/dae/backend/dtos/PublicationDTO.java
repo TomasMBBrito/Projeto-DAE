@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 public class PublicationDTO implements Serializable {
     private long id;
     private String title;
-    private String description;
+    private String summary;
     private ScientificArea scientificArea;
     private LocalDate publicationDate;
     private List<String> authors;
@@ -38,12 +38,12 @@ public class PublicationDTO implements Serializable {
         this.tagIds = new ArrayList<>();
     }
 
-    public PublicationDTO(Long id, String title, String author, String description) {
+    public PublicationDTO(Long id, String title, String author, String summary) {
         this();
         this.id = id;
         this.title = title;
         this.submitterUsername = author;
-        this.description = description;
+        this.summary = summary;
     }
 
     public PublicationDTO(Long id, String title, String author, String summary, boolean visible) {
@@ -86,12 +86,12 @@ public class PublicationDTO implements Serializable {
         this.title = title;
     }
 
-    public String getDescription() {
-        return description;
+    public String getSummary() {
+        return summary;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    public void setSummary(String summary) {
+        this.summary = summary;
     }
 
     public ScientificArea getScientificArea() {
@@ -215,7 +215,7 @@ public class PublicationDTO implements Serializable {
         dto.setId(pub.getId());
         dto.setTitle(pub.getTitle());
         dto.setSubmitterUsername(pub.getAuthor() != null ? pub.getAuthor().getUsername() : null);
-        dto.setDescription(pub.getDescription());
+        dto.setSummary(pub.getDescription());
         dto.setPublicationDate(pub.getPublicationDate());
         dto.setScientificArea(pub.getScientificArea());
         dto.setVisible(pub.isVisible());

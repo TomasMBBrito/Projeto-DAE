@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 
 public class RatingDTO implements Serializable {
     private Long id;
-    private int value;
+    private int rating;
 
     private String username;
     private String userFullName;
@@ -21,7 +21,7 @@ public class RatingDTO implements Serializable {
 
     public RatingDTO(Long id, int value, String username, String userFullName, Long publicationId) {
         this.id = id;
-        this.value = value;
+        this.rating = value;
         this.username = username;
         this.userFullName = userFullName;
         this.publicationId = publicationId;
@@ -36,12 +36,12 @@ public class RatingDTO implements Serializable {
         this.id = id;
     }
 
-    public int getValue() {
-        return value;
+    public int getRating() {
+        return rating;
     }
 
-    public void setValue(int value) {
-        this.value = value;
+    public void setRating(int rating) {
+        this.rating = rating;
     }
 
     public String getUsername() {
