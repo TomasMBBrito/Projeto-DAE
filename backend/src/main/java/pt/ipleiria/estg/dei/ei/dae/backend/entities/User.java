@@ -46,12 +46,12 @@ public class User implements Serializable {
     private Role role;
 
     @Column(nullable = false)
-    private boolean blocked = true;
+    private boolean blocked = false;
 
     @OneToMany(mappedBy = "author",cascade = CascadeType.ALL)
     private List<Publication> posts;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "user_tag_subscriptions",
             joinColumns = @JoinColumn(name = "user_username"),
@@ -70,7 +70,7 @@ public class User implements Serializable {
         this.email = email;
         this.name = name;
         this.role = role;
-        this.blocked = true;
+        this.blocked = false;
         this.posts = new ArrayList<>();
         this.subscribedTags = new ArrayList<>();
     }
