@@ -13,6 +13,7 @@ import pt.ipleiria.estg.dei.ei.dae.backend.ejbs.TagBean;
 import pt.ipleiria.estg.dei.ei.dae.backend.ejbs.UserBean;
 import pt.ipleiria.estg.dei.ei.dae.backend.entities.Tag;
 import pt.ipleiria.estg.dei.ei.dae.backend.exceptions.MyEntityNotFoundException;
+import pt.ipleiria.estg.dei.ei.dae.backend.security.Authenticated;
 
 import java.util.List;
 import java.util.Map;
@@ -20,6 +21,7 @@ import java.util.Map;
 @Path("me/tags")
 @Produces({MediaType.APPLICATION_JSON})
 @Consumes({MediaType.APPLICATION_JSON})
+@Authenticated
 public class SubscriptionService {
 
     @EJB

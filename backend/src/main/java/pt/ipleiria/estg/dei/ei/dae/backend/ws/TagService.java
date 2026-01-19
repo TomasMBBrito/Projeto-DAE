@@ -15,6 +15,7 @@ import pt.ipleiria.estg.dei.ei.dae.backend.ejbs.UserBean;
 import pt.ipleiria.estg.dei.ei.dae.backend.entities.Tag;
 import pt.ipleiria.estg.dei.ei.dae.backend.entities.User;
 import pt.ipleiria.estg.dei.ei.dae.backend.exceptions.MyEntityNotFoundException;
+import pt.ipleiria.estg.dei.ei.dae.backend.security.Authenticated;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,6 +23,7 @@ import java.util.stream.Collectors;
 @Path("/tags")
 @Produces({MediaType.APPLICATION_JSON})
 @Consumes({MediaType.APPLICATION_JSON})
+@Authenticated
 public class TagService {
 
     @EJB
@@ -84,6 +86,7 @@ public class TagService {
                             pub.getId(),
                             pub.getTitle(),
                             pub.getAuthor() != null ? pub.getAuthor().getUsername() : null,
+                            pub.getDescription() != null ? pub.getDescription() : null,
                             pub.isVisible()
                     ))
                     .collect(Collectors.toList());

@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "comments")
 @NamedQueries({
@@ -38,6 +40,10 @@ public class Comment {
 
     @Column(nullable = false)
     private boolean visible;
+
+    @NotNull
+    @Column(nullable = false)
+    private LocalDateTime createdAt;
 
     public Comment() {
     }
@@ -87,5 +93,13 @@ public class Comment {
 
     public void setVisible(boolean visible) {
         this.visible = visible;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 }

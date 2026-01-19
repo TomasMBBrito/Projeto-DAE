@@ -16,6 +16,7 @@ import pt.ipleiria.estg.dei.ei.dae.backend.entities.History;
 import pt.ipleiria.estg.dei.ei.dae.backend.entities.Publication;
 import pt.ipleiria.estg.dei.ei.dae.backend.entities.User;
 import pt.ipleiria.estg.dei.ei.dae.backend.exceptions.MyEntityNotFoundException;
+import pt.ipleiria.estg.dei.ei.dae.backend.security.Authenticated;
 
 import java.util.List;
 import java.util.Map;
@@ -23,6 +24,7 @@ import java.util.Map;
 @Path("history")
 @Produces({MediaType.APPLICATION_JSON})
 @Consumes({MediaType.APPLICATION_JSON})
+@Authenticated
 public class HistoryService {
 
     @EJB

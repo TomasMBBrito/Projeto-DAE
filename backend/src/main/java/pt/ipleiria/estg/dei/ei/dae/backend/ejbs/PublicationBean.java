@@ -5,6 +5,7 @@ import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import org.hibernate.Hibernate;
 import pt.ipleiria.estg.dei.ei.dae.backend.entities.*;
 import pt.ipleiria.estg.dei.ei.dae.backend.exceptions.MyEntityNotFoundException;
 
@@ -26,7 +27,11 @@ public class PublicationBean {
 
     public Publication create(String title, String description, ScientificArea scientificArea,
                               LocalDate publicationDate, List<String> authors, User submitter,
-                              String fileName, FileType fileType) {
+                              String fileName, FileType fileType,List<Long> tagIds) throws MyEntityNotFoundException {
+
+        if (submitter == null) {
+            throw new MyEntityNotFoundException("Submitter user not found");
+        }
 
         Document document = new Document(fileName,"home" ,fileType);
         // Create publication
@@ -45,6 +50,15 @@ public class PublicationBean {
         em.persist(publication);
         em.flush(); // Ensure publication gets an ID before creating document
 
+        if (tagIds != null && !tagIds.isEmpty()) {
+            for (Long tagId : tagIds) {
+                Tag tag = em.find(Tag.class, tagId);
+                if (tag != null) {
+                    publication.addTag(tag);
+                }
+            }
+        }
+
         // Log activity
         historyBean.logActivity(
                 ActivityType.PUBLICATION_CREATED,
@@ -62,6 +76,22 @@ public class PublicationBean {
         return em.find(Publication.class, id);
     }
 
+    public Publication findWithTags(Long id) {
+        Publication pub = find(id);
+        if (pub != null) {
+            Hibernate.initialize(pub.getTags());
+        }
+        return pub;
+    }
+
+    public Publication findWithComments(Long id) {
+        Publication pub = find(id);
+        if (pub != null) {
+            Hibernate.initialize(pub.getComments());
+        }
+        return pub;
+    }
+
     public List<Publication> getAll() {
         return em.createNamedQuery("getAllPublications", Publication.class).getResultList();
     }
@@ -69,6 +99,8 @@ public class PublicationBean {
     public List<Publication> getAllVisible() {
         return em.createNamedQuery("getVisiblePublications", Publication.class).getResultList();
     }
+
+
 
     public List<Publication> getByUser(String username) throws MyEntityNotFoundException {
 

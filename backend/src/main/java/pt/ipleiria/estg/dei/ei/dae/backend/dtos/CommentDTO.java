@@ -3,6 +3,7 @@ package pt.ipleiria.estg.dei.ei.dae.backend.dtos;
 import pt.ipleiria.estg.dei.ei.dae.backend.entities.Comment;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -10,28 +11,25 @@ public class CommentDTO implements Serializable {
     private Long id;
     private String text;
     private boolean visible;
-
-
-    private String username;
-    private String userFullName;
-
+    private String author;
+    private LocalDateTime createdAt;
 
     private Long publicationId;
 
-    public CommentDTO() {
-    }
+    public CommentDTO() {}
 
-    public CommentDTO(Long id, String text, boolean visible, String username,
-                      String userFullName, Long publicationId) {
+    public CommentDTO(Long id, String author, String text, LocalDateTime createdAt) {
         this.id = id;
+        this.author = author;
         this.text = text;
-        this.visible = visible;
-        this.username = username;
-        this.userFullName = userFullName;
-        this.publicationId = publicationId;
+        this.createdAt = createdAt;
     }
 
-    // Getters and Setters
+    public CommentDTO(Long id, String author, String text, boolean visible, LocalDateTime createdAt) {
+        this(id, author,text, createdAt);
+        this.visible = visible;
+    }
+
     public Long getId() {
         return id;
     }
@@ -56,20 +54,20 @@ public class CommentDTO implements Serializable {
         this.visible = visible;
     }
 
-    public String getUsername() {
-        return username;
+    public String getAuthor() {
+        return author;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setAuthor(String author) {
+        this.author = author;
     }
 
-    public String getUserFullName() {
-        return userFullName;
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 
-    public void setUserFullName(String userFullName) {
-        this.userFullName = userFullName;
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 
     public Long getPublicationId() {
@@ -80,21 +78,36 @@ public class CommentDTO implements Serializable {
         this.publicationId = publicationId;
     }
 
-    // Static factory method - converts Entity to DTO
-    public static CommentDTO from(Comment comment) {
+    public static CommentDTO forCollaborator(Comment comment) {
         return new CommentDTO(
                 comment.getId(),
-                comment.getText(),
-                comment.isVisible(),
                 comment.getUser() != null ? comment.getUser().getUsername() : null,
-                comment.getUser() != null ? comment.getUser().getName() : null,
-                comment.getPublication() != null ? comment.getPublication().getId() : null
+                comment.getText(),
+                comment.getCreatedAt()
         );
     }
 
-    public static List<CommentDTO> from(List<Comment> comments) {
+    public static CommentDTO forAdmin(Comment comment) {
+        return new CommentDTO(
+                comment.getId(),
+                comment.getUser() != null ? comment.getUser().getUsername() : null,
+                comment.getText(),
+                comment.isVisible(),
+                comment.getCreatedAt()
+        );
+    }
+
+
+    public static List<CommentDTO> forCollaboratorList(List<Comment> comments) {
         return comments.stream()
-                .map(CommentDTO::from)
+                .filter(Comment::isVisible)  // Colaborador só vê visíveis
+                .map(CommentDTO::forCollaborator)
+                .collect(Collectors.toList());
+    }
+
+    public static List<CommentDTO> forAdminList(List<Comment> comments) {
+        return comments.stream()
+                .map(CommentDTO::forAdmin)
                 .collect(Collectors.toList());
     }
 }
