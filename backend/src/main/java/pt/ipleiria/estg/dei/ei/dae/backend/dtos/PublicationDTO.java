@@ -190,8 +190,8 @@ public class PublicationDTO implements Serializable {
         this.tags = tags;
     }
 
-    // Métodos estáticos para conversão
-    public static PublicationDTO FromCollaborator(Publication pub) {
+
+    public static PublicationDTO forCollaborator(Publication pub) {
         return new PublicationDTO(
                 pub.getId(),
                 pub.getTitle(),
@@ -200,7 +200,8 @@ public class PublicationDTO implements Serializable {
         );
     }
 
-    public static PublicationDTO FromAdminOrRespList(Publication pub) {
+
+    public static PublicationDTO forAdminList(Publication pub) {
         return new PublicationDTO(
                 pub.getId(),
                 pub.getTitle(),
@@ -210,7 +211,8 @@ public class PublicationDTO implements Serializable {
         );
     }
 
-    public static PublicationDTO FromDetails(Publication pub) {
+
+    public static PublicationDTO forDetails(Publication pub) {
         PublicationDTO dto = new PublicationDTO();
         dto.setId(pub.getId());
         dto.setTitle(pub.getTitle());
@@ -229,7 +231,8 @@ public class PublicationDTO implements Serializable {
         return dto;
     }
 
-    public static PublicationDTO FromSearch(Publication pub) {
+
+    public static PublicationDTO forSearch(Publication pub) {
         return new PublicationDTO(
                 pub.getId(),
                 pub.getTitle(),
@@ -239,12 +242,13 @@ public class PublicationDTO implements Serializable {
         );
     }
 
-    public static PublicationDTO FromSearchWithComment(Publication pub) {
+
+    public static PublicationDTO forSearchWithComment(Publication pub) {
         String lastComment = null;
         if (pub.getComments() != null && !pub.getComments().isEmpty()) {
-            // Comentário mais recente
+            // Comentário mais recente visível
             lastComment = pub.getComments().stream()
-                    .filter(Comment::isVisible) // Apenas comentários visíveis
+                    .filter(Comment::isVisible)
                     .max(Comparator.comparing(Comment::getCreatedAt))
                     .map(Comment::getText)
                     .orElse(null);
@@ -260,7 +264,8 @@ public class PublicationDTO implements Serializable {
         );
     }
 
-    public static PublicationDTO FromSort(Publication pub) {
+
+    public static PublicationDTO forSort(Publication pub) {
         return new PublicationDTO(
                 pub.getId(),
                 pub.getTitle(),
@@ -271,7 +276,8 @@ public class PublicationDTO implements Serializable {
         );
     }
 
-    public static PublicationDTO fromSimple(Publication pub) {
+
+    public static PublicationDTO forUserPosts(Publication pub) {
         return new PublicationDTO(
                 pub.getId(),
                 pub.getTitle(),
@@ -281,46 +287,45 @@ public class PublicationDTO implements Serializable {
         );
     }
 
-    // Métodos para listas
-    public static List<PublicationDTO> forCollaboratorList(List<Publication> publications) {
+
+    public static List<PublicationDTO> toCollaboratorList(List<Publication> publications) {
         return publications.stream()
-                .map(PublicationDTO::FromCollaborator)
+                .map(PublicationDTO::forCollaborator)
                 .collect(Collectors.toList());
     }
 
-    public static List<PublicationDTO> forAdminList(List<Publication> publications) {
+
+    public static List<PublicationDTO> toAdminList(List<Publication> publications) {
         return publications.stream()
-                .map(PublicationDTO::FromAdminOrRespList)
+                .map(PublicationDTO::forAdminList)
                 .collect(Collectors.toList());
     }
 
-    public static List<PublicationDTO> forSearch(List<Publication> publications) {
+
+    public static List<PublicationDTO> toSearchList(List<Publication> publications) {
         return publications.stream()
-                .map(PublicationDTO::FromSearch)
+                .map(PublicationDTO::forSearch)
                 .collect(Collectors.toList());
     }
 
-    public static List<PublicationDTO> forSearchWithComments(List<Publication> publications) {
+
+    public static List<PublicationDTO> toSearchListWithComments(List<Publication> publications) {
         return publications.stream()
-                .map(PublicationDTO::FromSearchWithComment)
+                .map(PublicationDTO::forSearchWithComment)
                 .collect(Collectors.toList());
     }
 
-    public static List<PublicationDTO> forSort(List<Publication> publications) {
+
+    public static List<PublicationDTO> toSortedList(List<Publication> publications) {
         return publications.stream()
-                .map(PublicationDTO::FromSort)
+                .map(PublicationDTO::forSort)
                 .collect(Collectors.toList());
     }
 
-    public static List<PublicationDTO> fromSimple(List<Publication> publications) {
-        return publications.stream()
-                .map(PublicationDTO::fromSimple)
-                .collect(Collectors.toList());
-    }
 
-    public static List<PublicationDTO> from(List<Publication> publications) {
+    public static List<PublicationDTO> toUserPostsList(List<Publication> publications) {
         return publications.stream()
-                .map(PublicationDTO::fromSimple)
+                .map(PublicationDTO::forUserPosts)
                 .collect(Collectors.toList());
     }
 }

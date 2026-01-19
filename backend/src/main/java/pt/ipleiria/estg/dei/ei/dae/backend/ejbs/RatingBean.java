@@ -19,7 +19,12 @@ public class RatingBean {
     public Rating createOrUpdate(int value, User user, Publication publication) {
         Rating existing = findByUserAndPublication(user.getUsername(), publication.getId());
 
+
+
         if (existing != null) {
+            if (value < 1 || value > 5) {
+                throw new IllegalArgumentException("Rating deve estar entre 1 e 5 estrelas");
+            }
             // Update existing rating
             existing.setValue(value);
 

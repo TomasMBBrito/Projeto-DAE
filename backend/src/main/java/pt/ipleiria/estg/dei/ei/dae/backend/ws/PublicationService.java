@@ -41,7 +41,7 @@ public class PublicationService {
     @Context
     private SecurityContext securityContext;
 
-    // EP28: Obtém todas as publicações
+
     @GET
     @Path("/")
     @RolesAllowed({"COLABORADOR", "RESPONSAVEL", "ADMINISTRADOR"})
@@ -55,8 +55,8 @@ public class PublicationService {
                     : publicationBean.getAllVisible();
 
             List<PublicationDTO> dtos = isAdminOrResponsavel
-                    ? PublicationDTO.forAdminList(publications)
-                    : PublicationDTO.forCollaboratorList(publications);
+                    ? PublicationDTO.toAdminList(publications)
+                    : PublicationDTO.toCollaboratorList(publications);
 
             return Response.ok(dtos).build();
         }
@@ -92,7 +92,7 @@ public class PublicationService {
                         .build();
         }
 
-        List<PublicationDTO> dtos = PublicationDTO.forSort(publications);
+        List<PublicationDTO> dtos = PublicationDTO.toSortedList(publications);
         return Response.ok(dtos).build();
     }
 
@@ -119,7 +119,7 @@ public class PublicationService {
                         .build();
             }
 
-            PublicationDTO dto = PublicationDTO.FromDetails(publication);
+            PublicationDTO dto = PublicationDTO.forDetails(publication);
             return Response.ok(dto).build();
 
         } catch (MyEntityNotFoundException e) {
@@ -508,8 +508,8 @@ public class PublicationService {
 
         // Se menos de 45 publicações, inclui o último comentário
         List<PublicationDTO> dtos = publications.size() < 45
-                ? PublicationDTO.forSearchWithComments(publications)
-                : PublicationDTO.forSearch(publications);
+                ? PublicationDTO.toSearchListWithComments(publications)
+                : PublicationDTO.toSearchList(publications);
 
         return Response.ok(dtos).build();
     }

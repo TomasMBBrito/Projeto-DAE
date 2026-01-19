@@ -11,11 +11,11 @@ import java.time.LocalDateTime;
 @NamedQueries({
         @NamedQuery(
                 name = "getCommentsByPublication",
-                query = "SELECT c FROM Comment c WHERE c.publication.id = :publicationId AND c.visible = true ORDER BY c.user.name DESC"
+                query = "SELECT c FROM Comment c WHERE c.publication.id = :publicationId AND c.visible = true ORDER BY c.createdAt DESC"
         ),
         @NamedQuery(
                 name = "getAllCommentsByPublication",
-                query = "SELECT c FROM Comment c WHERE c.publication.id = :publicationId ORDER BY c.user.name DESC"
+                query = "SELECT c FROM Comment c WHERE c.publication.id = :publicationId ORDER BY c.createdAt DESC"
         )
 })
 public class Comment {
@@ -53,6 +53,7 @@ public class Comment {
         this.user = user;
         this.publication = publication;
         this.visible = true;
+        this.createdAt = LocalDateTime.now();
     }
 
     public Long getId() {
