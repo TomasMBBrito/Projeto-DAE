@@ -38,13 +38,15 @@ public class UserBean {
             em.persist(user);
             em.flush();
             // Log activity
-//            historyBean.logActivity(
-//                    ActivityType.USER_CREATED,
-//                    "User created: " + username,
-//                    "User",
-//                    null,
-//                    user_performing
-//            );
+            if (user_performing != null) {
+                historyBean.logActivity(
+                        ActivityType.USER_CREATED,
+                        "User created: " + username,
+                        "User",
+                        null,
+                        user_performing
+                );
+            }
 
             return user;
         }catch (ConstraintViolationException e){

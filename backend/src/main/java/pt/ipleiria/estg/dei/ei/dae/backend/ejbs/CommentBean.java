@@ -130,10 +130,11 @@ public class CommentBean {
         em.remove(comment);
     }
 
-    // PERMISSIONS
     public boolean canEdit(Comment comment, User user) {
-        // Only the comment author can edit
-        return comment.getUser().getUsername().equals(user.getUsername());
+        if (comment.getUser().getUsername().equals(user.getUsername())) {
+            return true;
+        }
+        return user.getRole() == Role.RESPONSAVEL || user.getRole() == Role.ADMINISTRADOR;
     }
 
     public boolean canDelete(Comment comment, User user) {

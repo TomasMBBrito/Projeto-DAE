@@ -18,6 +18,7 @@ import pt.ipleiria.estg.dei.ei.dae.backend.exceptions.MyEntityNotFoundException;
 import pt.ipleiria.estg.dei.ei.dae.backend.security.Authenticated;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Path("/tags")
@@ -35,7 +36,7 @@ public class TagService {
     @Context
     private SecurityContext securityContext;
 
-    // EP21: List all tags
+
     @GET
     @Path("/")
     @RolesAllowed({"COLABORADOR", "RESPONSAVEL", "ADMINISTRADOR"})
@@ -46,19 +47,14 @@ public class TagService {
                     securityContext.isUserInRole("ADMINISTRADOR");
 
             List<Tag> tags;
+            List<TagDTO> tagDTOs;
             if (isAdmin) {
-                // Responsável or Administrador: return all tags with visibility info
                 tags = tagBean.getAll();
-                List<TagDTO> tagDTOs = tags.stream()
-                        .map(tag -> new TagDTO(tag.getId(), tag.getName(), tag.isVisible(), 0, 0))
-                        .collect(Collectors.toList());
+                tagDTOs = TagDTO.from(tags);
                 return Response.ok(tagDTOs).build();
             } else {
-                // Colaborador: return only visible tags without visibility field
                 tags = tagBean.getAllVisible();
-                List<TagDTO> tagDTOs = tags.stream()
-                        .map(TagDTO::fromSimple)
-                        .collect(Collectors.toList());
+                tagDTOs = TagDTO.fromSimple(tags);
                 return Response.ok(tagDTOs).build();
             }
         } catch (Exception e) {
@@ -68,28 +64,20 @@ public class TagService {
         }
     }
 
-    // EP22: Get publications associated with a tag
+
     @GET
     @Path("/{tag_id}/posts")
     @RolesAllowed({"COLABORADOR", "RESPONSAVEL", "ADMINISTRADOR"})
     public Response getTagPublications(@PathParam("tag_id") Long tagId) {
         try {
-            Tag tag = tagBean.find(tagId);
+            Tag tag = tagBean.findWithPublications(tagId);
             if (tag == null) {
                 return Response.status(Response.Status.NOT_FOUND)
-                        .entity("Tag not found")
+                        .entity(Map.of("message", "Tag not found"))
                         .build();
             }
 
-            List<PublicationDTO> publications = tag.getPublications().stream()
-                    .map(pub -> new PublicationDTO(
-                            pub.getId(),
-                            pub.getTitle(),
-                            pub.getAuthor() != null ? pub.getAuthor().getUsername() : null,
-                            pub.getDescription() != null ? pub.getDescription() : null,
-                            pub.isVisible()
-                    ))
-                    .collect(Collectors.toList());
+            List<PublicationDTO> publications = PublicationDTO.toUserPostsList(tag.getPublications());
 
             return Response.ok(publications).build();
         } catch (Exception e) {
@@ -99,28 +87,19 @@ public class TagService {
         }
     }
 
-    // EP23: Get subscribers of a tag
     @GET
     @Path("/{tag_id}/subscribers")
     @RolesAllowed({"RESPONSAVEL", "ADMINISTRADOR"})
     public Response getTagSubscribers(@PathParam("tag_id") Long tagId) {
         try {
-            Tag tag = tagBean.find(tagId);
+            Tag tag = tagBean.findWithSubscribers(tagId);
             if (tag == null) {
                 return Response.status(Response.Status.NOT_FOUND)
-                        .entity("Tag not found")
+                        .entity(Map.of("message", "Tag not found"))
                         .build();
             }
 
-            List<UserDTO> subscribers = tag.getSubscribers().stream()
-                    .map(user -> new UserDTO(
-                            user.getUsername(),
-                            user.getEmail(),
-                            user.getName(),
-                            user.getRole(),
-                            user.isBlocked()
-                    ))
-                    .collect(Collectors.toList());
+            List<UserDTO> subscribers = UserDTO.from(tag.getSubscribers());
 
             return Response.ok(subscribers).build();
         } catch (Exception e) {
@@ -130,7 +109,7 @@ public class TagService {
         }
     }
 
-    // EP24: Create a new tag
+
     @POST
     @Path("/")
     @RolesAllowed({"RESPONSAVEL", "ADMINISTRADOR"})
@@ -154,16 +133,20 @@ public class TagService {
             Tag tag = tagBean.create(tagDTO.getName(), performedBy);
 
             return Response.status(Response.Status.CREATED)
-                    .entity(new MessageResponse("Tag com id " + tag.getId() + " criado com sucesso"))
+                    .entity(Map.of("message","Tag com id " + tag.getId() + " criado com sucesso"))
+                    .build();
+        } catch (MyEntityNotFoundException e) {
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity(Map.of("message", e.getMessage()))
                     .build();
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("Error creating tag: " + e.getMessage())
+                    .entity(Map.of("message", "Error creating tag: " + e.getMessage()))
                     .build();
         }
     }
 
-    // EP25: Update tag name
+
     @PUT
     @Path("/{tag_id}")
     @RolesAllowed({"RESPONSAVEL", "ADMINISTRADOR"})
@@ -188,16 +171,20 @@ public class TagService {
             tag.setName(tagDTO.getName());
 
             return Response.ok()
-                    .entity(new MessageResponse("Nome da tag com id " + tagId + " atualizada com com sucesso"))
+                    .entity(Map.of("message", "Nome da tag com id " + tagId + " atualizada com com sucesso"))
+                    .build();
+        } catch (MyEntityNotFoundException e) {
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity(Map.of("message", e.getMessage()))
                     .build();
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("Error updating tag: " + e.getMessage())
+                    .entity(Map.of("message", "Error updating tag: " + e.getMessage()))
                     .build();
         }
     }
 
-    // EP26: Delete a tag
+
     @DELETE
     @Path("/{tag_id}")
     @RolesAllowed({"RESPONSAVEL", "ADMINISTRADOR"})
@@ -216,16 +203,20 @@ public class TagService {
             tagBean.delete(tagId, performedBy);
 
             return Response.ok()
-                    .entity(new MessageResponse("Tag eliminada com sucesso"))
+                    .entity(Map.of("message", "Tag eliminada com sucesso"))
+                    .build();
+        } catch (MyEntityNotFoundException e) {
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity(Map.of("message", e.getMessage()))
                     .build();
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("Error deleting tag: " + e.getMessage())
+                    .entity(Map.of("message", "Error deleting tag: " + e.getMessage()))
                     .build();
         }
     }
 
-    // EP27: Get specific tag by ID
+
     @GET
     @Path("/{tag_id}")
     @RolesAllowed({"COLABORADOR", "RESPONSAVEL", "ADMINISTRADOR"})
@@ -238,29 +229,12 @@ public class TagService {
                         .build();
             }
 
-            TagDTO tagDTO = new TagDTO(tag.getId(), tag.getName());
+            TagDTO tagDTO = TagDTO.fromSimple(tag);
             return Response.ok(tagDTO).build();
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("Error retrieving tag: " + e.getMessage())
+                    .entity(Map.of("message", "Error retrieving tag: " + e.getMessage()))
                     .build();
-        }
-    }
-
-    // Helper class for message responses
-    private static class MessageResponse {
-        private String message;
-
-        public MessageResponse(String message) {
-            this.message = message;
-        }
-
-        public String getMessage() {
-            return message;
-        }
-
-        public void setMessage(String message) {
-            this.message = message;
         }
     }
 }

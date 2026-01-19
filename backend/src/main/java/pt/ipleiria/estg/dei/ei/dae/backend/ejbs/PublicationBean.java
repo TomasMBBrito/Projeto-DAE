@@ -313,7 +313,6 @@ public class PublicationBean {
             return true;
         }
 
-
         return user.getRole() == Role.RESPONSAVEL || user.getRole() == Role.ADMINISTRADOR;
     }
 
@@ -322,8 +321,8 @@ public class PublicationBean {
         if (publication.getAuthor().getUsername().equals(user.getUsername())) {
             return true;
         }
-        return false;
-        //return user.getRole() == Role.RESPONSAVEL || user.getRole() == Role.ADMINISTRADOR;
+        //return false;
+        return user.getRole() == Role.RESPONSAVEL || user.getRole() == Role.ADMINISTRADOR;
     }
 
     public boolean canView(Publication publication, User user) {

@@ -43,6 +43,15 @@ public class TagBean {
         return em.find(Tag.class, id);
     }
 
+    public Tag findWithDetails(Long id) {
+        Tag tag = find(id);
+        if (tag != null) {
+            Hibernate.initialize(tag.getPublications());
+            Hibernate.initialize(tag.getSubscribers());
+        }
+        return tag;
+    }
+
     public Tag findByName(String name) {
         try {
             return em.createNamedQuery("getTagByName", Tag.class)
@@ -51,6 +60,22 @@ public class TagBean {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    public Tag findWithPublications(Long id) {
+        Tag tag = find(id);
+        if (tag != null) {
+            Hibernate.initialize(tag.getPublications());
+        }
+        return tag;
+    }
+
+    public Tag findWithSubscribers(Long id) {
+        Tag tag = find(id);
+        if (tag != null) {
+            Hibernate.initialize(tag.getSubscribers());
+        }
+        return tag;
     }
 
     public List<Tag> getSubscribedTags(String username)

@@ -87,6 +87,12 @@ public class TagDTO implements Serializable {
         );
     }
 
+    public static List<TagDTO> fromSimple(List<Tag> tags) {
+        return tags.stream()
+                .map(TagDTO::fromSimple)
+                .collect(Collectors.toList());
+    }
+
     public static List<TagDTO> from(List<Tag> tags) {
         return tags.stream()
                 .map(TagDTO::from)
