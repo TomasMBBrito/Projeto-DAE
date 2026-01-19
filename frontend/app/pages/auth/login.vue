@@ -18,29 +18,19 @@
         <button class="btn secondary" @click="reset">Reset</button>
       </div>
 
-      <div v-if="token" class="token-box">
-        <h3>Token</h3>
-        <pre>{{ token }}</pre>
+      <div v-if="loginError" class="login-error">
+        {{ loginError }}
       </div>
 
-      <div v-if="user" class="user-box">
-        <h3>User</h3>
-        <pre>{{ user }}</pre>
-      </div>
-
-      <div v-if="messages.length > 0" class="messages-box">
-        <h2>Messages</h2>
-        <div v-for="(message, index) in messages" :key="index">
-          <pre>{{ message }}</pre>
-        </div>
-      </div>
     </div>
   </div>
 </template>
 
 <script setup>
 import { useAuthStore } from '~/stores/auth-store';
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
 const config = useRuntimeConfig()
 const api = config.public.apiBase
 
@@ -48,6 +38,9 @@ const loginFormData = reactive({
   username: "",
   password: "",
 })
+
+const loginError = ref('')
+
 
 const authStore = useAuthStore();
 const { token, user } = storeToRefs(authStore)
@@ -62,33 +55,48 @@ function reset() {
 }
 
 async function login() {
+  loginError.value = ''
+
   try {
-    await $fetch(`${api}/auth/login`, {
+    const response = await $fetch.raw(`${api}/auth/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Accept: 'application/json'
       },
-      body: loginFormData,
-      onResponse({ request, response, options }) {
-        messages.value.push({
-          method: options.method,
-          request: request,
-          status: response.status,
-          statusText: response.statusText,
-          payload: response._data
-        })
-        if (response.status == 200) {
-          token.value = response._data
-          getUserInfo()
-        }
-      }
+      body: loginFormData
     })
-  } catch (e) {
-    console.error('login request failed: ', e)
-    messages.value.push({ error: e.message })
+
+    // SUCCESS
+    if (response.status === 200) {
+      const authHeader = response.headers.get('authorization')
+
+      if (!authHeader) {
+        loginError.value = 'Login failed. Please try again.'
+        return
+      }
+
+      token.value = authHeader.replace('Bearer ', '')
+      await getUserInfo()
+      router.push('/publications/searchPublications')
+      return
+    }
+
+  } catch (error) {
+    // HTTP ERRORS LAND HERE
+    const status = error?.response?.status
+
+    if (status === 401 || status === 404) {
+      loginError.value = 'Invalid username or password'
+    } else {
+      loginError.value = 'Unable to connect to the server'
+    }
   }
 }
+
+
+
+
 
 async function getUserInfo() {
   try {
@@ -100,13 +108,6 @@ async function getUserInfo() {
         Authorization: `Bearer ${token.value}`
       },
       onResponse({ request, response, options }) {
-        messages.value.push({
-          method: options.method,
-          request: request,
-          status: response.status,
-          statusText: response.statusText,
-          payload: response._data
-        })
         if (response.status == 200) {
           user.value = response._data
         }
@@ -133,7 +134,7 @@ async function getUserInfo() {
   width: 400px;
   padding: 30px;
   border-radius: 10px;
-  box-shadow: 2px 2px 10px rgba(0,0,0,0.1);
+  box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .title {
@@ -163,7 +164,7 @@ label {
 .input:focus {
   outline: none;
   border-color: #0077cc;
-  box-shadow: 0 0 4px rgba(0,119,204,0.3);
+  box-shadow: 0 0 4px rgba(0, 119, 204, 0.3);
 }
 
 .buttons {
@@ -217,4 +218,16 @@ pre {
   max-height: 200px;
   overflow: auto;
 }
+
+.login-error {
+  margin-top: 12px;
+  padding: 8px 12px;
+  background: #fdecea;
+  color: #b42318;
+  border: 1px solid #f5c2c7;
+  border-radius: 6px;
+  font-size: 14px;
+  text-align: center;
+}
+
 </style>
