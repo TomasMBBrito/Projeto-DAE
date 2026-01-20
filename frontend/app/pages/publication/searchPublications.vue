@@ -1,70 +1,54 @@
+<!-- pages/publications/searchPublications.vue -->
 <template>
-  <div class="welcome-page">
-    <div class="hero-section">
-      <div class="container">
-        <div class="hero-content">
-          <h1 class="main-title">Scientific Publications Platform</h1>
-          <p class="tagline">Research Center XYZ</p>
-          <p class="description">
-            Manage and discover scientific publications across multiple research areas.
-            Collaborate with your team, share insights, and stay updated on the latest research.
-          </p>
-          <div class="cta-buttons">
-            <nuxt-link to="/auth/login" class="btn-login">
-              Login to Platform
-            </nuxt-link>
-          </div>
+  <div class="search-publications">
+    <h1>Search Publications</h1>
+
+    <div class="search-controls">
+      <div class="search-bar">
+        <input v-model="searchQuery" type="text" placeholder="Search by ID, title, author..." class="search-input"
+          @keyup.enter="searchPublications" />
+        <button @click="searchPublications" class="btn-search">Search</button>
+      </div>
+
+      <div class="sort-controls">
+        <label>Sort by:</label>
+        <select v-model="sortBy" @change="loadPublications" class="sort-select">
+          <option value="">Default</option>
+          <option value="recent">Recent</option>
+          <option value="comments">Comments</option>
+          <option value="rating">Rating</option>
+        </select>
+
+        <div class="tags-button">
+          <button @click="goToTags" class="btn-tags">Go to Tags</button>
         </div>
       </div>
     </div>
 
-    <div class="features-section">
-      <div class="container">
-        <h2>Platform Features</h2>
-        <div class="features-grid">
-          <div class="feature-card">
-            <h3>Publication Management</h3>
-            <p>Upload and organize scientific publications, articles, conference papers, patents, datasets, and more.</p>
-          </div>
+    <div v-if="loading" class="loading">Loading...</div>
 
-          <div class="feature-card">
-            <h3>Smart Tagging</h3>
-            <p>Tag publications by project, area, or topic. Subscribe to tags and get notified of new additions.</p>
-          </div>
+    <div v-else-if="error" class="error">{{ error }}</div>
 
-          <div class="feature-card">
-            <h3>Collaboration</h3>
-            <p>Add comments, ratings, and critical analyses to publications. Share insights with your team.</p>
-          </div>
-
-          <div class="feature-card">
-            <h3>Advanced Search</h3>
-            <p>Search by title, author, scientific area, tags, date, and more. Filter and sort results easily.</p>
-          </div>
-
-          <div class="feature-card">
-            <h3>AI-Powered Summaries</h3>
-            <p>Automatically generate summaries of publications using advanced language models.</p>
-          </div>
-
-          <div class="feature-card">
-            <h3>Real-time Notifications</h3>
-            <p>Get email alerts when publications with your subscribed tags are added or updated.</p>
-          </div>
-        </div>
-      </div>
+    <div v-else-if="publications.length === 0" class="empty">
+      <p>No publications found</p>
     </div>
 
-    <div class="research-areas">
-      <div class="container">
-        <h2>Research Areas</h2>
-        <div class="areas-list">
-          <span class="area-badge">Data Science</span>
-          <span class="area-badge">Materials Science</span>
-          <span class="area-badge">Artificial Intelligence</span>
-          <span class="area-badge">Machine Learning</span>
-          <span class="area-badge">Biotechnology</span>
-          <span class="area-badge">Nanotechnology</span>
+    <div v-else class="publications-list">
+      <div v-for="pub in publications" :key="pub.id" class="publication-card" @click="goToDetails(pub.id)">
+        <h3>{{ pub.title }}</h3>
+        <p class="authors">{{ pub.authors }}</p>
+        <p class="summary">{{ truncate(pub.summary, 150) }}</p>
+
+        <div class="publication-meta">
+          <span class="meta-item">
+            Area: {{ pub.scientificArea }}
+          </span>
+          <span class="meta-item">
+            Comments: {{ pub.commentCount || 0 }}
+          </span>
+          <span class="meta-item">
+            Rating: {{ pub.averageRating ? pub.averageRating.toFixed(1) : 'N/A' }}
+          </span>
         </div>
       </div>
     </div>
@@ -72,172 +56,206 @@
 </template>
 
 <script setup>
-// No login logic needed here anymore
+import { usePublicationStore } from '~/stores/publication-store';
+
+const publicationStore = usePublicationStore()
+const router = useRouter()
+
+const searchQuery = ref('')
+const sortBy = ref('')
+const publications = ref([])
+const loading = ref(false)
+const error = ref('')
+
+onMounted(() => {
+  loadPublications()
+})
+
+function goToTags() {
+  router.push('/tags')
+}
+
+
+async function loadPublications() {
+  loading.value = true
+  error.value = ''
+
+  try {
+    publications.value = await publicationStore.getAll(sortBy.value)
+  } catch (e) {
+    error.value = e.message || 'Failed to load publications'
+  } finally {
+    loading.value = false
+  }
+}
+
+async function searchPublications() {
+  if (!searchQuery.value.trim()) {
+    loadPublications()
+    return
+  }
+
+  loading.value = true
+  error.value = ''
+
+  try {
+    publications.value = await publicationStore.search(searchQuery.value)
+  } catch (e) {
+    error.value = e.message || 'Search failed'
+  } finally {
+    loading.value = false
+  }
+}
+
+function goToDetails(id) {
+  router.push(`/publications/${id}`)
+}
+
+function truncate(text, length) {
+  if (!text) return ''
+  return text.length > length ? text.substring(0, length) + '...' : text
+}
 </script>
 
 <style scoped>
-.welcome-page {
-  background: #36393f;
-  min-height: 100vh;
-}
-
-.container {
+.search-publications {
+  padding: 20px;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 20px;
 }
 
-/* Hero Section */
-.hero-section {
-  background: #202225;
-  padding: 120px 0;
+h1 {
+  color: #333;
+  margin-bottom: 30px;
 }
 
-.hero-content {
-  text-align: center;
-  max-width: 800px;
-  margin: 0 auto;
-  color: #dcddde;
-}
-
-.main-title {
-  font-size: 56px;
-  font-weight: 700;
-  margin: 0 0 16px 0;
-  color: #ffffff;
-}
-
-.tagline {
-  font-size: 24px;
-  margin: 0 0 24px 0;
-  color: #b9bbbe;
-}
-
-.description {
-  font-size: 18px;
-  line-height: 1.6;
-  margin: 0 0 40px 0;
-  color: #b9bbbe;
-}
-
-.cta-buttons {
+.search-controls {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
 }
 
-.btn-login {
-  padding: 16px 48px;
-  background: #ffffff;
-  color: #202225;
+.search-bar {
+  display: flex;
+  gap: 10px;
+  flex: 1;
+  min-width: 300px;
+}
+
+.search-input {
+  flex: 1;
+  padding: 10px 15px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #0077cc;
+}
+
+.btn-search {
+  padding: 10px 20px;
+  background: #0077cc;
+  color: white;
   border: none;
   border-radius: 4px;
-  font-size: 18px;
-  font-weight: 600;
-  text-decoration: none;
   cursor: pointer;
-  transition: background 0.2s;
-  display: inline-block;
+  font-weight: 600;
 }
 
-.btn-login:hover {
-  background: #dcddde;
+.btn-search:hover {
+  background: #005fa3;
 }
 
-/* Features Section */
-.features-section {
-  padding: 80px 0;
-}
-
-.features-section h2 {
-  text-align: center;
-  font-size: 32px;
-  color: #ffffff;
-  margin: 0 0 50px 0;
-}
-
-.features-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 24px;
-}
-
-.feature-card {
-  background: #2f3136;
-  padding: 24px;
-  border-radius: 8px;
-  transition: transform 0.2s;
-}
-
-.feature-card:hover {
-  transform: translateY(-4px);
-}
-
-.feature-card h3 {
-  font-size: 20px;
-  color: #ffffff;
-  margin: 0 0 12px 0;
-}
-
-.feature-card p {
-  font-size: 14px;
-  color: #b9bbbe;
-  line-height: 1.6;
-  margin: 0;
-}
-
-/* Research Areas */
-.research-areas {
-  background: #2f3136;
-  padding: 60px 0;
-}
-
-.research-areas h2 {
-  font-size: 28px;
-  color: #ffffff;
-  margin: 0 0 30px 0;
-  text-align: center;
-}
-
-.areas-list {
+.sort-controls {
   display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  justify-content: center;
+  align-items: center;
+  gap: 10px;
 }
 
-.area-badge {
-  background: #202225;
-  color: #b9bbbe;
-  padding: 8px 16px;
+.sort-controls label {
+  font-size: 14px;
+  color: #666;
+}
+
+.sort-select {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 14px;
-  font-weight: 500;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-  .hero-section {
-    padding: 80px 0;
-  }
+.loading,
+.error,
+.empty {
+  text-align: center;
+  padding: 40px;
+  font-size: 16px;
+}
 
-  .main-title {
-    font-size: 36px;
-  }
+.error {
+  color: #c33;
+  background: #fee;
+  border-radius: 4px;
+}
 
-  .tagline {
-    font-size: 20px;
-  }
+.empty {
+  color: #666;
+}
 
-  .description {
-    font-size: 16px;
-  }
+.publications-list {
+  display: grid;
+  gap: 20px;
+}
 
-  .features-section {
-    padding: 60px 0;
-  }
+.publication-card {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
 
-  .features-grid {
-    grid-template-columns: 1fr;
-  }
+.publication-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.publication-card h3 {
+  margin: 0 0 10px 0;
+  color: #0077cc;
+  font-size: 18px;
+}
+
+.authors {
+  color: #666;
+  font-size: 14px;
+  margin: 0 0 10px 0;
+  font-style: italic;
+}
+
+.summary {
+  color: #333;
+  line-height: 1.5;
+  margin: 0 0 15px 0;
+  font-size: 14px;
+}
+
+.publication-meta {
+  display: flex;
+  gap: 20px;
+  padding-top: 15px;
+  border-top: 1px solid #eee;
+}
+
+.meta-item {
+  font-size: 13px;
+  color: #666;
 }
 </style>

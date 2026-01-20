@@ -78,7 +78,7 @@ async function login() {
 
       token.value = authHeader.replace('Bearer ', '')
       await getUserInfo()
-      router.push('/publications/searchPublications')
+      router.push('/publication/searchPublications')
       return
     }
 
