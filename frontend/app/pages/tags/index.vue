@@ -1,5 +1,6 @@
 <template>
   <div class="tags-page">
+    <button @click="goToPublications" class="btn-back-to-pubs">← Back to Publications</button>
     <h1>Tags Management</h1>
 
     <!-- Create new tag -->
@@ -51,11 +52,18 @@ import { ref, onMounted } from "vue"
 import { useTagStore } from "~/stores/tag-store"
 
 const tagStore = useTagStore()
+const router = useRouter()
+
+function goToPublications() {
+  router.push('/publication/searchPublications')
+}
 
 const tags = ref([])
 const newTagName = ref('')
 const loading = ref(false)
 const error = ref('')
+
+useAuthErrorRedirect(error)
 
 async function loadTags() {
   loading.value = true
@@ -148,6 +156,23 @@ onMounted(() => {
   max-width: 1000px;
   margin: 0 auto;
   padding: 20px;
+}
+
+.btn-back-to-pubs {
+  padding: 10px 20px;
+  background: #0077cc;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 20px;
+  transition: background 0.2s;
+}
+
+.btn-back-to-pubs:hover {
+  background: #005fa3;
 }
 .new-tag {
   margin-bottom: 20px;

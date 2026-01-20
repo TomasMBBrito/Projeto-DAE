@@ -16,6 +16,13 @@ export const useAuthStore = defineStore("authStore", () => {
         }
     }
     
+    function setUser(userData) {
+        user.value = userData
+        if (process.client && userData) {
+            localStorage.setItem('auth_user', JSON.stringify(userData))
+        }
+    }
+    
     function restoreSession() {
         if (process.client) {
             const savedToken = localStorage.getItem('auth_token')
@@ -28,5 +35,5 @@ export const useAuthStore = defineStore("authStore", () => {
     // Auto restore on creation
     restoreSession()
     
-    return { token, user, isAuthenticated, logout, restoreSession }
+    return { token, user, isAuthenticated, logout, restoreSession, setUser }
 })

@@ -77,8 +77,12 @@ async function login() {
       }
 
       token.value = authHeader.replace('Bearer ', '')
-      // Tentativa de push para apanhar possiveis erros de roteamento
+      if (process.client) {
+        localStorage.setItem('auth_token', token.value)
+      }
+      
       try {
+        await getUserInfo()
         await router.push('/publication/searchPublications')
       } catch (navError) {
         console.error('Navigation error:', navError)
@@ -105,19 +109,21 @@ async function login() {
 
 async function getUserInfo() {
   try {
-    await $fetch(`${api}/auth/user`, {
+    const userData = await $fetch(`${api}/auth/user`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
         Accept: 'application/json',
         Authorization: `Bearer ${token.value}`
-      },
-      onResponse({ request, response, options }) {
-        if (response.status == 200) {
-          user.value = response._data
-        }
       }
     })
+    
+    if (userData) {
+      user.value = userData
+      if (process.client) {
+        localStorage.setItem('auth_user', JSON.stringify(userData))
+      }
+    }
   } catch (e) {
     console.error('user info request failed: ', e)
     messages.value.push({ error: e.message })

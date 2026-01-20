@@ -25,5 +25,37 @@ export const useUserStore = defineStore("userStore", () => {
         return response
     }
 
-    return { getAll }
+    async function getById(id) {
+        if (!authStore.token) {
+            throw new Error('Not authenticated')
+        }
+        
+        const response = await $fetch(`${api}/users/${id}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${authStore.token}`,
+                'Accept': 'application/json'
+            }
+        })
+
+        return response
+    }
+
+    async function getPublicationsByUsername(username) {
+        if (!authStore.token) {
+            throw new Error('Not authenticated')
+        }
+        
+        const response = await $fetch(`${api}/users/${username}/posts`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${authStore.token}`,
+                'Accept': 'application/json'
+            }
+        })
+
+        return response
+    }
+
+    return { getAll, getById, getPublicationsByUsername }
 })

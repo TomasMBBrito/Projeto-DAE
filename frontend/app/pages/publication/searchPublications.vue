@@ -23,7 +23,7 @@
           <button @click="goToTags" class="btn-tags">Go to Tags</button>
         </div>
 
-        <div class="users-button">
+        <div v-if="authStore.isAuthenticated && authStore.user?.role === 'ADMINISTRADOR'" class="users-button">
           <button @click="goToUsers" class="btn-users">Go to Users</button>
         </div>
       </div>
@@ -41,6 +41,8 @@
         <h3>{{ pub.title }}</h3>
         <p class="authors">{{ pub.authors }}</p>
         <p class="summary">{{ truncate(pub.summary, 150) }}</p>
+
+        <button v-if="authStore.isAuthenticated && authStore.user?.role === 'ADMINISTRADOR'" @click.stop="goToHistory(pub.id)" class="btn-history">View History</button>
 
         <div class="publication-meta">
           <span class="meta-item">
@@ -60,8 +62,10 @@
 
 <script setup>
 import { usePublicationStore } from '~/stores/publication-store';
+import { useAuthStore } from '~/stores/auth-store';
 
 const publicationStore = usePublicationStore()
+const authStore = useAuthStore()
 const router = useRouter()
 
 const searchQuery = ref('')
@@ -69,6 +73,8 @@ const sortBy = ref('')
 const publications = ref([])
 const loading = ref(false)
 const error = ref('')
+
+useAuthErrorRedirect(error)
 
 onMounted(() => {
   loadPublications()
@@ -118,6 +124,10 @@ function goToDetails(id) {
   router.push(`/publication/${id}`)
 }
 
+function goToHistory(id) {
+  router.push(`/history/publicationHistory?id=${id}`)
+}
+
 function truncate(text, length) {
   if (!text) return ''
   return text.length > length ? text.substring(0, length) + '...' : text
@@ -150,6 +160,17 @@ h1 {
   gap: 10px;
   flex: 1;
   min-width: 300px;
+}
+
+.btn-history {
+  padding: 8px 16px;
+  background: #28a745;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  margin-bottom: 15px;
 }
 
 .search-input {

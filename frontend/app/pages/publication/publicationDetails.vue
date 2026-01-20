@@ -1,7 +1,7 @@
 <!-- pages/publication/[id].vue -->
 <template>
   <div class="publication-details">
-    <button @click="goBack" class="btn-back">← Back to Search</button>
+    <button @click="goBack" class="btn-back">← Back to Publications</button>
 
     <div v-if="loading" class="loading">Loading...</div>
 
@@ -74,15 +74,19 @@
 
 <script setup>
 import { usePublicationStore } from '~/stores/publication-store';
+import { useAuthStore } from '~/stores/auth-store';
 
 const route = useRoute()
 const router = useRouter()
 const publicationStore = usePublicationStore()
+const authStore = useAuthStore()
 
 const publication = ref(null)
 const comments = ref([])
 const loading = ref(false)
 const error = ref('')
+
+useAuthErrorRedirect(error)
 const newComment = ref('')
 const userRating = ref(0)
 const ratingMessage = ref('')
@@ -90,6 +94,10 @@ const ratingMessage = ref('')
 const publicationId = computed(() => parseInt(route.params.id))
 
 onMounted(() => {
+  if (!authStore.isAuthenticated || authStore.user?.role !== 'ADMINISTRADOR') {
+    router.push('/publication/searchPublications')
+    return
+  }
   loadPublication()
   loadComments()
 })
@@ -141,7 +149,7 @@ async function ratePublication(rating) {
 }
 
 function goBack() {
-  router.push('/publications/searchPublications')
+  router.push('/publication/searchPublications')
 }
 
 function formatDate(date) {

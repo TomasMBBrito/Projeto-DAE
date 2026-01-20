@@ -1,5 +1,6 @@
 <template>
   <div class="users-page">
+    <button @click="goToPublications" class="btn-back-to-pubs">← Back to Publications</button>
     <h1>All Users</h1>
 
     <div v-if="loading" class="loading">Loading...</div>
@@ -14,7 +15,7 @@
       <div v-for="user in users" :key="user.id" class="user-card">
         <h3>{{ user.name }}</h3>
         <p class="email">{{ user.email }}</p>
-        <!-- Add more fields as needed -->
+        <button @click="goToUserDetails(user.username)" class="btn-details">Show Details</button>
       </div>
     </div>
   </div>
@@ -22,13 +23,22 @@
 
 <script setup>
 import { useUserStore } from '~/stores/user-store'
+import { useAuthStore } from '~/stores/auth-store'
 
 const userStore = useUserStore()
+const authStore = useAuthStore()
+const router = useRouter()
 const users = ref([])
 const loading = ref(true)
 const error = ref(null)
 
+useAuthErrorRedirect(error)
+
 onMounted(async () => {
+  if (!authStore.isAuthenticated || authStore.user?.role !== 'ADMINISTRADOR') {
+    router.push('/publication/searchPublications')
+    return
+  }
   try {
     const data = await userStore.getAll()
     users.value = data
@@ -38,11 +48,36 @@ onMounted(async () => {
     loading.value = false
   }
 })
+
+function goToUserDetails(userName) {
+  router.push(`/users/userDetails?id=${userName}`)
+}
+
+function goToPublications() {
+  router.push('/publication/searchPublications')
+}
 </script>
 
 <style scoped>
 .users-page {
   padding: 20px;
+}
+
+.btn-back-to-pubs {
+  padding: 10px 20px;
+  background: #0077cc;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 20px;
+  transition: background 0.2s;
+}
+
+.btn-back-to-pubs:hover {
+  background: #005fa3;
 }
 
 .loading, .error, .empty {
@@ -70,6 +105,22 @@ onMounted(async () => {
 
 .email {
   color: #666;
-  margin: 0;
+  margin: 0 0 15px 0;
+}
+
+.btn-details {
+  padding: 8px 16px;
+  background: #0077cc;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  transition: background 0.2s;
+}
+
+.btn-details:hover {
+  background: #005fa3;
 }
 </style>
