@@ -19,8 +19,9 @@
           <option value="rating">Rating</option>
         </select>
 
-        <div class="tags-button">
+        <div class="nav-buttons">
           <button @click="goToTags" class="btn-tags">Go to Tags</button>
+          <button @click="goToUsers" class="btn-users">Go to Users</button>
         </div>
       </div>
     </div>
@@ -74,6 +75,11 @@ onMounted(() => {
 function goToTags() {
   router.push('/tags')
 }
+
+function goToUsers() {
+  router.push('/users')
+}
+
 
 
 async function loadPublications() {
