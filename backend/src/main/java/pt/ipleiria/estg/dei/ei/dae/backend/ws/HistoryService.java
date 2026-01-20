@@ -55,6 +55,10 @@ public class HistoryService {
             return Response.status(Response.Status.NOT_FOUND)
                     .entity(Map.of("message", "Utilizador não encontrado"))
                     .build();
+        }catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(Map.of("message", "Erro ao obter histórico: " + e.getMessage()))
+                    .build();
         }
     }
 
@@ -79,7 +83,7 @@ public class HistoryService {
 
 
     @GET
-    @Path("/me/{post_id}")
+    @Path("/me/posts/{post_id}")
     @RolesAllowed({"COLABORADOR", "RESPONSAVEL", "ADMINISTRADOR"})
     public Response getMyPublicationHistory(@PathParam("post_id") Long postId) {
         try {
@@ -108,6 +112,10 @@ public class HistoryService {
             return Response.status(Response.Status.NOT_FOUND)
                     .entity(Map.of("message", e.getMessage()))
                     .build();
+        }catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(Map.of("message", "Erro ao obter histórico: " + e.getMessage()))
+                    .build();
         }
     }
 
@@ -130,7 +138,7 @@ public class HistoryService {
             return Response.ok(dtos).build();
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(Map.of("message", "Erro ao obter histórico"))
+                    .entity(Map.of("message", "Erro ao obter histórico: " + e.getMessage()))
                     .build();
         }
     }

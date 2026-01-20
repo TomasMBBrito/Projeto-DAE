@@ -12,18 +12,18 @@ public class HistoryDTO implements Serializable {
     private String action;
     private String description;
     private String user;
-    private LocalDateTime timestamp;
+    private String timestamp;
 
     public HistoryDTO() {
     }
 
-    public HistoryDTO(String action, String description, LocalDateTime timestamp) {
+    public HistoryDTO(String action, String description, String timestamp) {
         this.action = action;
         this.description = description;
         this.timestamp = timestamp;
     }
 
-    public HistoryDTO(String action, String description, LocalDateTime timestamp, String user) {
+    public HistoryDTO(String action, String description, String timestamp, String user) {
         this.action = action;
         this.description = description;
         this.timestamp = timestamp;
@@ -54,11 +54,11 @@ public class HistoryDTO implements Serializable {
         this.user = user;
     }
 
-    public LocalDateTime getTimestamp() {
+    public String getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(LocalDateTime timestamp) {
+    public void setTimestamp(String timestamp) {
         this.timestamp = timestamp;
     }
 
@@ -66,7 +66,7 @@ public class HistoryDTO implements Serializable {
         return new HistoryDTO(
                 history.getAction().toString(),
                 history.getDescription(),
-                history.getTimestamp()
+                history.getTimestamp().toString()
         );
     }
 
@@ -74,7 +74,7 @@ public class HistoryDTO implements Serializable {
         return new HistoryDTO(
                 history.getAction().toString(),
                 history.getDescription(),
-                history.getTimestamp(),
+                history.getTimestamp().toString(),
                 history.getUser() != null ? history.getUser().getUsername() : null
         );
     }
