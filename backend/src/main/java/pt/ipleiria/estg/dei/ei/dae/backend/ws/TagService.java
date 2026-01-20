@@ -200,7 +200,8 @@ public class TagService {
             String username = securityContext.getUserPrincipal().getName();
             User performedBy = userBean.find(username);
 
-            tagBean.delete(tagId, performedBy);
+            //tagBean.delete(tagId, performedBy);
+            tagBean.hide(tagId, performedBy);
 
             return Response.ok()
                     .entity(Map.of("message", "Tag eliminada com sucesso"))
@@ -229,7 +230,7 @@ public class TagService {
                         .build();
             }
 
-            TagDTO tagDTO = TagDTO.fromSimple(tag);
+            TagDTO tagDTO = TagDTO.from(tag);
             return Response.ok(tagDTO).build();
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)

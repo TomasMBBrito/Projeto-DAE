@@ -31,7 +31,7 @@ Content-Type: application/json
 
 
 ############################################################################################
-@token = Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOiJBRE1JTklTVFJBRE9SIiwiaWF0IjoxNzY4ODY3MjcwLCJleHAiOjE3Njg4NzA4NzB9.XV6-jEwbTlbjlKFz08ChubSxPM0MrpEeMcrqmiE10TnUT0fEzZgwcBoMJBxRNsC9
+@token = Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOiJBRE1JTklTVFJBRE9SIiwiaWF0IjoxNzY4ODcwOTI1LCJleHAiOjE3Njg4NzQ1MjV9.r8GiWr4Ki2XRSqmasKLoopNJh7CrhXZUgXuabiZ5rabxwTL9HyTrvE0vN75QgkgX
 
 
 ### EP-AUTH: Get Current User
@@ -184,11 +184,11 @@ GET {{baseUrl}}/tags
 Authorization: {{token}}
 
 ### EP22: Consultar publicações associadas a uma tag
-GET {{baseUrl}}/tags/1/posts
+GET {{baseUrl}}/tags/5/posts
 Authorization: {{token}}
 
 ### EP23: Consultar subscribers de uma tag (RESPONSAVEL/ADMIN)
-GET {{baseUrl}}/tags/1/subscribers
+GET {{baseUrl}}/tags/5/subscribers
 Authorization: {{token}}
 
 ### EP24: Criar nova tag (RESPONSAVEL/ADMIN)
@@ -197,11 +197,11 @@ Authorization: {{token}}
 Content-Type: application/json
 
 {
-  "name": "Projeto X"
+  "name": "Projeto Z"
 }
 
 ### EP25: Atualizar nome de uma tag (RESPONSAVEL/ADMIN)
-PUT {{baseUrl}}/tags/12
+PUT {{baseUrl}}/tags/1
 Authorization: {{token}}
 Content-Type: application/json
 
@@ -210,11 +210,11 @@ Content-Type: application/json
 }
 
 ### EP26: Eliminar uma tag (RESPONSAVEL/ADMIN)
-DELETE {{baseUrl}}/tags/12
+DELETE {{baseUrl}}/tags/5
 Authorization: {{token}}
 
 ### EP27: Obter tag específica
-GET {{baseUrl}}/tags/12
+GET {{baseUrl}}/tags/5
 Authorization: {{token}}
 
 ###############################################################################
@@ -237,11 +237,11 @@ Content-Type: application/json
 {
   "title": "Análise de Algoritmos Genéticos",
   "summary": "Estudo sobre algoritmos genéticos e suas aplicações em IA.",
-  "scientificArea": "Ciência de Dados",
-  "publicationDate": "2025-01-15T10:00:00Z",
-  "authors": "João Silva, Ana Ferreira",
+  "scientificArea": "ENVIRONMENTAL_SCIENCE",
+  "publicationDate": "2025-01-15",
+  "authors": ["João Silva", "Ana Ferreira"],
   "filename": "AlgoritmosGeneticos.zip",
-  "tagIds": [12, 34]
+  "tagIds": [1, 2]
 }
 
 ### EP31: Atualizar resumo de publicação
@@ -258,7 +258,7 @@ DELETE {{baseUrl}}/posts/7
 Authorization: {{token}}
 
 ### EP33: Alterar visibilidade de publicação
-PUT {{baseUrl}}/posts/7/state
+PUT {{baseUrl}}/posts/6/state
 Authorization: {{token}}
 Content-Type: application/json
 
@@ -267,11 +267,11 @@ Content-Type: application/json
 }
 
 ### EP34: Consultar comentários de uma publicação
-GET {{baseUrl}}/posts/1/comments
+GET {{baseUrl}}/posts/6/comments
 Authorization: {{token}}
 
 ### EP35: Comentar uma publicação
-POST {{baseUrl}}/posts/7/comments
+POST {{baseUrl}}/posts/6/comments
 Authorization: {{token}}
 Content-Type: application/json
 
@@ -289,7 +289,7 @@ Content-Type: application/json
 }
 
 ### EP37: Avaliar uma publicação
-POST {{baseUrl}}/posts/7/ratings
+POST {{baseUrl}}/posts/6/ratings
 Authorization: {{token}}
 Content-Type: application/json
 
@@ -298,11 +298,11 @@ Content-Type: application/json
 }
 
 ### EP38: Associar tag a publicação
-POST {{baseUrl}}/posts/12/tags/13
+POST {{baseUrl}}/posts/6/tags/5
 Authorization: {{token}}
 
 ### EP39: Desassociar tag de publicação (RESPONSAVEL/ADMIN)
-DELETE {{baseUrl}}/posts/12/tags/13
+DELETE {{baseUrl}}/posts/6/tags/5
 Authorization: {{token}}
 
 ### EP40: Pesquisar publicações
@@ -322,7 +322,7 @@ GET {{baseUrl}}/posts?sort=rating
 Authorization: {{token}}
 
 ### EP42: Regenerar resumo com IA
-PUT {{baseUrl}}/posts/7/summary
+PUT {{baseUrl}}/posts/6/summary
 Authorization: {{token}}
 Content-Type: application/json
 
