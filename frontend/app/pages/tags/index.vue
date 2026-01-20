@@ -1,190 +1,442 @@
 <template>
   <div class="tags-page">
-    <h1>Tags Management</h1>
+    <h1>Tags</h1>
 
-    <!-- Create new tag -->
-    <div class="new-tag">
-      <input v-model="newTagName" placeholder="New tag name" />
-      <button @click="createTag">Add Tag</button>
+    <!-- Error messages -->
+    <div v-if="error" class="error">
+      {{ error }}
+      <button v-if="isAuthError" @click="goToLogin">Go to Login</button>
+      <button v-else @click="retry">Retry</button>
     </div>
 
+    <!-- Loading -->
     <div v-if="loading" class="loading">Loading...</div>
-    <div v-if="error" class="error">{{ error }}</div>
 
-    <div v-if="!loading && tags.length === 0" class="empty">No tags found</div>
+    <!-- Create Tag (only for admins/responsavel) -->
+    <div v-if="canEdit" class="create-tag">
+      <button v-if="!creatingTag" class="btn-create" @click="creatingTag = true">
+        + Create Tag
+      </button>
 
-    <div class="tags-list">
+      <div v-else class="create-tag-input">
+        <input
+          v-model="newTagName"
+          placeholder="Enter tag name"
+          @keyup.enter="createTag"
+          @keyup.esc="() => { creatingTag = false; newTagName = '' }"
+        />
+        <button class="btn-save" @click="createTag">Save</button>
+        <button class="btn-cancel" @click="() => { creatingTag = false; newTagName = '' }">Cancel</button>
+      </div>
+    </div>
+
+    <!-- Tag List -->
+    <div v-if="tags.length > 0" class="tags-list">
       <div v-for="tag in tags" :key="tag.id" class="tag-card">
         <div class="tag-info">
-          <strong>{{ tag.name }}</strong>
-          <span>Publications: {{ tag.publicationCount || 0 }}</span>
-          <span>Subscribers: {{ tag.subscriberCount || 0 }}</span>
+          <span v-if="editingTagId !== tag.id" class="tag-name">{{ tag.name }}</span>
+          <input
+            v-else
+            v-model="editingTagName"
+            class="tag-input"
+            @keyup.enter="saveEdit(tag.id)"
+            @keyup.esc="cancelEdit"
+          />
         </div>
 
         <div class="tag-actions">
-          <button @click="toggleSubscribers(tag)">View Subscribers</button>
-          <button @click="editTag(tag)">Edit</button>
-          <button @click="deleteTag(tag)">Delete</button>
-        </div>
+          <!-- Edit buttons (only for responsavel/administrador) -->
+          <template v-if="canEdit">
+            <button
+              v-if="editingTagId !== tag.id"
+              class="btn-edit"
+              :disabled="actionLoading[tag.id]"
+              @click="startEdit(tag.id, tag.name)"
+            >
+              Edit
+            </button>
 
-        <div v-if="tag.showSubscribers" class="subscribers-list">
-          <h4>Subscribers:</h4>
-          <ul>
-            <li v-for="user in tag.subscribers" :key="user.id">
-              {{ user.username }} ({{ user.email }})
-            </li>
-          </ul>
-        </div>
+            <template v-else>
+              <button class="btn-save" :disabled="actionLoading[tag.id]" @click="saveEdit(tag.id)">
+                {{ actionLoading[tag.id] ? 'Saving...' : 'Save' }}
+              </button>
+              <button class="btn-cancel" :disabled="actionLoading[tag.id]" @click="cancelEdit">
+                Cancel
+              </button>
+            </template>
+          </template>
 
-        <div v-if="tag.editing" class="edit-tag">
-          <input v-model="tag.newName" />
-          <button @click="saveTag(tag)">Save</button>
-          <button @click="cancelEdit(tag)">Cancel</button>
+          <!-- Subscribe/Unsubscribe buttons -->
+          <button
+            v-if="!isSubscribed(tag.id) && editingTagId !== tag.id"
+            class="btn-subscribe"
+            :disabled="actionLoading[tag.id]"
+            @click="handleSubscribe(tag.id)"
+          >
+            {{ actionLoading[tag.id] ? 'Loading...' : 'Subscribe' }}
+          </button>
+          <button
+            v-else-if="editingTagId !== tag.id"
+            class="btn-unsubscribe"
+            :disabled="actionLoading[tag.id]"
+            @click="handleUnsubscribe(tag.id)"
+          >
+            {{ actionLoading[tag.id] ? 'Loading...' : 'Unsubscribe' }}
+          </button>
         </div>
       </div>
+    </div>
+
+    <!-- Empty state -->
+    <div v-else-if="!loading" class="empty">
+      No tags available
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue"
-import { useTagStore } from "~/stores/tag-store"
+import { ref, reactive, computed, onMounted } from 'vue'
+import { useTagStore } from '~/stores/tag-store'
+import { useAuthStore } from '~/stores/auth-store'
+import { useRouter } from 'vue-router'
 
 const tagStore = useTagStore()
+const authStore = useAuthStore()
+const router = useRouter()
 
 const tags = ref([])
-const newTagName = ref('')
+const subscribedTags = ref([])
 const loading = ref(false)
-const error = ref('')
+const error = ref(null)
+const isAuthError = ref(false)
+const actionLoading = reactive({})
 
-async function loadTags() {
+// Edit state
+const editingTagId = ref(null)
+const editingTagName = ref('')
+
+// Create tag state
+const creatingTag = ref(false)
+const newTagName = ref('')
+
+// Check if user can edit (responsavel or administrador)
+const canEdit = computed(() => {
+  const role = authStore.user?.role?.toLowerCase()
+  return role === 'responsavel' || role === 'administrador'
+})
+
+onMounted(async () => {
+  await loadData()
+})
+
+async function loadData() {
   loading.value = true
-  error.value = ''
+  error.value = null
+  isAuthError.value = false
+
   try {
-    const data = await tagStore.getAll()
-    // Add frontend helper fields
-    tags.value = data.map(tag => ({
-      ...tag,
-      showSubscribers: false,
-      editing: false,
-      newName: tag.name,
-      subscribers: []
-    }))
+    await Promise.all([loadTags(), loadSubscribed()])
   } catch (e) {
-    error.value = e.message || 'Failed to load tags'
+    console.error('Failed to load data:', e)
+    if (e.message?.includes('Not authenticated') || e.statusCode === 401) {
+      error.value = 'You are not authenticated. Please log in.'
+      isAuthError.value = true
+    } else {
+      error.value = e.message || 'Failed to load tags'
+    }
   } finally {
     loading.value = false
   }
 }
 
-async function toggleSubscribers(tag) {
-  if (tag.showSubscribers) {
-    tag.showSubscribers = false
-    return
-  }
+async function loadTags() {
+  tags.value = await tagStore.getAll()
+}
+
+async function loadSubscribed() {
+  subscribedTags.value = await tagStore.getSubscribed()
+}
+
+function isSubscribed(tagId) {
+  return subscribedTags.value.some(t => t.id === tagId)
+}
+
+async function handleSubscribe(tagId) {
+  actionLoading[tagId] = true
   try {
-    const subs = await tagStore.getSubscribers(tag.id)
-    tag.subscribers = subs
-    tag.showSubscribers = true
+    await tagStore.subscribe(tagId)
+    await loadSubscribed()
   } catch (e) {
-    alert('Failed to load subscribers: ' + e.message)
+    console.error('Subscribe failed:', e)
+    error.value = 'Failed to subscribe to tag'
+  } finally {
+    actionLoading[tagId] = false
   }
 }
 
-function editTag(tag) {
-  tag.editing = true
-}
-
-function cancelEdit(tag) {
-  tag.editing = false
-  tag.newName = tag.name
-}
-
-async function saveTag(tag) {
-  if (!tag.newName.trim()) {
-    alert("Tag name cannot be empty")
-    return
-  }
+async function handleUnsubscribe(tagId) {
+  actionLoading[tagId] = true
   try {
-    await tagStore.update(tag.id, tag.newName)
-    tag.name = tag.newName
-    tag.editing = false
+    await tagStore.unsubscribe(tagId)
+    await loadSubscribed()
   } catch (e) {
-    alert("Failed to update tag: " + e.message)
+    console.error('Unsubscribe failed:', e)
+    error.value = 'Failed to unsubscribe from tag'
+  } finally {
+    actionLoading[tagId] = false
   }
 }
 
-async function deleteTag(tag) {
-  if (!confirm(`Delete tag "${tag.name}"?`)) return
-  try {
-    await tagStore.remove(tag.id)
-    tags.value = tags.value.filter(t => t.id !== tag.id)
-  } catch (e) {
-    alert("Failed to delete tag: " + e.message)
-  }
+function startEdit(tagId, currentName) {
+  editingTagId.value = tagId
+  editingTagName.value = currentName
 }
 
+function cancelEdit() {
+  editingTagId.value = null
+  editingTagName.value = ''
+}
+
+// ---------------- Create Tag ----------------
 async function createTag() {
   if (!newTagName.value.trim()) {
-    alert("Tag name cannot be empty")
+    error.value = 'Tag name cannot be empty'
     return
   }
+
+  loading.value = true
+  error.value = null
+
   try {
-    await tagStore.create(newTagName.value)
+    await tagStore.create(newTagName.value.trim())
     newTagName.value = ''
-    loadTags()
+    creatingTag.value = false
+    await loadTags() // reload tags to include the new one
   } catch (e) {
-    alert("Failed to create tag: " + e.message)
+    console.error('Create tag failed:', e)
+    if (e?.message?.includes('409')) {
+      error.value = 'A tag with this name already exists'
+    } else {
+      error.value = 'Failed to create tag: ' + (e.message || 'Unknown error')
+    }
+  } finally {
+    loading.value = false
   }
 }
 
-onMounted(() => {
-  loadTags()
-})
+// ---------------- Edit Tag ----------------
+async function saveEdit(tagId) {
+  if (!editingTagName.value.trim()) {
+    error.value = 'Tag name cannot be empty'
+    return
+  }
+
+  actionLoading[tagId] = true
+  error.value = null
+
+  try {
+    await tagStore.update(tagId, editingTagName.value.trim())
+    await loadTags()
+    cancelEdit()
+  } catch (e) {
+    console.error('Update failed:', e)
+    error.value = 'Failed to update tag: ' + (e.message || 'Unknown error')
+  } finally {
+    actionLoading[tagId] = false
+  }
+}
+
+// Retry / Login
+async function retry() {
+  await loadData()
+}
+
+function goToLogin() {
+  router.push('/auth/login')
+}
 </script>
 
 <style scoped>
 .tags-page {
-  max-width: 1000px;
+  max-width: 800px;
   margin: 0 auto;
   padding: 20px;
 }
-.new-tag {
+
+h1 {
+  margin-bottom: 24px;
+}
+
+.loading,
+.empty,
+.error {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+}
+
+.error {
+  color: #dc3545;
+  background: #fee;
+  border-radius: 6px;
   margin-bottom: 20px;
 }
-.new-tag input {
-  padding: 8px;
-  width: 250px;
-  margin-right: 10px;
+
+.error button {
+  margin-top: 10px;
+  padding: 8px 16px;
+  background: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
 }
-.new-tag button {
-  padding: 8px 12px;
+
+.error button:hover {
+  background: #c82333;
 }
+
 .tags-list {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 12px;
 }
+
 .tag-card {
-  padding: 15px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-}
-.tag-info {
   display: flex;
-  gap: 15px;
-  margin-bottom: 10px;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px;
+  background: white;
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
-.tag-actions button {
-  margin-right: 10px;
+
+.tag-info {
+  flex: 1;
+  margin-right: 12px;
 }
-.subscribers-list {
-  margin-top: 10px;
-  background: #f9f9f9;
-  padding: 10px;
+
+.tag-name {
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.tag-input {
+  padding: 6px 10px;
+  border: 2px solid #007bff;
   border-radius: 4px;
+  font-size: 16px;
+  font-weight: 600;
+  width: 100%;
+  max-width: 300px;
 }
-.edit-tag input {
-  margin-right: 10px;
+
+.tag-input:focus {
+  outline: none;
+  border-color: #0056b3;
+}
+
+.tag-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.btn-subscribe,
+.btn-unsubscribe,
+.btn-edit,
+.btn-save,
+.btn-cancel {
+  border: none;
+  padding: 6px 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.btn-subscribe {
+  background: #28a745;
+  color: white;
+  min-width: 100px;
+}
+
+.btn-subscribe:hover:not(:disabled) {
+  background: #218838;
+}
+
+.btn-unsubscribe {
+  background: #dc3545;
+  color: white;
+  min-width: 100px;
+}
+
+.btn-unsubscribe:hover:not(:disabled) {
+  background: #c82333;
+}
+
+.btn-edit {
+  background: #007bff;
+  color: white;
+}
+
+.btn-edit:hover:not(:disabled) {
+  background: #0056b3;
+}
+
+.btn-save {
+  background: #28a745;
+  color: white;
+}
+
+.btn-save:hover:not(:disabled) {
+  background: #218838;
+}
+
+.btn-cancel {
+  background: #6c757d;
+  color: white;
+}
+
+.btn-cancel:hover:not(:disabled) {
+  background: #5a6268;
+}
+
+.btn-subscribe:disabled,
+.btn-unsubscribe:disabled,
+.btn-edit:disabled,
+.btn-save:disabled,
+.btn-cancel:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.create-tag {
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.create-tag input {
+  padding: 6px 10px;
+  border: 2px solid #007bff;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.btn-create {
+  background: #007bff;
+  color: white;
+  padding: 6px 14px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-create:hover:not(:disabled) {
+  background: #0056b3;
 }
 </style>

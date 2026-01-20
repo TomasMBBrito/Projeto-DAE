@@ -38,6 +38,25 @@ public class TagBean {
         return tag;
     }
 
+    public Tag update(Long id, String newName) throws MyEntityNotFoundException {
+        Tag tag = find(id);
+        if (tag == null) {
+            throw new MyEntityNotFoundException("Tag not found: " + id);
+        }
+
+        if (newName == null || newName.trim().isEmpty()) {
+            throw new IllegalArgumentException("Tag name cannot be empty");
+        }
+
+        tag.setName(newName);
+
+        // Persist the change
+        em.merge(tag);
+
+        return tag;
+    }
+
+
 
     public Tag find(Long id) {
         return em.find(Tag.class, id);

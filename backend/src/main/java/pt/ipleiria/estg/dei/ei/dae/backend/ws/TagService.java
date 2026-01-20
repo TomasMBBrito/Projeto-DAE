@@ -152,29 +152,22 @@ public class TagService {
     @RolesAllowed({"RESPONSAVEL", "ADMINISTRADOR"})
     public Response updateTag(@PathParam("tag_id") Long tagId, TagDTO tagDTO) {
         try {
-            Tag tag = tagBean.find(tagId);
-            if (tag == null) {
-                return Response.status(Response.Status.NOT_FOUND)
-                        .entity("Tag not found")
-                        .build();
-            }
 
-            if (tagDTO.getName() == null || tagDTO.getName().trim().isEmpty()) {
-                return Response.status(Response.Status.BAD_REQUEST)
-                        .entity("Tag name is required")
-                        .build();
-            }
-
-            String username = securityContext.getUserPrincipal().getName();
-            User performedBy = userBean.find(username);
-
-            tag.setName(tagDTO.getName());
+            Tag updatedTag = tagBean.update(tagId, tagDTO.getName());
 
             return Response.ok()
-                    .entity(Map.of("message", "Nome da tag com id " + tagId + " atualizada com com sucesso"))
+                    .entity(Map.of(
+                            "message", "Tag updated successfully",
+                            "tag", updatedTag
+                    ))
                     .build();
+
         } catch (MyEntityNotFoundException e) {
             return Response.status(Response.Status.NOT_FOUND)
+                    .entity(Map.of("message", e.getMessage()))
+                    .build();
+        } catch (IllegalArgumentException e) {
+            return Response.status(Response.Status.BAD_REQUEST)
                     .entity(Map.of("message", e.getMessage()))
                     .build();
         } catch (Exception e) {
@@ -183,7 +176,6 @@ public class TagService {
                     .build();
         }
     }
-
 
     @DELETE
     @Path("/{tag_id}")

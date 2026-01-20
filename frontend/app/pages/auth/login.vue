@@ -77,6 +77,7 @@ async function login() {
       }
 
       token.value = authHeader.replace('Bearer ', '')
+      getUserInfo()
       // Tentativa de push para apanhar possiveis erros de roteamento
       try {
         await router.push('/publication/searchPublications')

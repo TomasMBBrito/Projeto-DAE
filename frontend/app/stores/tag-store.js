@@ -16,7 +16,7 @@ export const useTagStore = defineStore("tagStore", () => {
         }
     }
 
-    // Get all tags
+    // ---------------- EXISTING ----------------
     async function getAll() {
         return await $fetch(`${api}/tags/`, {
             method: 'GET',
@@ -24,7 +24,6 @@ export const useTagStore = defineStore("tagStore", () => {
         })
     }
 
-    // Get subscribers for a tag
     async function getSubscribers(tagId) {
         return await $fetch(`${api}/tags/${tagId}/subscribers`, {
             method: 'GET',
@@ -32,7 +31,6 @@ export const useTagStore = defineStore("tagStore", () => {
         })
     }
 
-    // Create a new tag
     async function create(name) {
         return await $fetch(`${api}/tags/`, {
             method: 'POST',
@@ -41,18 +39,44 @@ export const useTagStore = defineStore("tagStore", () => {
         })
     }
 
-    // Update a tag
     async function update(tagId, name) {
         return await $fetch(`${api}/tags/${tagId}`, {
             method: 'PUT',
             headers: getHeaders(),
-            body: { name }
+            body: { name}
         })
     }
 
-    // Delete a tag
     async function remove(tagId) {
         return await $fetch(`${api}/tags/${tagId}`, {
+            method: 'DELETE',
+            headers: getHeaders()
+        })
+    }
+
+    // ---------------- NEW ----------------
+
+    // Get my subscribed tags
+    async function getSubscribed() {
+        console.log(authStore.user.role)
+        return await $fetch(`${api}/me/tags/`, {
+            method: 'GET',
+            headers: getHeaders()
+        })
+    }
+
+    // Subscribe to a tag
+    async function subscribe(tagId) {
+        return await $fetch(`${api}/me/tags/`, {
+            method: 'POST',
+            headers: getHeaders(),
+            body: { id: tagId }
+        })
+    }
+
+    // Unsubscribe from a tag
+    async function unsubscribe(tagId) {
+        return await $fetch(`${api}/me/tags/${tagId}`, {
             method: 'DELETE',
             headers: getHeaders()
         })
@@ -63,6 +87,9 @@ export const useTagStore = defineStore("tagStore", () => {
         getSubscribers,
         create,
         update,
-        remove
+        remove,
+        getSubscribed,
+        subscribe,
+        unsubscribe
     }
 })
