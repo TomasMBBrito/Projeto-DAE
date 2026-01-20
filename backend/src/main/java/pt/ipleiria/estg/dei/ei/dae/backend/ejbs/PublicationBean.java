@@ -23,6 +23,9 @@ public class PublicationBean {
     private HistoryBean historyBean;
 
     @EJB
+    private TagBean tagBean;
+
+    @EJB
     private EmailBean emailBean;
 
     public Publication create(String title, String description, ScientificArea scientificArea,
@@ -88,6 +91,9 @@ public class PublicationBean {
         Publication pub = find(id);
         if (pub != null) {
             Hibernate.initialize(pub.getComments());
+            pub.getComments().forEach(comment ->
+                    Hibernate.initialize(comment.getUser())
+            );
         }
         return pub;
     }
@@ -98,6 +104,30 @@ public class PublicationBean {
 
     public List<Publication> getAllVisible() {
         return em.createNamedQuery("getVisiblePublications", Publication.class).getResultList();
+    }
+
+    public List<Publication> getAllWithComments() {
+        List<Publication> publications = getAll();
+        publications.forEach(p -> Hibernate.initialize(p.getComments()));
+        return publications;
+    }
+
+    public List<Publication> getAllVisibleWithComments() {
+        List<Publication> publications = getAllVisible();
+        publications.forEach(p -> Hibernate.initialize(p.getComments()));
+        return publications;
+    }
+
+    public List<Publication> getAllWithRatings() {
+        List<Publication> publications = getAll();
+        publications.forEach(p -> Hibernate.initialize(p.getRatings()));
+        return publications;
+    }
+
+    public List<Publication> getAllVisibleWithRatings() {
+        List<Publication> publications = getAllVisible();
+        publications.forEach(p -> Hibernate.initialize(p.getRatings()));
+        return publications;
     }
 
 
@@ -127,6 +157,19 @@ public class PublicationBean {
     public List<Publication> search(String searchTerm) {
         return em.createQuery(
                         "SELECT p FROM Publication p WHERE (LOWER(p.title) LIKE LOWER(:search) OR LOWER(p.description) LIKE LOWER(:search)) AND p.visible = true ORDER BY p.publicationDate DESC",
+                        Publication.class
+                )
+                .setParameter("search", "%" + searchTerm + "%")
+                .getResultList();
+    }
+
+    public List<Publication> searchWithComments(String searchTerm) {
+        return em.createQuery(
+                        "SELECT DISTINCT p FROM Publication p " +
+                                "LEFT JOIN FETCH p.comments " +
+                                "WHERE (LOWER(p.title) LIKE LOWER(:search) OR LOWER(p.description) LIKE LOWER(:search)) " +
+                                "AND p.visible = true " +
+                                "ORDER BY p.publicationDate DESC",
                         Publication.class
                 )
                 .setParameter("search", "%" + searchTerm + "%")
@@ -267,10 +310,15 @@ public class PublicationBean {
     }
 
 
-    public void addTag(Long publicationId, Tag tag, User performedBy) {
+    public void addTag(Long publicationId, Long tagId, User performedBy) throws MyEntityNotFoundException {
         Publication publication = find(publicationId);
         if (publication == null) {
-            throw new IllegalArgumentException("Publication not found: " + publicationId);
+            throw new MyEntityNotFoundException("Publication not found: " + publicationId);
+        }
+
+        Tag tag = tagBean.find(tagId);
+        if (tag == null) {
+            throw new MyEntityNotFoundException("Tag not found: " + tagId);
         }
 
         publication.addTag(tag);
@@ -288,11 +336,13 @@ public class PublicationBean {
         emailBean.notifyTagSubscribers(tag, publication, "New publication with tag: " + tag.getName());
     }
 
-    public void removeTag(Long publicationId, Tag tag, User performedBy) {
+    public void removeTag(Long publicationId, Long tagId, User performedBy) {
         Publication publication = find(publicationId);
         if (publication == null) {
             throw new IllegalArgumentException("Publication not found: " + publicationId);
         }
+
+        Tag tag = tagBean.find(tagId);
 
         publication.removeTag(tag);
 
@@ -337,5 +387,23 @@ public class PublicationBean {
         }
 
         return user.getRole() == Role.RESPONSAVEL || user.getRole() == Role.ADMINISTRADOR;
+    }
+
+    public void updateDescription(Long id, String newDescription, User performedBy) throws MyEntityNotFoundException {
+        Publication publication = find(id);
+        if (publication == null) {
+            throw new MyEntityNotFoundException("Publication not found: " + id);
+        }
+
+        publication.setDescription(newDescription);
+
+        // Log activity
+        historyBean.logActivity(
+                ActivityType.PUBLICATION_UPDATED,
+                "Summary regenerated for publication: " + publication.getTitle(),
+                "Publication",
+                id,
+                performedBy
+        );
     }
 }

@@ -12,20 +12,20 @@ public class CommentDTO implements Serializable {
     private String content;
     private boolean visible;
     private String author;
-    private LocalDateTime createdAt;
+    private String createdAt;
 
     private Long publicationId;
 
     public CommentDTO() {}
 
-    public CommentDTO(Long id, String author, String content, LocalDateTime createdAt) {
+    public CommentDTO(Long id, String author, String content, String createdAt) {
         this.id = id;
         this.author = author;
         this.content = content;
         this.createdAt = createdAt;
     }
 
-    public CommentDTO(Long id, String author, String text, boolean visible, LocalDateTime createdAt) {
+    public CommentDTO(Long id, String author, String text, boolean visible, String createdAt) {
         this(id, author,text, createdAt);
         this.visible = visible;
     }
@@ -62,11 +62,11 @@ public class CommentDTO implements Serializable {
         this.author = author;
     }
 
-    public LocalDateTime getCreatedAt() {
+    public String getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
+    public void setCreatedAt(String createdAt) {
         this.createdAt = createdAt;
     }
 
@@ -83,7 +83,7 @@ public class CommentDTO implements Serializable {
                 comment.getId(),
                 comment.getUser() != null ? comment.getUser().getUsername() : null,
                 comment.getText(),
-                comment.getCreatedAt()
+                comment.getCreatedAt().toString()
         );
     }
 
@@ -93,7 +93,7 @@ public class CommentDTO implements Serializable {
                 comment.getUser() != null ? comment.getUser().getUsername() : null,
                 comment.getText(),
                 comment.isVisible(),
-                comment.getCreatedAt()
+                comment.getCreatedAt().toString()
         );
     }
 

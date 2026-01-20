@@ -4,6 +4,8 @@ import jakarta.ejb.Stateless;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import pt.ipleiria.estg.dei.ei.dae.backend.entities.*;
+import pt.ipleiria.estg.dei.ei.dae.backend.exceptions.MyEntityNotFoundException;
+
 import java.util.List;
 
 @Stateless
@@ -18,11 +20,16 @@ public class CommentBean {
     @EJB
     private EmailBean emailBean;
 
-    public Comment create(String text, User user, Publication publication) {
-        Comment comment = new Comment(text, user, publication);
+    public Comment create(String text, User user, Publication publication) throws MyEntityNotFoundException {
+        Publication managedPublication = em.find(Publication.class, publication.getId());
+        if (managedPublication == null) {
+            throw new MyEntityNotFoundException("Publication not found: " + publication.getId());
+        }
+
+        Comment comment = new Comment(text, user, managedPublication);
         em.persist(comment);
 
-        publication.addComment(comment);
+        managedPublication.addComment(comment);
 
         historyBean.logActivity(
                 ActivityType.COMMENT_CREATED,
@@ -33,7 +40,7 @@ public class CommentBean {
         );
 
         // Notify subscribers of tags on this publication
-        for (Tag tag : publication.getTags()) {
+        for (Tag tag : managedPublication.getTags()) {
             emailBean.notifyTagSubscribers(
                     tag,
                     publication,

@@ -75,7 +75,13 @@ public class UserService {
             String currentUsername = securityContext.getUserPrincipal().getName();
             User performingUser = userBean.find(currentUsername);
 
-            userBean.delete(username, performingUser);
+            //userBean.delete(username, performingUser);
+            if(userBean.hasActivity(username)) {
+                userBean.deactivate(username,performingUser);
+            }else{
+                userBean.delete(username, performingUser);
+            }
+
             return Response.ok(Map.of(
                     "message", "O utilizador " + username + " foi eliminado com sucesso"
             )).build();

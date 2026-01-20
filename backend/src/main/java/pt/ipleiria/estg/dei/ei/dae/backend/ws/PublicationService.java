@@ -15,6 +15,7 @@ import pt.ipleiria.estg.dei.ei.dae.backend.entities.*;
 import pt.ipleiria.estg.dei.ei.dae.backend.exceptions.MyEntityNotFoundException;
 import pt.ipleiria.estg.dei.ei.dae.backend.security.Authenticated;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -75,9 +76,15 @@ public class PublicationService {
                 publications.sort((p1, p2) -> p2.getPublicationDate().compareTo(p1.getPublicationDate()));
                 break;
             case "comments":
+                publications = isAdminOrResponsavel
+                        ? publicationBean.getAllWithComments()
+                        : publicationBean.getAllVisibleWithComments();
                 publications.sort((p1, p2) -> Integer.compare(p2.getComments().size(), p1.getComments().size()));
                 break;
             case "rating":
+                publications = isAdminOrResponsavel
+                        ? publicationBean.getAllWithRatings()
+                        : publicationBean.getAllVisibleWithRatings();
                 publications.sort((p1, p2) -> {
                     Double avg1 = p1.getAverageRating();
                     Double avg2 = p2.getAverageRating();
@@ -143,11 +150,14 @@ public class PublicationService {
                     ? FileType.PDF
                     : FileType.ZIP;
 
+            LocalDate publicationDate = publicationDTO.getPublicationDate() != null ?
+                    LocalDate.parse(publicationDTO.getPublicationDate()) : null;
+
             Publication publication = publicationBean.create(
                     publicationDTO.getTitle(),
                     publicationDTO.getSummary(),
                     publicationDTO.getScientificArea(),
-                    publicationDTO.getPublicationDate(),
+                    publicationDate,
                     publicationDTO.getAuthors(),
                     user,
                     publicationDTO.getFilename(),
@@ -196,7 +206,7 @@ public class PublicationService {
             // Atualiza apenas o resumo/descrição
             publicationBean.update(
                     id,
-                    publication.getTitle(),
+                    publicationDTO.getTitle(),
                     publicationDTO.getSummary(),
                     publication.getScientificArea(),
                     publication.getPublicationDate(),
@@ -394,15 +404,8 @@ public class PublicationService {
         try {
             String username = securityContext.getUserPrincipal().getName();
             User user = userBean.find(username);
-            Publication publication = publicationBean.find(id);
 
-            if (publication == null) {
-                return Response.status(Response.Status.NOT_FOUND)
-                        .entity(Map.of("message", "Publicação não encontrada"))
-                        .build();
-            }
-
-            ratingBean.createOrUpdate(ratingDTO.getRating(), user, publication);
+            ratingBean.createOrUpdate(ratingDTO.getRating(), user, id);
 
             return Response.status(Response.Status.CREATED)
                     .entity(Map.of("message", "Avaliação registada com sucesso na publicação com id " + id + "."))
@@ -443,7 +446,7 @@ public class PublicationService {
                         .build();
             }
 
-            publicationBean.addTag(publicationId, tag, user);
+            publicationBean.addTag(publicationId, tagId, user);
 
             return Response.ok()
                     .entity(Map.of("message", "Tag com id " + tagId + " associada à publicação com id " + publicationId + " com sucesso."))
@@ -480,7 +483,7 @@ public class PublicationService {
                         .build();
             }
 
-            publicationBean.removeTag(publicationId, tag, user);
+            publicationBean.removeTag(publicationId, tagId, user);
 
             return Response.ok()
                     .entity(Map.of("message", "Tag com id " + tagId + " desassociada da publicação com id " + publicationId + " com sucesso."))
@@ -504,12 +507,16 @@ public class PublicationService {
                     .build();
         }
 
-        List<Publication> publications = publicationBean.search(searchTerm);
+        List<Publication> publications;
+        List<PublicationDTO> dtos;
 
-        // Se menos de 45 publicações, inclui o último comentário
-        List<PublicationDTO> dtos = publications.size() < 45
-                ? PublicationDTO.toSearchListWithComments(publications)
-                : PublicationDTO.toSearchList(publications);
+        if (publicationBean.search(searchTerm).size() < 45) {
+            publications = publicationBean.searchWithComments(searchTerm);
+            dtos = PublicationDTO.toSearchListWithComments(publications);
+        } else {
+            publications = publicationBean.search(searchTerm);
+            dtos = PublicationDTO.toSearchList(publications);
+        }
 
         return Response.ok(dtos).build();
     }
@@ -589,7 +596,7 @@ public class PublicationService {
             String oldSummary = publication.getDescription();
             String newSummary = "Métodos de inteligência artificial para otimização de tarefas complexas."; // Placeholder
 
-            publication.setDescription(newSummary);
+            publicationBean.updateDescription(id, newSummary, user);
 
             return Response.ok()
                     .entity(Map.of("message", "New: " + newSummary + " Old: " + oldSummary))

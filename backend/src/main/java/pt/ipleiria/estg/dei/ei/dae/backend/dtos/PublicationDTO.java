@@ -14,14 +14,15 @@ public class PublicationDTO implements Serializable {
     private String title;
     private String summary;
     private ScientificArea scientificArea;
-    private LocalDate publicationDate;
+
+    private String publicationDate;
     private List<String> authors;
     private boolean visible;
 
     private String submitterUsername;
     private String lastComment;
 
-    // Campos para criação/edição
+
     private String filename;
     private List<Long> tagIds;
 
@@ -64,9 +65,9 @@ public class PublicationDTO implements Serializable {
     }
 
     public PublicationDTO(Long id, String title, String author, String summary,
-                          ScientificArea scientificArea, LocalDate createdAt) {
+                          ScientificArea scientificArea, LocalDate publicationDate) {
         this(id, title, author, summary, scientificArea);
-        this.publicationDate = createdAt;
+        this.publicationDate = publicationDate.toString();
     }
 
     // Getters e Setters
@@ -102,11 +103,11 @@ public class PublicationDTO implements Serializable {
         this.scientificArea = scientificArea;
     }
 
-    public LocalDate getPublicationDate() {
+    public String getPublicationDate() {
         return publicationDate;
     }
 
-    public void setPublicationDate(LocalDate publicationDate) {
+    public void setPublicationDate(String publicationDate) {
         this.publicationDate = publicationDate;
     }
 
@@ -218,7 +219,8 @@ public class PublicationDTO implements Serializable {
         dto.setTitle(pub.getTitle());
         dto.setSubmitterUsername(pub.getAuthor() != null ? pub.getAuthor().getUsername() : null);
         dto.setSummary(pub.getDescription());
-        dto.setPublicationDate(pub.getPublicationDate());
+        dto.setPublicationDate(pub.getPublicationDate() != null ?
+                pub.getPublicationDate().toString() : null);
         dto.setScientificArea(pub.getScientificArea());
         dto.setVisible(pub.isVisible());
 

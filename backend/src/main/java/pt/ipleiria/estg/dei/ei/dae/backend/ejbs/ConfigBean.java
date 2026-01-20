@@ -319,36 +319,36 @@ public class ConfigBean {
             logger.info("Creating ratings...");
 
             // Ratings para pub1 (média alta)
-            ratingBean.createOrUpdate(5, anaF, pub1);
-            ratingBean.createOrUpdate(5, brunoC, pub1);
-            ratingBean.createOrUpdate(4, manuelC, pub1);
-            ratingBean.createOrUpdate(5, joanaB, pub1);
+            ratingBean.createOrUpdate(5, anaF, pub1.getId());
+            ratingBean.createOrUpdate(5, brunoC, pub1.getId());
+            ratingBean.createOrUpdate(4, manuelC, pub1.getId());
+            ratingBean.createOrUpdate(5, joanaB, pub1.getId());
 
             // Ratings para pub2
-            ratingBean.createOrUpdate(4, joaoA, pub2);
-            ratingBean.createOrUpdate(5, brunoC, pub2);
-            ratingBean.createOrUpdate(4, manuelC, pub2);
+            ratingBean.createOrUpdate(4, joaoA, pub2.getId());
+            ratingBean.createOrUpdate(5, brunoC, pub2.getId());
+            ratingBean.createOrUpdate(4, manuelC, pub2.getId());
 
             // Ratings para pub3
-            ratingBean.createOrUpdate(5, joaoA, pub3);
-            ratingBean.createOrUpdate(4, anaF, pub3);
+            ratingBean.createOrUpdate(5, joaoA, pub3.getId());
+            ratingBean.createOrUpdate(4, anaF, pub3.getId());
 
             // Ratings para pub4 (técnica revolucionária)
-            ratingBean.createOrUpdate(5, joaoA, pub4);
-            ratingBean.createOrUpdate(5, manuelC, pub4);
+            ratingBean.createOrUpdate(5, joaoA, pub4.getId());
+            ratingBean.createOrUpdate(5, manuelC, pub4.getId());
 
             // Ratings para pub5 (artigo com erro - ratings mais baixos)
-            ratingBean.createOrUpdate(2, joaoA, pub5);
-            ratingBean.createOrUpdate(3, brunoC, pub5);
+            ratingBean.createOrUpdate(2, joaoA, pub5.getId());
+            ratingBean.createOrUpdate(3, brunoC, pub5.getId());
 
             // Ratings para pub6 (mais recente)
-            ratingBean.createOrUpdate(5, joaoA, pub6);
-            ratingBean.createOrUpdate(5, brunoC, pub6);
-            ratingBean.createOrUpdate(4, manuelC, pub6);
+            ratingBean.createOrUpdate(5, joaoA, pub6.getId());
+            ratingBean.createOrUpdate(5, brunoC, pub6.getId());
+            ratingBean.createOrUpdate(4, manuelC, pub6.getId());
 
             // Ratings para pub7
-            ratingBean.createOrUpdate(4, anaF, pub7);
-            ratingBean.createOrUpdate(5, brunoC, pub7);
+            ratingBean.createOrUpdate(4, anaF, pub7.getId());
+            ratingBean.createOrUpdate(5, brunoC, pub7.getId());
 
             logger.info("✓ Created 20 ratings");
 

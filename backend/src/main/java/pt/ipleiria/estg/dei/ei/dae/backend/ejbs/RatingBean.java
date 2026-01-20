@@ -5,6 +5,7 @@ import jakarta.ejb.Stateless;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import pt.ipleiria.estg.dei.ei.dae.backend.entities.*;
+import pt.ipleiria.estg.dei.ei.dae.backend.exceptions.MyEntityNotFoundException;
 
 @Stateless
 public class RatingBean {
@@ -16,15 +17,25 @@ public class RatingBean {
     private HistoryBean historyBean;
 
 
-    public Rating createOrUpdate(int value, User user, Publication publication) {
+    public Rating createOrUpdate(int value, User user, Long publicationId) throws MyEntityNotFoundException {
+
+        // Buscar a publicação gerenciada (managed)
+        Publication publication = em.find(Publication.class, publicationId);
+
+        if (publication == null) {
+            throw new MyEntityNotFoundException("Publication not found: " + publicationId);
+        }
+
+        if (value < 1 || value > 5) {
+            throw new IllegalArgumentException("Rating deve estar entre 1 e 5 estrelas");
+        }
+
+
         Rating existing = findByUserAndPublication(user.getUsername(), publication.getId());
 
 
 
         if (existing != null) {
-            if (value < 1 || value > 5) {
-                throw new IllegalArgumentException("Rating deve estar entre 1 e 5 estrelas");
-            }
             // Update existing rating
             existing.setValue(value);
 

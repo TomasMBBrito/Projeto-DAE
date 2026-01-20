@@ -31,7 +31,7 @@ Content-Type: application/json
 
 
 ############################################################################################
-@token = Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOiJBRE1JTklTVFJBRE9SIiwiaWF0IjoxNzY4ODc3ODYwLCJleHAiOjE3Njg4ODE0NjB9.gcKcZOCdD7mHT7N0oCMOSfVfialRhEozuGd3AEU_M78ZHjWk4gx3vJCuXy2QAGh-
+@token = Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOiJBRE1JTklTVFJBRE9SIiwiaWF0IjoxNzY4OTM5MjgwLCJleHAiOjE3Njg5NDI4ODB9.tlTjeRZtuDHhKg8eqg1G-C97bdHcorqZdoERjhNZj34rDhELvn1rJANRuPJB8B6G
 
 
 ### EP-AUTH: Get Current User
@@ -225,7 +225,7 @@ GET {{baseUrl}}/posts
 Authorization: {{token}}
 
 ### EP29: Obter publicação específica
-GET {{baseUrl}}/posts/1
+GET {{baseUrl}}/posts/7
 Authorization: {{token}}
 
 ### EP30: Criar nova publicação
@@ -249,6 +249,7 @@ Authorization: {{token}}
 Content-Type: application/json
 
 {
+  "title": "Estudo dos Algoritmos",
   "summary": "Estudo sobre algoritmos genéticos e as diversas aplicações em IA."
 }
 
@@ -262,7 +263,7 @@ Authorization: {{token}}
 Content-Type: application/json
 
 {
-  "visible": false
+  "visible": true
 }
 
 ### EP34: Consultar comentários de uma publicação
@@ -279,12 +280,12 @@ Content-Type: application/json
 }
 
 ### EP36: Alterar visibilidade de um comentário
-PUT {{baseUrl}}/posts/1/comments/5
+PUT {{baseUrl}}/posts/1/comments/1
 Authorization: {{token}}
 Content-Type: application/json
 
 {
-  "visible": false
+  "visible": true
 }
 
 ### EP37: Avaliar uma publicação
@@ -305,7 +306,7 @@ DELETE {{baseUrl}}/posts/6/tags/5
 Authorization: {{token}}
 
 ### EP40: Pesquisar publicações
-GET {{baseUrl}}/posts/search?q=algoritmos+IA
+GET {{baseUrl}}/posts/search?q=algoritmos
 Authorization: {{token}}
 
 ### EP41: Ordenar publicações por data recente

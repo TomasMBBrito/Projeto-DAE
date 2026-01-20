@@ -236,6 +236,40 @@ public class UserBean {
         );
     }
 
+    public boolean hasActivity(String username) throws MyEntityNotFoundException {
+        User user = find(username);
+        if (user == null) {
+            throw new MyEntityNotFoundException("User not found: " + username);
+        }
+
+
+        Long publicationCount = em.createQuery(
+                "SELECT COUNT(p) FROM Publication p WHERE p.author.username = :username",
+                Long.class
+        ).setParameter("username", username).getSingleResult();
+
+
+        Long commentCount = em.createQuery(
+                "SELECT COUNT(c) FROM Comment c WHERE c.user.username = :username",
+                Long.class
+        ).setParameter("username", username).getSingleResult();
+
+
+        Long ratingCount = em.createQuery(
+                "SELECT COUNT(r) FROM Rating r WHERE r.user.username = :username",
+                Long.class
+        ).setParameter("username", username).getSingleResult();
+
+
+        Long historyCount = em.createQuery(
+                "SELECT COUNT(h) FROM History h WHERE h.user.username = :username",
+                Long.class
+        ).setParameter("username", username).getSingleResult();
+
+
+        return (publicationCount > 0 || commentCount > 0 || ratingCount > 0 || historyCount > 0);
+    }
+
     public boolean exists(String username){
         try {
             find(username);
