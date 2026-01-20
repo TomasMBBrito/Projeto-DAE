@@ -141,7 +141,7 @@ async function ratePublication(rating) {
 }
 
 function goBack() {
-  router.push('/publications/searchPublications')
+  router.push('/publication/searchPublications')
 }
 
 function formatDate(date) {

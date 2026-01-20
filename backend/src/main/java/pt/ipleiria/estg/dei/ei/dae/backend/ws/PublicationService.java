@@ -109,7 +109,7 @@ public class PublicationService {
     @RolesAllowed({"COLABORADOR", "RESPONSAVEL", "ADMINISTRADOR"})
     public Response getPublication(@PathParam("id") Long id) {
         try {
-            Publication publication = publicationBean.findWithTags(id);
+            Publication publication = publicationBean.findWithAllDetails(id);
 
             if (publication == null) {
                 return Response.status(Response.Status.NOT_FOUND)
@@ -132,6 +132,12 @@ public class PublicationService {
         } catch (MyEntityNotFoundException e) {
             return Response.status(Response.Status.NOT_FOUND)
                     .entity(Map.of("message", e.getMessage()))
+                    .build();
+        } catch (Exception e) {
+            // Log the actual error for debugging
+            e.printStackTrace();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(Map.of("message", "Server error: " + e.getMessage()))
                     .build();
         }
     }
