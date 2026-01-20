@@ -77,8 +77,13 @@ async function login() {
       }
 
       token.value = authHeader.replace('Bearer ', '')
-      await getUserInfo()
-      router.push('/publication/searchPublications')
+      // Tentativa de push para apanhar possiveis erros de roteamento
+      try {
+        await router.push('/publication/searchPublications')
+      } catch (navError) {
+        console.error('Navigation error:', navError)
+        loginError.value = 'An application error occurred. Please contact support or try refreshing the page.'
+      }
       return
     }
 

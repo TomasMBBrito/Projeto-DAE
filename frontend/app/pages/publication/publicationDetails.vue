@@ -1,4 +1,4 @@
-<!-- pages/publications/[id].vue -->
+<!-- pages/publication/[id].vue -->
 <template>
   <div class="publication-details">
     <button @click="goBack" class="btn-back">← Back to Search</button>
