@@ -6,7 +6,10 @@
   <component name="ChangeListManager">
     <list default="true" id="c7cffce6-2d0d-4c10-8c8d-6814661ac849" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/app/pages/publication/searchPublications.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/app/pages/publication/searchPublications.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/pt/ipleiria/estg/dei/ei/dae/backend/dtos/PublicationDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/pt/ipleiria/estg/dei/ei/dae/backend/dtos/PublicationDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/pt/ipleiria/estg/dei/ei/dae/backend/ejbs/PublicationBean.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/pt/ipleiria/estg/dei/ei/dae/backend/ejbs/PublicationBean.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/pt/ipleiria/estg/dei/ei/dae/backend/ws/PublicationService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/pt/ipleiria/estg/dei/ei/dae/backend/ws/PublicationService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/app/pages/publication/publicationDetails.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/app/pages/publication/[id].vue" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -49,7 +52,7 @@
     &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
     &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;toni-publication&quot;,
     &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
     &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
     &quot;last_opened_file_path&quot;: &quot;/home/caramelooo/Documents/repos/Projeto-DAE&quot;,

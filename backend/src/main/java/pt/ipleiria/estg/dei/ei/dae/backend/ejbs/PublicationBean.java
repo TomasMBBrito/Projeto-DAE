@@ -98,6 +98,18 @@ public class PublicationBean {
         return pub;
     }
 
+    public Publication findWithAllDetails(Long id) {
+        Publication pub = find(id);
+        if (pub != null) {
+            // Initialize all lazy-loaded collections to avoid LazyInitializationException
+            Hibernate.initialize(pub.getTags());
+            Hibernate.initialize(pub.getComments());
+            Hibernate.initialize(pub.getRatings());
+            Hibernate.initialize(pub.getAuthors());
+        }
+        return pub;
+    }
+
     public List<Publication> getAll() {
         return em.createNamedQuery("getAllPublications", Publication.class).getResultList();
     }

@@ -193,23 +193,29 @@ public class PublicationDTO implements Serializable {
 
 
     public static PublicationDTO forCollaborator(Publication pub) {
-        return new PublicationDTO(
+        PublicationDTO dto = new PublicationDTO(
                 pub.getId(),
                 pub.getTitle(),
                 pub.getAuthor() != null ? pub.getAuthor().getUsername() : null,
                 pub.getDescription()
         );
+        dto.setScientificArea(pub.getScientificArea());
+        dto.setPublicationDate(pub.getPublicationDate() != null ? pub.getPublicationDate().toString() : null);
+        return dto;
     }
 
 
     public static PublicationDTO forAdminList(Publication pub) {
-        return new PublicationDTO(
+        PublicationDTO dto = new PublicationDTO(
                 pub.getId(),
                 pub.getTitle(),
                 pub.getAuthor() != null ? pub.getAuthor().getUsername() : null,
                 pub.getDescription(),
                 pub.isVisible()
         );
+        dto.setScientificArea(pub.getScientificArea());
+        dto.setPublicationDate(pub.getPublicationDate() != null ? pub.getPublicationDate().toString() : null);
+        return dto;
     }
 
 
@@ -224,6 +230,11 @@ public class PublicationDTO implements Serializable {
         dto.setScientificArea(pub.getScientificArea());
         dto.setVisible(pub.isVisible());
 
+        dto.setAuthors(pub.getAuthors() != null ? pub.getAuthors() : new ArrayList<>()); // FIXED
+        dto.setAverageRating(pub.getAverageRating());
+        dto.setCommentCount(pub.getComments() != null ? pub.getComments().size() : 0);
+        dto.setRatingCount(pub.getRatingCount());
+
         if (pub.getTags() != null) {
             dto.setTags(pub.getTags().stream()
                     .map(tag -> new TagDTO(tag.getId(), tag.getName()))
@@ -235,20 +246,22 @@ public class PublicationDTO implements Serializable {
 
 
     public static PublicationDTO forSearch(Publication pub) {
-        return new PublicationDTO(
+        PublicationDTO dto = new PublicationDTO(
                 pub.getId(),
                 pub.getTitle(),
                 pub.getAuthor() != null ? pub.getAuthor().getUsername() : null,
                 pub.getDescription(),
                 pub.getScientificArea()
         );
+        dto.setPublicationDate(pub.getPublicationDate() != null ? pub.getPublicationDate().toString() : null);
+        return dto;
     }
 
 
     public static PublicationDTO forSearchWithComment(Publication pub) {
         String lastComment = null;
         if (pub.getComments() != null && !pub.getComments().isEmpty()) {
-            // Comentário mais recente visível
+            // Comentário mais recente visivel
             lastComment = pub.getComments().stream()
                     .filter(Comment::isVisible)
                     .max(Comparator.comparing(Comment::getCreatedAt))
@@ -256,7 +269,7 @@ public class PublicationDTO implements Serializable {
                     .orElse(null);
         }
 
-        return new PublicationDTO(
+        PublicationDTO dto = new PublicationDTO(
                 pub.getId(),
                 pub.getTitle(),
                 pub.getAuthor() != null ? pub.getAuthor().getUsername() : null,
@@ -264,11 +277,13 @@ public class PublicationDTO implements Serializable {
                 pub.getScientificArea(),
                 lastComment
         );
+        dto.setPublicationDate(pub.getPublicationDate() != null ? pub.getPublicationDate().toString() : null);
+        return dto;
     }
 
 
     public static PublicationDTO forSort(Publication pub) {
-        return new PublicationDTO(
+        PublicationDTO dto = new PublicationDTO(
                 pub.getId(),
                 pub.getTitle(),
                 pub.getAuthor() != null ? pub.getAuthor().getUsername() : null,
@@ -276,17 +291,21 @@ public class PublicationDTO implements Serializable {
                 pub.getScientificArea(),
                 pub.getPublicationDate()
         );
+        return dto;
     }
 
 
     public static PublicationDTO forUserPosts(Publication pub) {
-        return new PublicationDTO(
+        PublicationDTO dto = new PublicationDTO(
                 pub.getId(),
                 pub.getTitle(),
                 pub.getAuthor() != null ? pub.getAuthor().getUsername() : null,
                 pub.getDescription(),
                 pub.isVisible()
         );
+        dto.setScientificArea(pub.getScientificArea());
+        dto.setPublicationDate(pub.getPublicationDate() != null ? pub.getPublicationDate().toString() : null);
+        return dto;
     }
 
 
