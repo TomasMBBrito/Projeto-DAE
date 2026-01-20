@@ -5,8 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c7cffce6-2d0d-4c10-8c8d-6814661ac849" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/frontend/app/pages/auth/login.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/app/pages/auth/login.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/app/pages/publication/publicationDetails.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/app/pages/publication/publicationDetails.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/app/pages/publication/searchPublications.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/app/pages/publication/searchPublications.vue" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -89,7 +89,7 @@
       <workItem from="1768859618960" duration="82000" />
       <workItem from="1768917256373" duration="92000" />
       <workItem from="1768917355273" duration="2000" />
-      <workItem from="1768917373424" duration="3930000" />
+      <workItem from="1768917373424" duration="5266000" />
     </task>
     <servers />
   </component>

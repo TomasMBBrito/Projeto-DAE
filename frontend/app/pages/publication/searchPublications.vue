@@ -1,4 +1,4 @@
-<!-- pages/publications/searchPublications.vue -->
+<!-- pages/publication/searchPublications.vue -->
 <template>
   <div class="search-publications">
     <h1>Search Publications</h1>
@@ -108,7 +108,7 @@ async function searchPublications() {
 }
 
 function goToDetails(id) {
-  router.push(`/publications/${id}`)
+  router.push(`/publication/${id}`)
 }
 
 function truncate(text, length) {
