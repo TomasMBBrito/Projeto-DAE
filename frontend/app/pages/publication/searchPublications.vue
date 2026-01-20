@@ -22,6 +22,10 @@
         <div class="tags-button">
           <button @click="goToTags" class="btn-tags">Go to Tags</button>
         </div>
+
+        <div class="users-button">
+          <button @click="goToUsers" class="btn-users">Go to Users</button>
+        </div>
       </div>
     </div>
 
@@ -32,7 +36,6 @@
     <div v-else-if="publications.length === 0" class="empty">
       <p>No publications found</p>
     </div>
-
     <div v-else class="publications-list">
       <div v-for="pub in publications" :key="pub.id" class="publication-card" @click="goToDetails(pub.id)">
         <h3>{{ pub.title }}</h3>
@@ -73,6 +76,10 @@ onMounted(() => {
 
 function goToTags() {
   router.push('/tags')
+}
+
+function goToUsers() {
+  router.push('/users/users')
 }
 
 
@@ -169,6 +176,20 @@ h1 {
 }
 
 .btn-search:hover {
+  background: #005fa3;
+}
+
+.btn-users {
+  padding: 10px 20px;
+  background: #0077cc;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btn-users:hover {
   background: #005fa3;
 }
 
