@@ -23,12 +23,10 @@ public class TagDTO implements Serializable {
         this.name = name;
     }
 
-    public TagDTO(Long id, String name, boolean visible, int publicationCount, int subscriberCount) {
+    public TagDTO(Long id, String name, boolean visible) {
         this.id = id;
         this.name = name;
         this.visible = visible;
-        this.publicationCount = publicationCount;
-        this.subscriberCount = subscriberCount;
     }
 
     // Getters and Setters
@@ -81,9 +79,7 @@ public class TagDTO implements Serializable {
         return new TagDTO(
                 tag.getId(),
                 tag.getName(),
-                tag.isVisible(),
-                tag.getPublications() != null ? tag.getPublications().size() : 0,
-                tag.getSubscribers() != null ? tag.getSubscribers().size() : 0
+                tag.isVisible()
         );
     }
 

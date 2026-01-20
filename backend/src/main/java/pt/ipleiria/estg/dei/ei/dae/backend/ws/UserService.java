@@ -249,7 +249,7 @@ public class UserService {
     public Response updateMyPassword(UserDTO userDTO) {
         try {
             String username = securityContext.getUserPrincipal().getName();
-            userBean.changePassword(username, userDTO.getOldpassword(), userDTO.getNewpassword());
+            userBean.changePassword(username, userDTO.getOldPassword(), userDTO.getNewPassword());
             return Response.ok(Map.of(
                     "message", "Password atualizada com sucesso !!"
             )).build();

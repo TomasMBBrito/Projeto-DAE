@@ -16,6 +16,7 @@ import pt.ipleiria.estg.dei.ei.dae.backend.security.Authenticated;
 import pt.ipleiria.estg.dei.ei.dae.backend.security.TokenIssuer;
 
 import java.security.Principal;
+import java.util.Map;
 
 @Path("auth")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -48,5 +49,22 @@ public class AuthService {
         String username = securityContext.getUserPrincipal().getName();
         User user = userBean.find(username);
         return Response.ok(UserDTO.from(user)).build();
+    }
+
+    @GET
+    @Path("/debug")
+    @Authenticated
+    public Response debug() {
+        String username = securityContext.getUserPrincipal().getName();
+        boolean isAdmin = securityContext.isUserInRole("ADMINISTRADOR");
+        boolean isColaborador = securityContext.isUserInRole("COLABORADOR");
+        boolean isResponsavel = securityContext.isUserInRole("RESPONSAVEL");
+
+        return Response.ok(Map.of(
+                "username", username,
+                "isADMINISTRADOR", isAdmin,
+                "isCOLABORADOR", isColaborador,
+                "isRESPONSAVEL", isResponsavel
+        )).build();
     }
 }

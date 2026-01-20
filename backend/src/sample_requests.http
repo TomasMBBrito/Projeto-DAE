@@ -1,0 +1,331 @@
+### Variables
+@baseUrl = http://localhost:8080/centroXYZ/api
+@adminUsername = admin
+@adminPassword = admin123
+@colaboradorUsername = joao
+@colaboradorPassword = password123
+
+###############################################################################
+# AUTHENTICATION SERVICE
+###############################################################################
+
+### EP-AUTH: Login as Admin
+# @name login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "username": "{{adminUsername}}",
+  "password": "{{adminPassword}}"
+}
+
+### EP-AUTH: Login as Colaborador
+# @name loginColaborador
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "username": "{{colaboradorUsername}}",
+  "password": "{{colaboradorPassword}}"
+}
+
+
+############################################################################################
+@token = Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOiJBRE1JTklTVFJBRE9SIiwiaWF0IjoxNzY4ODY3MjcwLCJleHAiOjE3Njg4NzA4NzB9.XV6-jEwbTlbjlKFz08ChubSxPM0MrpEeMcrqmiE10TnUT0fEzZgwcBoMJBxRNsC9
+
+
+### EP-AUTH: Get Current User
+GET {{baseUrl}}/auth/user
+Accept: application/json
+Authorization: {{token}}
+
+### EP-AUTH: Debug
+GET {{baseUrl}}/auth/debug
+Accept: application/json
+Authorization: {{token}}
+
+###############################################################################
+# USER SERVICE
+###############################################################################
+
+### EP01: Listar todos os utilizadores (ADMIN)
+GET {{baseUrl}}/users
+Authorization: {{token}}
+
+### EP02: Obter utilizador específico (ADMIN)
+GET {{baseUrl}}/users/bruno
+Authorization: {{token}}
+
+### EP03: Eliminar utilizador (ADMIN)
+DELETE {{baseUrl}}/users/carla
+Authorization: {{token}}
+
+### EP04: Editar dados de utilizador (ADMIN)
+PUT {{baseUrl}}/users/bruno
+Authorization: {{token}}
+Content-Type: application/json
+
+{
+  "name": "Bruno Carlos Costa",
+  "email": "bruno_upd@mail.pt"
+}
+
+### EP05: Criar novo utilizador (ADMIN)
+POST {{baseUrl}}/users
+Authorization: {{token}}
+Content-Type: application/json
+
+{
+  "name": "Carla Santos",
+  "email": "carla@xyz.pt",
+  "username": "carla",
+  "password": "123456",
+  "role": "RESPONSAVEL"
+}
+
+### EP06: Alterar role de utilizador (ADMIN)
+PUT {{baseUrl}}/users/carla/role
+Authorization: {{token}}
+Content-Type: application/json
+
+{
+  "role": "ADMINISTRADOR"
+}
+
+### EP07: Alterar status de utilizador (ADMIN)
+PUT {{baseUrl}}/users/bruno/status
+Authorization: {{token}}
+Content-Type: application/json
+
+{
+  "blocked": true
+}
+
+### EP08: Consultar publicações de um utilizador (RESPONSAVEL/ADMIN)
+GET {{baseUrl}}/users/joao/posts
+Authorization: {{token}}
+
+### EP09: Consultar minhas publicações
+GET {{baseUrl}}/users/me/posts
+Authorization: {{token}}
+
+### EP11: Eliminar uma das minhas publicações
+DELETE {{baseUrl}}/users/me/posts/1
+Authorization: {{token}}
+
+### EP12: Editar minhas informações pessoais
+PUT {{baseUrl}}/users/me
+Authorization: {{token}}
+Content-Type: application/json
+
+{
+  "name": "João A. Silva",
+  "email": "joao_upd@mail.pt"
+}
+
+### EP13: Alterar minha password
+PUT {{baseUrl}}/users/me/password
+Authorization: {{token}}
+Content-Type: application/json
+
+{
+  "oldPassword": "admin123",
+  "newPassword": "newPassword123"
+}
+
+###############################################################################
+# SUBSCRIPTION SERVICE
+###############################################################################
+
+### EP14: Subscrever uma tag
+POST {{baseUrl}}/me/tags
+Authorization: {{token}}
+Content-Type: application/json
+
+{
+  "id": 6
+}
+
+### EP15: Consultar tags subscritas
+GET {{baseUrl}}/me/tags
+Authorization: {{token}}
+
+### EP16: Remover subscrição de uma tag
+DELETE {{baseUrl}}/me/tags/6
+Authorization: {{token}}
+
+###############################################################################
+# HISTORY SERVICE
+###############################################################################
+
+### EP17: Consultar histórico de um utilizador (ADMIN)
+GET {{baseUrl}}/history/joao
+Authorization: {{token}}
+
+### EP18: Consultar meu próprio histórico
+GET {{baseUrl}}/history/me
+Authorization: {{token}}
+
+### EP19: Consultar histórico de uma das minhas publicações
+GET {{baseUrl}}/history/me/1
+Authorization: {{token}}
+
+### EP20: Consultar histórico de uma publicação (ADMIN)
+# ⚠️ NOTA: Implementação usa /history/posts/{post_id} em vez de /history/{post_id}
+GET {{baseUrl}}/history/posts/1
+Authorization: {{token}}
+
+###############################################################################
+# TAG SERVICE
+###############################################################################
+
+### EP21: Consultar tags existentes
+GET {{baseUrl}}/tags
+Authorization: {{token}}
+
+### EP22: Consultar publicações associadas a uma tag
+GET {{baseUrl}}/tags/1/posts
+Authorization: {{token}}
+
+### EP23: Consultar subscribers de uma tag (RESPONSAVEL/ADMIN)
+GET {{baseUrl}}/tags/1/subscribers
+Authorization: {{token}}
+
+### EP24: Criar nova tag (RESPONSAVEL/ADMIN)
+POST {{baseUrl}}/tags
+Authorization: {{token}}
+Content-Type: application/json
+
+{
+  "name": "Projeto X"
+}
+
+### EP25: Atualizar nome de uma tag (RESPONSAVEL/ADMIN)
+PUT {{baseUrl}}/tags/12
+Authorization: {{token}}
+Content-Type: application/json
+
+{
+  "name": "New Projeto X"
+}
+
+### EP26: Eliminar uma tag (RESPONSAVEL/ADMIN)
+DELETE {{baseUrl}}/tags/12
+Authorization: {{token}}
+
+### EP27: Obter tag específica
+GET {{baseUrl}}/tags/12
+Authorization: {{token}}
+
+###############################################################################
+# PUBLICATION SERVICE
+###############################################################################
+
+### EP28: Obter todas as publicações
+GET {{baseUrl}}/posts
+Authorization: {{token}}
+
+### EP29: Obter publicação específica
+GET {{baseUrl}}/posts/1
+Authorization: {{token}}
+
+### EP30: Criar nova publicação
+POST {{baseUrl}}/posts
+Authorization: {{token}}
+Content-Type: application/json
+
+{
+  "title": "Análise de Algoritmos Genéticos",
+  "summary": "Estudo sobre algoritmos genéticos e suas aplicações em IA.",
+  "scientificArea": "Ciência de Dados",
+  "publicationDate": "2025-01-15T10:00:00Z",
+  "authors": "João Silva, Ana Ferreira",
+  "filename": "AlgoritmosGeneticos.zip",
+  "tagIds": [12, 34]
+}
+
+### EP31: Atualizar resumo de publicação
+PUT {{baseUrl}}/posts/7
+Authorization: {{token}}
+Content-Type: application/json
+
+{
+  "summary": "Estudo sobre algoritmos genéticos e as diversas aplicações em IA."
+}
+
+### EP32: Eliminar publicação
+DELETE {{baseUrl}}/posts/7
+Authorization: {{token}}
+
+### EP33: Alterar visibilidade de publicação
+PUT {{baseUrl}}/posts/7/state
+Authorization: {{token}}
+Content-Type: application/json
+
+{
+  "visible": false
+}
+
+### EP34: Consultar comentários de uma publicação
+GET {{baseUrl}}/posts/1/comments
+Authorization: {{token}}
+
+### EP35: Comentar uma publicação
+POST {{baseUrl}}/posts/7/comments
+Authorization: {{token}}
+Content-Type: application/json
+
+{
+  "content": "Bem explicado!"
+}
+
+### EP36: Alterar visibilidade de um comentário
+PUT {{baseUrl}}/posts/1/comments/5
+Authorization: {{token}}
+Content-Type: application/json
+
+{
+  "visible": false
+}
+
+### EP37: Avaliar uma publicação
+POST {{baseUrl}}/posts/7/ratings
+Authorization: {{token}}
+Content-Type: application/json
+
+{
+  "rating": 5
+}
+
+### EP38: Associar tag a publicação
+POST {{baseUrl}}/posts/12/tags/13
+Authorization: {{token}}
+
+### EP39: Desassociar tag de publicação (RESPONSAVEL/ADMIN)
+DELETE {{baseUrl}}/posts/12/tags/13
+Authorization: {{token}}
+
+### EP40: Pesquisar publicações
+GET {{baseUrl}}/posts/search?q=algoritmos+IA
+Authorization: {{token}}
+
+### EP41: Ordenar publicações por data recente
+GET {{baseUrl}}/posts?sort=recent
+Authorization: {{token}}
+
+### EP41b: Ordenar publicações por número de comentários
+GET {{baseUrl}}/posts?sort=comments
+Authorization: {{token}}
+
+### EP41c: Ordenar publicações por rating
+GET {{baseUrl}}/posts?sort=rating
+Authorization: {{token}}
+
+### EP42: Regenerar resumo com IA
+PUT {{baseUrl}}/posts/7/summary
+Authorization: {{token}}
+Content-Type: application/json
+
+{
+  "regenerate": true
+}

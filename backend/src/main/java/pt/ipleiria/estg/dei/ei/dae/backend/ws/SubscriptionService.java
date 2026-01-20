@@ -60,7 +60,7 @@ public class SubscriptionService {
     public Response getSubscribedTags() {
         String currentUsername = securityContext.getUserPrincipal().getName();
         try {
-            List<TagDTO> tags = TagDTO.from(tagBean.getSubscribedTags(currentUsername));
+            List<TagDTO> tags = TagDTO.fromSimple(tagBean.getSubscribedTags(currentUsername));
             return Response.ok(tags).build();
         } catch (MyEntityNotFoundException e) {
             return Response.status(Response.Status.NOT_FOUND)
