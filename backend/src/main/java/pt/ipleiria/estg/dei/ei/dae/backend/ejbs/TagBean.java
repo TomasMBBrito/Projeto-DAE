@@ -38,17 +38,30 @@ public class TagBean {
         return tag;
     }
 
-    public Tag update(Long id, String newName) throws MyEntityNotFoundException {
+    public Tag update(Long id, String newName,String username) throws MyEntityNotFoundException {
         Tag tag = find(id);
         if (tag == null) {
             throw new MyEntityNotFoundException("Tag not found: " + id);
         }
 
         if (newName == null || newName.trim().isEmpty()) {
-            throw new IllegalArgumentException("Tag name cannot be empty");
+            throw new MyEntityNotFoundException("Tag name cannot be empty");
         }
 
         tag.setName(newName);
+
+        User performedBy = userbean.find(username);
+        if(performedBy == null) {
+            throw new MyEntityNotFoundException("User not found: " + username);
+        }
+
+        historyBean.logActivity(
+                ActivityType.TAG_UPDATED,
+                "Tag updated: " + newName,
+                "Tag",
+                id,
+                performedBy
+        );
 
         // Persist the change
         em.merge(tag);
@@ -115,13 +128,18 @@ public class TagBean {
     }
 
 
-    public void hide(Long id, User performedBy) {
+    public void hide(Long id, String username) throws MyEntityNotFoundException {
         Tag tag = find(id);
         if (tag == null) {
             throw new IllegalArgumentException("Tag not found: " + id);
         }
 
         tag.setVisible(false);
+
+        User performedBy = userbean.find(username);
+        if(performedBy == null) {
+            throw new MyEntityNotFoundException("User not found " + username);
+        }
 
         historyBean.logActivity(
                 ActivityType.TAG_DELETED,
@@ -132,13 +150,18 @@ public class TagBean {
         );
     }
 
-    public void show(Long id, User performedBy) {
+    public void show(Long id, String username) throws MyEntityNotFoundException {
         Tag tag = find(id);
         if (tag == null) {
             throw new IllegalArgumentException("Tag not found: " + id);
         }
 
         tag.setVisible(true);
+
+        User performedBy = userbean.find(username);
+        if(performedBy == null) {
+            throw new MyEntityNotFoundException("User not found " + username);
+        }
 
         historyBean.logActivity(
                 ActivityType.TAG_CREATED,
@@ -150,13 +173,18 @@ public class TagBean {
     }
 
 
-    public void delete(Long id, User performedBy) {
+    public void delete(Long id,String username) throws MyEntityNotFoundException {
         Tag tag = find(id);
         if (tag == null) {
             throw new IllegalArgumentException("Tag not found: " + id);
         }
 
         String name = tag.getName();
+
+        User performedBy = userbean.find(username);
+        if(performedBy == null) {
+            throw new MyEntityNotFoundException("User not found " + username);
+        }
 
         historyBean.logActivity(
                 ActivityType.TAG_DELETED,

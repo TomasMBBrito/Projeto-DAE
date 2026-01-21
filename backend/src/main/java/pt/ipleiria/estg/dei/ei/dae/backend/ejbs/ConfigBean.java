@@ -137,7 +137,7 @@ public class ConfigBean {
             logger.info("Creating publications...");
 
             // Publicação 1: Análise de Algoritmos de IA (João A)
-            Publication pub1 = publicationBean.create(
+            Publication pub1 = publicationBean.createWithoutFile(
                     "Análise de Algoritmos de IA",
                     "Exploração detalhada de métodos de IA e algoritmos heurísticos aplicados a problemas complexos.",
                     ScientificArea.CHEMISTRY,
@@ -150,7 +150,7 @@ public class ConfigBean {
             );
 
             // Publicação 2: Ciência por trás de uma base de dados (Ana)
-            Publication pub2 = publicationBean.create(
+            Publication pub2 = publicationBean.createWithoutFile(
                     "Ciência por trás de uma base de dados",
                     "Discussão aprofundada sobre a estrutura, otimização e design de bases de dados relacionais.",
                     ScientificArea.ENGINEERING,
@@ -163,7 +163,7 @@ public class ConfigBean {
             );
 
             // Publicação 3: Algoritmos Evolutivos em Machine Learning (Bruno)
-            Publication pub3 = publicationBean.create(
+            Publication pub3 = publicationBean.createWithoutFile(
                     "Algoritmos Evolutivos em Machine Learning",
                     "Discussão sobre otimização baseada em evolução aplicada ao machine learning.",
                     ScientificArea.HUMANITIES,
@@ -176,7 +176,7 @@ public class ConfigBean {
             );
 
             // Publicação 4: Nova técnica revolucionária (Joana B - Exemplo 2)
-            Publication pub4 = publicationBean.create(
+            Publication pub4 = publicationBean.createWithoutFile(
                     "Nova Técnica de Otimização para Projeto X",
                     "Técnica inovadora que pode revolucionar a abordagem ao Projeto X.",
                     ScientificArea.MATHEMATICS,
@@ -189,7 +189,7 @@ public class ConfigBean {
             );
 
             // Publicação 5: Artigo de referência com erro (Exemplo 3)
-            Publication pub5 = publicationBean.create(
+            Publication pub5 = publicationBean.createWithoutFile(
                     "Implementação de Algoritmo de Referência",
                     "Artigo de referência para implementação de algoritmo usado nos Projetos X e Y.",
                     ScientificArea.BIOLOGY,
@@ -202,7 +202,7 @@ public class ConfigBean {
             );
 
             // Publicação 6: Redes Neuronais Convolucionais (recente)
-            Publication pub6 = publicationBean.create(
+            Publication pub6 = publicationBean.createWithoutFile(
                     "Redes Neuronais Convolucionais",
                     "Exploração detalhada de redes neuronais convolucionais e suas aplicações.",
                     ScientificArea.SOCIAL_SCIENCES,
@@ -215,7 +215,7 @@ public class ConfigBean {
             );
 
             // Publicação 7: Aprendizagem por Reforço
-            Publication pub7 = publicationBean.create(
+            Publication pub7 = publicationBean.createWithoutFile(
                     "Aprendizagem por Reforço",
                     "Discussão sobre o método de aprendizagem por reforço e suas vantagens práticas.",
                     ScientificArea.ENGINEERING,
@@ -228,7 +228,7 @@ public class ConfigBean {
             );
 
             // Publicação 8: Dataset de Ciência de Materiais (ZIP)
-            Publication pub8 = publicationBean.create(
+            Publication pub8 = publicationBean.createWithoutFile(
                     "Dataset Completo de Propriedades de Materiais",
                     "Conjunto de dados científicos sobre propriedades térmicas e mecânicas de materiais.",
                     ScientificArea.MATHEMATICS,
@@ -241,7 +241,7 @@ public class ConfigBean {
             );
 
             // Publicação 9: Publicação não visível (teste)
-            Publication pub9 = publicationBean.create(
+            Publication pub9 = publicationBean.createWithoutFile(
                     "Artigo Confidencial em Desenvolvimento",
                     "Trabalho em progresso sobre nova abordagem.",
                     ScientificArea.MEDICINE,

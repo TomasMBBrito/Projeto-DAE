@@ -15,6 +15,7 @@ public enum ActivityType {
     TAG_REMOVED_FROM_PUBLICATION,
     TAG_SUBSCRIBED,
     TAG_UNSUBSCRIBED,
+    TAG_UPDATED,
 
     // Comentários
     COMMENT_CREATED,
@@ -34,5 +35,5 @@ public enum ActivityType {
     USER_DELETED,
     USER_ACTIVATED,
     USER_DEACTIVATED,
-    USER_ROLE_CHANGED, TAG_UPDATED,
+    USER_ROLE_CHANGED,
 }

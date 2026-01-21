@@ -9,6 +9,7 @@ import org.hibernate.Hibernate;
 import pt.ipleiria.estg.dei.ei.dae.backend.entities.*;
 import pt.ipleiria.estg.dei.ei.dae.backend.exceptions.MyEntityNotFoundException;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
 import java.util.List;
@@ -28,15 +29,18 @@ public class PublicationBean {
     @EJB
     private EmailBean emailBean;
 
+    @EJB
+    private DocumentBean documentBean;
+
     public Publication create(String title, String description, ScientificArea scientificArea,
                               LocalDate publicationDate, List<String> authors, User submitter,
-                              String fileName, FileType fileType,List<Long> tagIds) throws MyEntityNotFoundException {
+                              String fileName, FileType fileType,List<Long> tagIds,InputStream fileInputStream) throws MyEntityNotFoundException, IOException {
 
         if (submitter == null) {
             throw new MyEntityNotFoundException("Submitter user not found");
         }
 
-        Document document = new Document(fileName,"home" ,fileType);
+        Document document = documentBean.create(fileName, submitter.getUsername(), fileInputStream, fileType);
         // Create publication
         Publication publication = new Publication(
                 title,
@@ -50,12 +54,15 @@ public class PublicationBean {
         publication.setAuthors(authors);
         publication.setDocument(document);
         document.setPublication(publication);
+
+
+
         em.persist(publication);
         em.flush(); // Ensure publication gets an ID before creating document
 
         if (tagIds != null && !tagIds.isEmpty()) {
             for (Long tagId : tagIds) {
-                Tag tag = em.find(Tag.class, tagId);
+                Tag tag = tagBean.find(tagId);
                 if (tag != null) {
                     publication.addTag(tag);
                 }
@@ -66,6 +73,55 @@ public class PublicationBean {
         historyBean.logActivity(
                 ActivityType.PUBLICATION_CREATED,
                 "Publication created: " + title + " with file: " + fileName,
+                "Publication",
+                publication.getId(),
+                submitter
+        );
+
+        return publication;
+    }
+
+    public Publication createWithoutFile(String title, String description, ScientificArea scientificArea,
+                                         LocalDate publicationDate, List<String> authors, User submitter,
+                                         String fileName, FileType fileType, List<Long> tagIds)
+            throws MyEntityNotFoundException {
+
+        if (submitter == null) {
+            throw new MyEntityNotFoundException("Submitter user not found");
+        }
+
+        // Criar documento SEM ficheiro físico (apenas metadados)
+        Document document = new Document(fileName, "dummy_path", fileType);
+
+        // Criar publicação
+        Publication publication = new Publication(
+                title,
+                description,
+                scientificArea,
+                document,
+                publicationDate,
+                submitter
+        );
+
+        publication.setAuthors(authors);
+        publication.setDocument(document);
+        document.setPublication(publication);
+
+        em.persist(publication);
+        em.flush();
+
+        if (tagIds != null && !tagIds.isEmpty()) {
+            for (Long tagId : tagIds) {
+                Tag tag = em.find(Tag.class, tagId);
+                if (tag != null) {
+                    publication.addTag(tag);
+                }
+            }
+        }
+
+        historyBean.logActivity(
+                ActivityType.PUBLICATION_CREATED,
+                "Publication created: " + title + " (test data - no physical file)",
                 "Publication",
                 publication.getId(),
                 submitter

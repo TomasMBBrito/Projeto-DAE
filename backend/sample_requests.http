@@ -31,7 +31,7 @@ Content-Type: application/json
 
 
 ############################################################################################
-@token = Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOiJBRE1JTklTVFJBRE9SIiwiaWF0IjoxNzY4OTM5MjgwLCJleHAiOjE3Njg5NDI4ODB9.tlTjeRZtuDHhKg8eqg1G-C97bdHcorqZdoERjhNZj34rDhELvn1rJANRuPJB8B6G
+@token = Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOiJBRE1JTklTVFJBRE9SIiwiaWF0IjoxNzY4OTUxMTU4LCJleHAiOjE3Njg5NTQ3NTh9.F7jJk-xLV-1b8KYM6T_LxeK-GdJ79wPxakD7BYDaVFatKHHdZeSWQ1ff8wtJ_XW4
 
 
 ### EP-AUTH: Get Current User
@@ -225,23 +225,44 @@ GET {{baseUrl}}/posts
 Authorization: {{token}}
 
 ### EP29: Obter publicação específica
-GET {{baseUrl}}/posts/7
+GET {{baseUrl}}/posts/10
 Authorization: {{token}}
 
-### EP30: Criar nova publicação
+### Upload de publicação com ficheiro
 POST {{baseUrl}}/posts
 Authorization: {{token}}
-Content-Type: application/json
+Content-Type: multipart/form-data; boundary=boundary
 
-{
-  "title": "Análise de Algoritmos Genéticos",
-  "summary": "Estudo sobre algoritmos genéticos e suas aplicações em IA.",
-  "scientificArea": "ENVIRONMENTAL_SCIENCE",
-  "publicationDate": "2025-01-15",
-  "authors": ["João Silva", "Ana Ferreira"],
-  "filename": "AlgoritmosGeneticos.zip",
-  "tagIds": [1, 2]
-}
+--boundary
+Content-Disposition: form-data; name="title"
+
+Análise de Algoritmos Genéticos
+--boundary
+Content-Disposition: form-data; name="summary"
+
+Estudo sobre algoritmos genéticos e suas aplicações em IA.
+--boundary
+Content-Disposition: form-data; name="scientificArea"
+
+ENVIRONMENTAL_SCIENCE
+--boundary
+Content-Disposition: form-data; name="publicationDate"
+
+2025-01-15
+--boundary
+Content-Disposition: form-data; name="authors"
+
+["João Silva", "Ana Ferreira"]
+--boundary
+Content-Disposition: form-data; name="tagIds"
+
+[1, 2]
+--boundary
+Content-Disposition: form-data; name="file"; filename="AlgoritmosGeneticos.pdf"
+Content-Type: application/zip
+
+< C:/Users/tomas/Desktop/AlgoritmosGeneticos.pdf
+--boundary--
 
 ### EP31: Atualizar resumo de publicação
 PUT {{baseUrl}}/posts/7

@@ -7,6 +7,7 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.SecurityContext;
+import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
 import pt.ipleiria.estg.dei.ei.dae.backend.dtos.CommentDTO;
 import pt.ipleiria.estg.dei.ei.dae.backend.dtos.PublicationDTO;
 import pt.ipleiria.estg.dei.ei.dae.backend.dtos.RatingDTO;
@@ -15,9 +16,13 @@ import pt.ipleiria.estg.dei.ei.dae.backend.entities.*;
 import pt.ipleiria.estg.dei.ei.dae.backend.exceptions.MyEntityNotFoundException;
 import pt.ipleiria.estg.dei.ei.dae.backend.security.Authenticated;
 
+import java.io.InputStream;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Path("posts")
 @Produces({MediaType.APPLICATION_JSON})
@@ -145,30 +150,65 @@ public class PublicationService {
     // EP30: Cria uma nova publicação
     @POST
     @Path("/")
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Produces(MediaType.APPLICATION_JSON)
     @RolesAllowed({"COLABORADOR", "RESPONSAVEL", "ADMINISTRADOR"})
-    public Response createPublication(PublicationDTO publicationDTO) {
+    public Response createPublication(MultipartFormDataInput form) {
         try {
             String username = securityContext.getUserPrincipal().getName();
             User user = userBean.find(username);
 
-            // Determina o FileType com base no filename
-            FileType fileType = publicationDTO.getFilename().toLowerCase().endsWith(".pdf")
+            var formData = form.getFormDataMap();
+
+            String title = formData.get("title").get(0).getBodyAsString();
+            String summary = formData.get("summary").get(0).getBodyAsString();
+            String scientificAreaStr = formData.get("scientificArea").get(0).getBodyAsString();
+            String publicationDateStr = formData.get("publicationDate").get(0).getBodyAsString();
+
+            var filePart = formData.get("file").get(0);
+            String fileName = filePart.getFileName();
+            InputStream fileInputStream = filePart.getBody(InputStream.class, null);
+
+            // Verifica o tipo de ficheiro (PDF ou ZIP)
+            FileType fileType = fileName.toLowerCase().endsWith(".pdf")
                     ? FileType.PDF
                     : FileType.ZIP;
 
-            LocalDate publicationDate = publicationDTO.getPublicationDate() != null ?
-                    LocalDate.parse(publicationDTO.getPublicationDate()) : null;
+            ScientificArea scientificArea = ScientificArea.valueOf(scientificAreaStr);
+            LocalDate publicationDate = LocalDate.parse(publicationDateStr);
+
+            List<String> authors = new ArrayList<>();
+            if (formData.containsKey("authors")) {
+                String authorsStr = formData.get("authors").get(0).getBodyAsString();
+                if (!authorsStr.trim().isEmpty()) {
+                    authorsStr = authorsStr.replaceAll("[\\[\\]\"]", "");
+                    authors = Arrays.asList(authorsStr.split(","));
+                }
+            }
+
+            List<Long> tagIds = new ArrayList<>();
+            if (formData.containsKey("tagIds")) {
+                String tagIdsStr = formData.get("tagIds").get(0).getBodyAsString();
+                if (!tagIdsStr.trim().isEmpty()) {
+                    tagIdsStr = tagIdsStr.replaceAll("[\\[\\]]", "");
+                    tagIds = Arrays.stream(tagIdsStr.split(","))
+                            .map(String::trim)
+                            .map(Long::parseLong)
+                            .collect(Collectors.toList());
+                }
+            }
 
             Publication publication = publicationBean.create(
-                    publicationDTO.getTitle(),
-                    publicationDTO.getSummary(),
-                    publicationDTO.getScientificArea(),
+                    title,
+                    summary,
+                    scientificArea,
                     publicationDate,
-                    publicationDTO.getAuthors(),
+                    authors,
                     user,
-                    publicationDTO.getFilename(),
+                    fileName,
                     fileType,
-                    publicationDTO.getTagIds()
+                    tagIds,
+                    fileInputStream
             );
 
             return Response.status(Response.Status.CREATED)

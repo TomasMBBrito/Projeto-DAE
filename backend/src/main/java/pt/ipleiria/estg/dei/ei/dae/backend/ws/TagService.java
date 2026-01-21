@@ -42,7 +42,7 @@ public class TagService {
     @RolesAllowed({"COLABORADOR", "RESPONSAVEL", "ADMINISTRADOR"})
     public Response listTags() {
         try {
-            String role = securityContext.getUserPrincipal().getName();
+            //String role = securityContext.getUserPrincipal().getName();
             boolean isAdmin = securityContext.isUserInRole("RESPONSAVEL") ||
                     securityContext.isUserInRole("ADMINISTRADOR");
 
@@ -152,8 +152,8 @@ public class TagService {
     @RolesAllowed({"RESPONSAVEL", "ADMINISTRADOR"})
     public Response updateTag(@PathParam("tag_id") Long tagId, TagDTO tagDTO) {
         try {
-
-            Tag updatedTag = tagBean.update(tagId, tagDTO.getName());
+            String username = securityContext.getUserPrincipal().getName();
+            Tag updatedTag = tagBean.update(tagId, tagDTO.getName(), username);
 
             return Response.ok()
                     .entity(Map.of(
@@ -190,10 +190,9 @@ public class TagService {
             }
 
             String username = securityContext.getUserPrincipal().getName();
-            User performedBy = userBean.find(username);
 
             //tagBean.delete(tagId, performedBy);
-            tagBean.hide(tagId, performedBy);
+            tagBean.hide(tagId,username);
 
             return Response.ok()
                     .entity(Map.of("message", "Tag eliminada com sucesso"))
@@ -209,13 +208,50 @@ public class TagService {
         }
     }
 
+    @PUT
+    @Path("/{tag_id}/status")
+    @RolesAllowed({"RESPONSAVEL", "ADMINISTRADOR"})
+    public Response UpdateTagStatus(@PathParam("tag_id") Long tagId, TagDTO tagDTO) {
+        try {
+            Tag tag = tagBean.find(tagId);
+            if (tag == null) {
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity(Map.of("message", "Tag não encontrada"))
+                        .build();
+            }
+
+            String username = securityContext.getUserPrincipal().getName();
+
+            if (tagDTO.isVisible()) {
+                tagBean.show(tagId, username);
+                return Response.ok()
+                        .entity(Map.of("message", "Tag com id " + tagId + " foi mostrada com sucesso"))
+                        .build();
+            } else {
+                tagBean.hide(tagId, username);
+                return Response.ok()
+                        .entity(Map.of("message", "Tag com id " + tagId + " foi ocultada com sucesso"))
+                        .build();
+            }
+
+        } catch (MyEntityNotFoundException e) {
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity(Map.of("message", e.getMessage()))
+                    .build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(Map.of("message", "Erro ao alterar visibilidade da tag: " + e.getMessage()))
+                    .build();
+        }
+    }
+
 
     @GET
     @Path("/{tag_id}")
     @RolesAllowed({"COLABORADOR", "RESPONSAVEL", "ADMINISTRADOR"})
     public Response getTag(@PathParam("tag_id") Long tagId) {
         try {
-            Tag tag = tagBean.find(tagId);
+            Tag tag = tagBean.findWithDetails(tagId);
             if (tag == null) {
                 return Response.status(Response.Status.NOT_FOUND)
                         .entity("Tag not found")
