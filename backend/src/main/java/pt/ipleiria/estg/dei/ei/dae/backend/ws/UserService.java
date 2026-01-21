@@ -9,6 +9,7 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.SecurityContext;
 import pt.ipleiria.estg.dei.ei.dae.backend.dtos.PublicationDTO;
 import pt.ipleiria.estg.dei.ei.dae.backend.dtos.UserDTO;
+import pt.ipleiria.estg.dei.ei.dae.backend.ejbs.EmailBean;
 import pt.ipleiria.estg.dei.ei.dae.backend.ejbs.PublicationBean;
 import pt.ipleiria.estg.dei.ei.dae.backend.ejbs.UserBean;
 import pt.ipleiria.estg.dei.ei.dae.backend.entities.Publication;
@@ -33,6 +34,9 @@ public class UserService {
 
     @EJB
     private PublicationBean publicationBean;
+
+    @EJB
+    private EmailBean emailBean;
 
     @Context
     private SecurityContext securityContext;
@@ -266,6 +270,25 @@ public class UserService {
         } catch (IllegalArgumentException e) {
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity(Map.of("message", e.getMessage()))
+                    .build();
+        }
+    }
+
+    @GET
+    @Path("/me/emails")
+    @RolesAllowed({"COLABORADOR", "RESPONSAVEL", "ADMINISTRADOR"})
+    public Response getMyEmails() {
+        try {
+            String username = securityContext.getUserPrincipal().getName();
+            User user = userBean.find(username);
+
+            List<Map<String, String>> emails = emailBean.getEmailsForUser(user.getEmail());
+
+            return Response.ok(emails).build();
+
+        } catch (MyEntityNotFoundException e) {
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity(Map.of("message", "Utilizador não encontrado"))
                     .build();
         }
     }
