@@ -654,4 +654,42 @@ public class PublicationService {
                     .build();
         }
     }
-}
+
+    @GET
+    @Path("filter/tags")
+    @RolesAllowed({"COLABORADOR", "RESPONSAVEL", "ADMINISTRADOR"})
+    public Response filterByTags(@QueryParam("tagIds") String tagIdsParam) {
+        try {
+            if (tagIdsParam == null || tagIdsParam.trim().isEmpty()) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity(Map.of("message", "Parâmetro 'tagIds' é obrigatório"))
+                        .build();
+            }
+
+            // Parse tag IDs from comma-separated string
+            List<Long> tagIds = Arrays.stream(tagIdsParam.split(","))
+                    .map(String::trim)
+                    .map(Long::parseLong)
+                    .collect(Collectors.toList());
+
+            boolean isAdminOrResponsavel = securityContext.isUserInRole("RESPONSAVEL") ||
+                    securityContext.isUserInRole("ADMINISTRADOR");
+
+            List<Publication> publications = isAdminOrResponsavel
+                    ? publicationBean.filterByTags(tagIds)
+                    : publicationBean.filterByTagsVisible(tagIds);
+
+            List<PublicationDTO> dtos = PublicationDTO.toSearchList(publications);
+            return Response.ok(dtos).build();
+
+        } catch (NumberFormatException e) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(Map.of("message", "IDs de tags inválidos"))
+                    .build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(Map.of("message", "Erro ao filtrar publicações"))
+                    .build();
+        }
+    }
+    }
