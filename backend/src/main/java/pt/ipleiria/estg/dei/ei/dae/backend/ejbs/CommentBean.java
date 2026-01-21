@@ -68,10 +68,10 @@ public class CommentBean {
     }
 
 
-    public void update(Long id, String text, User performedBy) {
+    public void update(Long id, String text, User performedBy) throws MyEntityNotFoundException {
         Comment comment = find(id);
         if (comment == null) {
-            throw new IllegalArgumentException("Comment not found: " + id);
+            throw new MyEntityNotFoundException("Comment not found: " + id);
         }
 
         comment.setText(text);
@@ -85,10 +85,10 @@ public class CommentBean {
         );
     }
 
-    public void hide(Long id, User performedBy) {
+    public void hide(Long id, User performedBy) throws MyEntityNotFoundException {
         Comment comment = find(id);
         if (comment == null) {
-            throw new IllegalArgumentException("Comment not found: " + id);
+            throw new MyEntityNotFoundException("Comment not found: " + id);
         }
 
         comment.setVisible(false);
@@ -102,10 +102,10 @@ public class CommentBean {
         );
     }
 
-    public void show(Long id, User performedBy) {
+    public void show(Long id, User performedBy) throws MyEntityNotFoundException {
         Comment comment = find(id);
         if (comment == null) {
-            throw new IllegalArgumentException("Comment not found: " + id);
+            throw new MyEntityNotFoundException("Comment not found: " + id);
         }
 
         comment.setVisible(true);
@@ -120,10 +120,10 @@ public class CommentBean {
     }
 
     // DELETE
-    public void delete(Long id, User performedBy) {
+    public void delete(Long id, User performedBy) throws MyEntityNotFoundException {
         Comment comment = find(id);
         if (comment == null) {
-            throw new IllegalArgumentException("Comment not found: " + id);
+            throw new MyEntityNotFoundException("Comment not found: " + id);
         }
 
         historyBean.logActivity(

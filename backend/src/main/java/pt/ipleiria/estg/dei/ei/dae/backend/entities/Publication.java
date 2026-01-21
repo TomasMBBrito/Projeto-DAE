@@ -21,7 +21,7 @@ import java.util.List;
                 query = "SELECT p FROM Publication p WHERE p.visible = true ORDER BY p.publicationDate DESC"
         )
 })
-public class Publication implements Serializable {
+public class Publication extends Versionable implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;

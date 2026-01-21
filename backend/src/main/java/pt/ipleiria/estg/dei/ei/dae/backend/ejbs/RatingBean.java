@@ -84,10 +84,10 @@ public class RatingBean {
     }
 
 
-    public void delete(Long id, User performedBy) {
+    public void delete(Long id, User performedBy) throws MyEntityNotFoundException {
         Rating rating = find(id);
         if (rating == null) {
-            throw new IllegalArgumentException("Rating not found: " + id);
+            throw new MyEntityNotFoundException("Rating not found: " + id);
         }
 
         historyBean.logActivity(

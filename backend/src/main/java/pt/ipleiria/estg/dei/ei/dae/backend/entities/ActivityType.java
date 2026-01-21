@@ -36,4 +36,5 @@ public enum ActivityType {
     USER_ACTIVATED,
     USER_DEACTIVATED,
     USER_ROLE_CHANGED,
+    USER_PASSWORD_RESET
 }

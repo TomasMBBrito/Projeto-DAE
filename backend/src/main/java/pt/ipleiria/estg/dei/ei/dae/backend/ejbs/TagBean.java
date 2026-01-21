@@ -3,6 +3,7 @@ package pt.ipleiria.estg.dei.ei.dae.backend.ejbs;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
 import jakarta.persistence.PersistenceContext;
 import org.hibernate.Hibernate;
 import pt.ipleiria.estg.dei.ei.dae.backend.entities.*;
@@ -47,6 +48,8 @@ public class TagBean {
         if (newName == null || newName.trim().isEmpty()) {
             throw new MyEntityNotFoundException("Tag name cannot be empty");
         }
+
+        em.lock(tag, LockModeType.OPTIMISTIC);
 
         tag.setName(newName);
 

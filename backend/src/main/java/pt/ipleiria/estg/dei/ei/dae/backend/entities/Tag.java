@@ -23,7 +23,7 @@ import java.util.List;
                 query = "SELECT t FROM Tag t WHERE t.name = :name"
         )
 })
-public class Tag implements Serializable {
+public class Tag extends Versionable implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

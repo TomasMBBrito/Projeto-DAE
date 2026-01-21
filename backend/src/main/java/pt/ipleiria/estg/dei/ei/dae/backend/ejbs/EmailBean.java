@@ -41,9 +41,10 @@ public class EmailBean {
 
     public void sendPasswordResetEmail(String email, String resetToken) {
         String subject = "Password Reset Request";
-        String body = "You requested a password reset.\n\n" +
-                "Reset token: " + resetToken + "\n\n" +
-                "If you didn't request this, please ignore this email.";
+        String body = "Para redefinir a sua password, use o seguinte token:\\n\\n\" +\n" +
+                "            resetToken + \"\\n\\n\" +\n" +
+                "            \"Cole este token no campo apropriado da aplicação e defina a sua nova password.\\n\\n\" +\n" +
+                "            \"Se não solicitou isto, ignore este email.    ";
 
         send(email, subject, body);
     }

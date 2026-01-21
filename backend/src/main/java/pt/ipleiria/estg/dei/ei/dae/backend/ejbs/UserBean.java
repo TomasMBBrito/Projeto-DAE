@@ -3,6 +3,7 @@ package pt.ipleiria.estg.dei.ei.dae.backend.ejbs;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
 import jakarta.persistence.PersistenceContext;
 import jakarta.validation.ConstraintViolationException;
 import org.hibernate.Hibernate;
@@ -62,6 +63,18 @@ public class UserBean {
         return user;
     }
 
+    public User findByMail(String email) throws MyEntityNotFoundException {
+        User user = em.createQuery(
+                        "SELECT u FROM User u WHERE u.email = :email",
+                        User.class
+                )
+                .setParameter("email", email)
+                .getResultStream()
+                .findFirst()
+                .orElse(null);
+        return user;
+    }
+
     public List<User> getAll(User user) {
         if(user.getRole().equals(Role.ADMINISTRADOR)) {
             return em.createNamedQuery("getAllUsers", User.class).getResultList();
@@ -74,7 +87,7 @@ public class UserBean {
         if (user == null) {
             throw new MyEntityNotFoundException("User not found: " + username);
         }
-
+        em.lock(user, LockModeType.OPTIMISTIC);
         user.setEmail(email);
         user.setName(name);
         em.merge(user);
@@ -106,6 +119,29 @@ public class UserBean {
         historyBean.logActivity(
                 ActivityType.USER_UPDATED,
                 "Password changed for user: " + username,
+                "User",
+                null,
+                user
+        );
+    }
+
+    public void resetPassword(String username, String newPassword) throws MyEntityNotFoundException {
+        User user = find(username);
+        if (user == null) {
+            throw new MyEntityNotFoundException("User not found: " + username);
+        }
+
+        if(newPassword == null || newPassword.trim().isEmpty()){
+            throw new IllegalArgumentException("New password cannot be null or empty");
+        }
+
+        user.setPassword(Hasher.hash(newPassword));
+        em.merge(user);
+
+        // Log activity
+        historyBean.logActivity(
+                ActivityType.USER_PASSWORD_RESET,
+                "Password reset for user: " + username,
                 "User",
                 null,
                 user

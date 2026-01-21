@@ -4,6 +4,7 @@ import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
 import jakarta.persistence.PersistenceContext;
 import org.hibernate.Hibernate;
 import pt.ipleiria.estg.dei.ei.dae.backend.entities.*;
@@ -315,12 +316,12 @@ public class PublicationBean {
 
 
     public void update(Long id, String title, String description, ScientificArea scientificArea,
-                       LocalDate publicationDate, List<String> authors, User performedBy) {
+                       LocalDate publicationDate, List<String> authors, User performedBy) throws MyEntityNotFoundException {
         Publication publication = find(id);
         if (publication == null) {
-            throw new IllegalArgumentException("Publication not found: " + id);
+            throw new MyEntityNotFoundException("Publication not found: " + id);
         }
-
+        em.lock(publication, LockModeType.OPTIMISTIC);
         publication.setTitle(title);
         publication.setDescription(description);
         publication.setScientificArea(scientificArea);
@@ -339,10 +340,10 @@ public class PublicationBean {
 
 
     public void updateDocument(Long publicationId, String fileName, FileType fileType,
-                               InputStream fileContent, User performedBy) {
+                               InputStream fileContent, User performedBy) throws MyEntityNotFoundException {
         Publication publication = find(publicationId);
         if (publication == null) {
-            throw new IllegalArgumentException("Publication not found: " + publicationId);
+            throw new MyEntityNotFoundException("Publication not found: " + publicationId);
         }
 
         // Delete old document if exists
@@ -367,10 +368,10 @@ public class PublicationBean {
     }
 
 
-    public void hide(Long id, User performedBy) {
+    public void hide(Long id, User performedBy) throws MyEntityNotFoundException {
         Publication publication = find(id);
         if (publication == null) {
-            throw new IllegalArgumentException("Publication not found: " + id);
+            throw new MyEntityNotFoundException("Publication not found: " + id);
         }
 
         publication.setVisible(false);
@@ -385,10 +386,10 @@ public class PublicationBean {
         );
     }
 
-    public void show(Long id, User performedBy) {
+    public void show(Long id, User performedBy) throws MyEntityNotFoundException {
         Publication publication = find(id);
         if (publication == null) {
-            throw new IllegalArgumentException("Publication not found: " + id);
+            throw new MyEntityNotFoundException("Publication not found: " + id);
         }
 
         publication.setVisible(true);
@@ -464,10 +465,10 @@ public class PublicationBean {
         emailBean.notifyTagSubscribers(tag, publication, "New publication with tag: " + tag.getName());
     }
 
-    public void removeTag(Long publicationId, Long tagId, User performedBy) {
+    public void removeTag(Long publicationId, Long tagId, User performedBy) throws MyEntityNotFoundException {
         Publication publication = find(publicationId);
         if (publication == null) {
-            throw new IllegalArgumentException("Publication not found: " + publicationId);
+            throw new MyEntityNotFoundException("Publication not found: " + publicationId);
         }
 
         Tag tag = tagBean.find(tagId);

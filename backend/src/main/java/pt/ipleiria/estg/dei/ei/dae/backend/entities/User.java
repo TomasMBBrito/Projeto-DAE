@@ -23,7 +23,7 @@ import java.util.List;
 })
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 
-public class User implements Serializable {
+public class User extends Versionable implements Serializable {
     @Id
     @Column(nullable = false, unique = true)
     private String username;
