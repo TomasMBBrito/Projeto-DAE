@@ -65,6 +65,29 @@ export const usePublicationStore = defineStore("publicationStore", () => {
         return response
     }
 
+    async function filterByTags(tagIds) {
+        const authStore = useAuthStore()
+
+        if (!authStore.token) {
+            throw new Error('Not authenticated')
+        }
+
+        if (!tagIds || tagIds.length === 0) {
+            return []
+        }
+
+        const tagIdsString = tagIds.join(',')
+        const response = await $fetch(`${api}/posts/filter/tags?tagIds=${tagIdsString}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${authStore.token}`,
+                'Accept': 'application/json'
+            }
+        })
+
+        return response
+    }
+
     async function getComments(publicationId) {
         const authStore = useAuthStore()
         
@@ -127,6 +150,7 @@ export const usePublicationStore = defineStore("publicationStore", () => {
         getAll,
         getById,
         search,
+        filterByTags,
         getComments,
         addComment,
         addRating

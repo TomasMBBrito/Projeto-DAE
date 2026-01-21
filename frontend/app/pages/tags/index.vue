@@ -258,73 +258,128 @@ function goToLogin() {
 
 <style scoped>
 .tags-page {
-  max-width: 800px;
-  margin: 0 auto;
   padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 h1 {
-  margin-bottom: 24px;
+  color: #333;
+  margin-bottom: 30px;
 }
 
 .loading,
-.empty,
-.error {
+.empty {
   text-align: center;
   padding: 40px;
   color: #666;
+  font-size: 16px;
 }
 
 .error {
-  color: #dc3545;
+  color: #c33;
   background: #fee;
-  border-radius: 6px;
+  border-radius: 4px;
+  padding: 20px;
+  text-align: center;
   margin-bottom: 20px;
 }
 
 .error button {
   margin-top: 10px;
   padding: 8px 16px;
-  background: #dc3545;
+  background: #0077cc;
   color: white;
   border: none;
   border-radius: 4px;
   cursor: pointer;
+  font-weight: 600;
 }
 
 .error button:hover {
-  background: #c82333;
+  background: #005fa3;
 }
 
-.tags-list {
+/* Create Tag Section */
+.create-tag {
+  margin-bottom: 30px;
+}
+
+.btn-create {
+  padding: 10px 20px;
+  background: white;
+  color: #0077cc;
+  border: 2px solid #0077cc;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.btn-create:hover {
+  background: #0077cc;
+  color: white;
+}
+
+.create-tag-input {
   display: flex;
-  flex-direction: column;
-  gap: 12px;
+  gap: 10px;
+  align-items: center;
+}
+
+.create-tag-input input {
+  flex: 1;
+  max-width: 400px;
+  padding: 10px 15px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.create-tag-input input:focus {
+  outline: none;
+  border-color: #0077cc;
+}
+
+/* Tag List */
+.tags-list {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: grid;
+  gap: 15px;
 }
 
 .tag-card {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 14px;
-  background: white;
-  border-radius: 6px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 15px;
+  background: #f9f9f9;
+  border-radius: 4px;
+  border-left: 3px solid #0077cc;
+  transition: background 0.2s;
+}
+
+.tag-card:hover {
+  background: #f0f0f0;
 }
 
 .tag-info {
   flex: 1;
-  margin-right: 12px;
+  margin-right: 15px;
 }
 
 .tag-name {
   font-weight: 600;
   font-size: 16px;
+  color: #333;
 }
 
 .tag-input {
-  padding: 6px 10px;
-  border: 2px solid #007bff;
+  padding: 8px 12px;
+  border: 2px solid #0077cc;
   border-radius: 4px;
   font-size: 16px;
   font-weight: 600;
@@ -334,13 +389,15 @@ h1 {
 
 .tag-input:focus {
   outline: none;
-  border-color: #0056b3;
+  border-color: #005fa3;
 }
 
+/* Tag Actions Buttons */
 .tag-actions {
   display: flex;
   gap: 8px;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 .btn-subscribe,
@@ -349,94 +406,79 @@ h1 {
 .btn-save,
 .btn-cancel {
   border: none;
-  padding: 6px 14px;
+  padding: 8px 16px;
   border-radius: 4px;
   cursor: pointer;
-  transition: all 0.2s;
   font-size: 14px;
+  font-weight: 600;
   white-space: nowrap;
+  transition: all 0.2s;
+}
+
+.btn-edit {
+  background: #0077cc;
+  color: white;
+  border: 2px solid #0077cc;
+}
+
+.btn-edit:hover:not(:disabled) {
+  background: #005fa3;
+  border-color: #005fa3;
+}
+
+.btn-save {
+  background: #0077cc;
+  color: white;
+  border: 2px solid #0077cc;
+}
+
+.btn-save:hover:not(:disabled) {
+  background: #005fa3;
+  border-color: #005fa3;
+}
+
+.btn-cancel {
+  background: #f0f0f0;
+  color: #333;
+  border: 2px solid #ddd;
+}
+
+.btn-cancel:hover:not(:disabled) {
+  background: #e0e0e0;
+  border-color: #ccc;
 }
 
 .btn-subscribe {
-  background: #28a745;
-  color: white;
+  background: white;
+  color: #0077cc;
+  border: 2px solid #0077cc;
   min-width: 100px;
 }
 
 .btn-subscribe:hover:not(:disabled) {
-  background: #218838;
+  background: #0077cc;
+  color: white;
 }
 
 .btn-unsubscribe {
-  background: #dc3545;
+  background: #ff6b6b;
   color: white;
+  border: 2px solid #ff6b6b;
   min-width: 100px;
 }
 
 .btn-unsubscribe:hover:not(:disabled) {
-  background: #c82333;
+  background: #ee5a52;
+  border-color: #ee5a52;
 }
 
-.btn-edit {
-  background: #007bff;
-  color: white;
-}
-
-.btn-edit:hover:not(:disabled) {
-  background: #0056b3;
-}
-
-.btn-save {
-  background: #28a745;
-  color: white;
-}
-
-.btn-save:hover:not(:disabled) {
-  background: #218838;
-}
-
-.btn-cancel {
-  background: #6c757d;
-  color: white;
-}
-
-.btn-cancel:hover:not(:disabled) {
-  background: #5a6268;
-}
-
+/* Disabled state */
 .btn-subscribe:disabled,
 .btn-unsubscribe:disabled,
 .btn-edit:disabled,
 .btn-save:disabled,
 .btn-cancel:disabled {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: not-allowed;
-}
-
-.create-tag {
-  margin-bottom: 20px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.create-tag input {
-  padding: 6px 10px;
-  border: 2px solid #007bff;
-  border-radius: 4px;
-  font-size: 14px;
-}
-
-.btn-create {
-  background: #007bff;
-  color: white;
-  padding: 6px 14px;
-  border-radius: 4px;
-  border: none;
-  cursor: pointer;
-}
-
-.btn-create:hover:not(:disabled) {
-  background: #0056b3;
 }
 </style>
