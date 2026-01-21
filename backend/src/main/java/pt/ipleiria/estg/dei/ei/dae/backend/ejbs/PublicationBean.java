@@ -175,6 +175,26 @@ public class PublicationBean {
         return em.createNamedQuery("getVisiblePublications", Publication.class).getResultList();
     }
 
+    public List<Publication> getAllWithAllDetails() {
+        List<Publication> publications = getAll();
+        publications.forEach(p -> {
+            Hibernate.initialize(p.getComments());
+            Hibernate.initialize(p.getRatings());
+            Hibernate.initialize(p.getTags());
+        });
+        return publications;
+    }
+
+    public List<Publication> getAllVisibleWithAllDetails() {
+        List<Publication> publications = getAllVisible();
+        publications.forEach(p -> {
+            Hibernate.initialize(p.getComments());
+            Hibernate.initialize(p.getRatings());
+            Hibernate.initialize(p.getTags());
+        });
+        return publications;
+    }
+
     public List<Publication> getAllWithComments() {
         List<Publication> publications = getAll();
         publications.forEach(p -> Hibernate.initialize(p.getComments()));

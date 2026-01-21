@@ -130,6 +130,7 @@ async function loadPublications() {
 
   try {
     publications.value = await publicationStore.getAll(sortBy.value)
+    console.log(publications.value)
   } catch (e) {
     error.value = e.message || 'Failed to load publications'
   } finally {

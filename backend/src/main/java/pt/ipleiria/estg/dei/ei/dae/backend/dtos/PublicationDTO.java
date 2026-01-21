@@ -201,6 +201,8 @@ public class PublicationDTO implements Serializable {
         );
         dto.setScientificArea(pub.getScientificArea());
         dto.setPublicationDate(pub.getPublicationDate() != null ? pub.getPublicationDate().toString() : null);
+        dto.setCommentCount(pub.getComments().size());
+        dto.setAverageRating(pub.getAverageRating());
         return dto;
     }
 
@@ -215,6 +217,8 @@ public class PublicationDTO implements Serializable {
         );
         dto.setScientificArea(pub.getScientificArea());
         dto.setPublicationDate(pub.getPublicationDate() != null ? pub.getPublicationDate().toString() : null);
+        dto.setCommentCount(pub.getComments().size());
+        dto.setAverageRating(pub.getAverageRating());
         return dto;
     }
 
@@ -230,7 +234,7 @@ public class PublicationDTO implements Serializable {
         dto.setScientificArea(pub.getScientificArea());
         dto.setVisible(pub.isVisible());
 
-        dto.setAuthors(pub.getAuthors() != null ? pub.getAuthors() : new ArrayList<>()); // FIXED
+        dto.setAuthors(pub.getAuthors() != null ? pub.getAuthors() : new ArrayList<>());
         dto.setAverageRating(pub.getAverageRating());
         dto.setCommentCount(pub.getComments() != null ? pub.getComments().size() : 0);
         dto.setRatingCount(pub.getRatingCount());

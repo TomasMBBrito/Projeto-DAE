@@ -57,8 +57,8 @@ public class PublicationService {
                     securityContext.isUserInRole("ADMINISTRADOR");
 
             List<Publication> publications = isAdminOrResponsavel
-                    ? publicationBean.getAll()
-                    : publicationBean.getAllVisible();
+                    ? publicationBean.getAllWithAllDetails()
+                    : publicationBean.getAllVisibleWithAllDetails();
 
             List<PublicationDTO> dtos = isAdminOrResponsavel
                     ? PublicationDTO.toAdminList(publications)

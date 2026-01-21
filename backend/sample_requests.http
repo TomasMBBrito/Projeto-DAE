@@ -31,7 +31,7 @@ Content-Type: application/json
 
 
 ############################################################################################
-@token = Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOiJBRE1JTklTVFJBRE9SIiwiaWF0IjoxNzY4OTUxMTU4LCJleHAiOjE3Njg5NTQ3NTh9.F7jJk-xLV-1b8KYM6T_LxeK-GdJ79wPxakD7BYDaVFatKHHdZeSWQ1ff8wtJ_XW4
+@token = Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJhZG1pbjEiLCJyb2xlIjoiQURNSU5JU1RSQURPUiIsImlhdCI6MTc2OTAxODY2OCwiZXhwIjoxNzY5MDIyMjY4fQ.fICoBsr6reQehsmOPXxSWBFbQelLiQmWi6AT2oZwTjN0jZb2g7jAks0OTp4FZAO3
 
 
 ### EP-AUTH: Get Current User
