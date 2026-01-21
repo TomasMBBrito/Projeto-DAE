@@ -65,7 +65,12 @@
           <div v-else class="empty-list">No publications</div>
         </div>
 
-        <button @click="goBack" class="btn-back">Back to Users</button>
+        <div class="actions">
+          <button @click="goBack" class="btn-back">Back to Users</button>
+          <button @click="goToUserHistory" class="btn-history" :disabled="!user?.username">
+            View User History
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -135,6 +140,14 @@ async function loadPublications(username) {
 
 function goBack() {
   router.push('/users/users')
+}
+
+function goToUserHistory() {
+  if (!user.value?.username) return
+  router.push({
+    path: '/history/userHistory',
+    query: { username: user.value.username }
+  })
 }
 </script>
 
@@ -328,6 +341,12 @@ h1 {
   font-size: 13px;
 }
 
+.actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
 .btn-back {
   padding: 10px 20px;
   background: #0077cc;
@@ -342,5 +361,26 @@ h1 {
 
 .btn-back:hover {
   background: #005fa3;
+}
+
+.btn-history {
+  padding: 10px 20px;
+  background: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  transition: background 0.2s, opacity 0.2s;
+}
+
+.btn-history:hover {
+  background: #5a6268;
+}
+
+.btn-history:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 </style>
