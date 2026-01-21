@@ -131,7 +131,7 @@ public class TagBean {
     public void hide(Long id, String username) throws MyEntityNotFoundException {
         Tag tag = find(id);
         if (tag == null) {
-            throw new IllegalArgumentException("Tag not found: " + id);
+            throw new MyEntityNotFoundException("Tag not found: " + id);
         }
 
         tag.setVisible(false);
@@ -153,7 +153,7 @@ public class TagBean {
     public void show(Long id, String username) throws MyEntityNotFoundException {
         Tag tag = find(id);
         if (tag == null) {
-            throw new IllegalArgumentException("Tag not found: " + id);
+            throw new MyEntityNotFoundException("Tag not found: " + id);
         }
 
         tag.setVisible(true);
@@ -176,7 +176,7 @@ public class TagBean {
     public void delete(Long id,String username) throws MyEntityNotFoundException {
         Tag tag = find(id);
         if (tag == null) {
-            throw new IllegalArgumentException("Tag not found: " + id);
+            throw new MyEntityNotFoundException("Tag not found: " + id);
         }
 
         String name = tag.getName();

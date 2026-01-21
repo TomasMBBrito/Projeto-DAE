@@ -10,7 +10,7 @@ import pt.ipleiria.estg.dei.ei.dae.backend.exceptions.MyEntityExistsException;
 import pt.ipleiria.estg.dei.ei.dae.backend.exceptions.MyEntityNotFoundException;
 
 import java.time.LocalDate;
-import java.util.Arrays;
+import java.util.*;
 import java.util.logging.Logger;
 
 @Singleton
@@ -34,6 +34,8 @@ public class ConfigBean {
     @EJB
     private RatingBean ratingBean;
 
+    private Random random = new Random(42);
+
 
     @PostConstruct
     public void populateDB() {
@@ -45,340 +47,290 @@ public class ConfigBean {
             // ==================== USERS ====================
             logger.info("Creating users...");
 
-            User admin = userBean.create(
-                    "admin",
-                    "admin123",
-                    "admin@research.pt",
-                    "Administrator System",
-                    Role.ADMINISTRADOR,
-                    null
-            );
+            List<User> allUsers = new ArrayList<>();
+            List<User> admins = new ArrayList<>();
+            List<User> responsaveis = new ArrayList<>();
+            List<User> colaboradores = new ArrayList<>();
 
-            User joanaB = userBean.create(
-                    "joana",
-                    "password123",
-                    "joana.b@research.pt",
-                    "Joana B",
-                    Role.RESPONSAVEL,
-                    null
-            );
+            // 3 ADMINISTRADORES
+            User admin1 = userBean.create("admin1", "admin123", "admin1@research.pt", "Administrator One", Role.ADMINISTRADOR, null);
+            User admin2 = userBean.create("admin2", "admin123", "admin2@research.pt", "Administrator Two", Role.ADMINISTRADOR, null);
+            User admin3 = userBean.create("admin3", "admin123", "admin3@research.pt", "Administrator Three", Role.ADMINISTRADOR, null);
 
-            User joaoA = userBean.create(
-                    "joao",
-                    "password123",
-                    "joao.a@research.pt",
-                    "João A",
-                    Role.COLABORADOR,
-                    null
-            );
+            admins.add(admin1);
+            admins.add(admin2);
+            admins.add(admin3);
+            allUsers.addAll(admins);
 
-            User manuelC = userBean.create(
-                    "manuel",
-                    "password123",
-                    "manuel.c@research.pt",
-                    "Manuel C",
-                    Role.COLABORADOR,
-                    null
-            );
+            // 7 RESPONSÁVEIS
+            User resp1 = userBean.create("resp1", "password123", "resp1@research.pt", "Responsável One", Role.RESPONSAVEL, null);
+            User resp2 = userBean.create("resp2", "password123", "resp2@research.pt", "Responsável Two", Role.RESPONSAVEL, null);
+            User resp3 = userBean.create("resp3", "password123", "resp3@research.pt", "Responsável Three", Role.RESPONSAVEL, null);
+            User resp4 = userBean.create("resp4", "password123", "resp4@research.pt", "Responsável Four", Role.RESPONSAVEL, null);
+            User resp5 = userBean.create("resp5", "password123", "resp5@research.pt", "Responsável Five", Role.RESPONSAVEL, null);
+            User resp6 = userBean.create("resp6", "password123", "resp6@research.pt", "Responsável Six", Role.RESPONSAVEL, null);
+            User resp7 = userBean.create("resp7", "password123", "resp7@research.pt", "Responsável Seven", Role.RESPONSAVEL, null);
 
-            User anaF = userBean.create(
-                    "ana",
-                    "password123",
-                    "ana.f@research.pt",
-                    "Ana Ferreira",
-                    Role.COLABORADOR,
-                    null
-            );
+            responsaveis.addAll(Arrays.asList(resp1, resp2, resp3, resp4, resp5, resp6, resp7));
+            allUsers.addAll(responsaveis);
 
-            User brunoC = userBean.create(
-                    "bruno",
-                    "password123",
-                    "bruno.c@research.pt",
-                    "Bruno Costa",
-                    Role.COLABORADOR,
-                    null
-            );
+            // 10 COLABORADORES
+            User colab1 = userBean.create("colab1", "password123", "colab1@research.pt", "Colaborador One", Role.COLABORADOR, null);
+            User colab2 = userBean.create("colab2", "password123", "colab2@research.pt", "Colaborador Two", Role.COLABORADOR, null);
+            User colab3 = userBean.create("colab3", "password123", "colab3@research.pt", "Colaborador Three", Role.COLABORADOR, null);
+            User colab4 = userBean.create("colab4", "password123", "colab4@research.pt", "Colaborador Four", Role.COLABORADOR, null);
+            User colab5 = userBean.create("colab5", "password123", "colab5@research.pt", "Colaborador Five", Role.COLABORADOR, null);
+            User colab6 = userBean.create("colab6", "password123", "colab6@research.pt", "Colaborador Six", Role.COLABORADOR, null);
+            User colab7 = userBean.create("colab7", "password123", "colab7@research.pt", "Colaborador Seven", Role.COLABORADOR, null);
+            User colab8 = userBean.create("colab8", "password123", "colab8@research.pt", "Colaborador Eight", Role.COLABORADOR, null);
+            User colab9 = userBean.create("colab9", "password123", "colab9@research.pt", "Colaborador Nine", Role.COLABORADOR, null);
+            User colab10 = userBean.create("colab10", "password123", "colab10@research.pt", "Colaborador Ten", Role.COLABORADOR, null);
 
-            logger.info("✓ Created 6 users (1 Admin, 1 Responsável, 4 Colaboradores)");
+            colaboradores.addAll(Arrays.asList(colab1, colab2, colab3, colab4, colab5, colab6, colab7, colab8, colab9, colab10));
+            allUsers.addAll(colaboradores);
+
+            logger.info("✓ Created 20 users");
 
             // ==================== TAGS ====================
             logger.info("Creating tags...");
 
-            Tag tagProjetoX = tagBean.create("Projeto X", admin);
-            Tag tagProjetoY = tagBean.create("Projeto Y", admin);
-            Tag tagIA = tagBean.create("IA", admin);
-            Tag tagCienciaDados = tagBean.create("Ciência de Dados", admin);
-            Tag tagMachineLearning = tagBean.create("Machine Learning", admin);
-            Tag tagBaseDados = tagBean.create("Base de Dados", admin);
-            Tag tagAlgoritmos = tagBean.create("Algoritmos", admin);
+            List<Tag> allTags = new ArrayList<>();
 
-            logger.info("✓ Created 7 tags");
+            Tag tag1 = tagBean.create("Projeto X", admin1);
+            Tag tag2 = tagBean.create("Projeto Y", admin1);
+            Tag tag3 = tagBean.create("Projeto Z", admin2);
+            Tag tag4 = tagBean.create("Inteligência Artificial", admin2);
+            Tag tag5 = tagBean.create("Machine Learning", admin2);
+            Tag tag6 = tagBean.create("Deep Learning", admin3);
+            Tag tag7 = tagBean.create("Ciência de Dados", admin3);
+            Tag tag8 = tagBean.create("Big Data", admin1);
+            Tag tag9 = tagBean.create("IoT", admin1);
+            Tag tag10 = tagBean.create("Cloud Computing", admin2);
+            Tag tag11 = tagBean.create("Blockchain", admin2);
+            Tag tag12 = tagBean.create("Cibersegurança", admin3);
+            Tag tag13 = tagBean.create("Redes Neuronais", admin3);
+            Tag tag14 = tagBean.create("Processamento de Linguagem Natural", admin1);
+            Tag tag15 = tagBean.create("Visão Computacional", admin1);
+
+            allTags.addAll(Arrays.asList(tag1, tag2, tag3, tag4, tag5, tag6, tag7, tag8, tag9, tag10, tag11, tag12, tag13, tag14, tag15));
+
+            logger.info("✓ Created 15 tags");
 
             // ==================== SUBSCRIPTIONS ====================
             logger.info("Creating tag subscriptions...");
 
-            // João A subscreve Projeto X (Exemplo 1)
-            userBean.subscribeTag("joao", tagProjetoX.getId());
-
-            // Joana B subscreve Projeto X
-            userBean.subscribeTag("joana", tagProjetoX.getId());
-
-            // Manuel C subscreve Projeto X e Y (Exemplo 3)
-            userBean.subscribeTag("manuel", tagProjetoX.getId());
-            userBean.subscribeTag("manuel", tagProjetoY.getId());
-
-            // Ana subscreve IA e Ciência de Dados
-            userBean.subscribeTag("ana", tagIA.getId());
-            userBean.subscribeTag("ana", tagCienciaDados.getId());
+            int subscriptionCount = 0;
+            for (User user : allUsers) {
+                // Selecionar 3 tags aleatórias diferentes
+                List<Tag> selectedTags = getRandomTags(allTags, 3);
+                for (Tag tag : selectedTags) {
+                    userBean.subscribeTag(user.getUsername(), tag.getId());
+                    subscriptionCount++;
+                }
+            }
 
             logger.info("✓ Created tag subscriptions");
 
             // ==================== PUBLICATIONS ====================
             logger.info("Creating publications...");
 
-            // Publicação 1: Análise de Algoritmos de IA (João A)
-            Publication pub1 = publicationBean.createWithoutFile(
-                    "Análise de Algoritmos de IA",
-                    "Exploração detalhada de métodos de IA e algoritmos heurísticos aplicados a problemas complexos.",
-                    ScientificArea.CHEMISTRY,
-                    LocalDate.of(2024, 10, 18),
-                    Arrays.asList("João Silva", "Maria Santos"),
-                    joaoA,
-                    "analise_algoritmos_ia.pdf",
-                    FileType.PDF,
-                    Arrays.asList(tagIA.getId(), tagCienciaDados.getId(), tagAlgoritmos.getId())
-            );
+            List<Publication> allPublications = new ArrayList<>();
+            ScientificArea[] areas = ScientificArea.values();
 
-            // Publicação 2: Ciência por trás de uma base de dados (Ana)
-            Publication pub2 = publicationBean.createWithoutFile(
-                    "Ciência por trás de uma base de dados",
-                    "Discussão aprofundada sobre a estrutura, otimização e design de bases de dados relacionais.",
-                    ScientificArea.ENGINEERING,
-                    LocalDate.of(2024, 10, 20),
-                    Arrays.asList("Ana Ferreira", "Pedro Costa"),
-                    anaF,
-                    "ciencia_base_dados.pdf",
-                    FileType.PDF,
-                    Arrays.asList(tagBaseDados.getId(), tagCienciaDados.getId())
-            );
+            String[] titles = {
+                    "Análise Avançada de Algoritmos de IA",
+                    "Fundamentos de Machine Learning Aplicado",
+                    "Redes Neuronais Profundas na Medicina",
+                    "Processamento de Big Data em Tempo Real",
+                    "Blockchain e Aplicações em Saúde",
+                    "Segurança Cibernética em IoT",
+                    "Cloud Computing para Análise de Dados",
+                    "Visão Computacional em Robótica",
+                    "Processamento de Linguagem Natural",
+                    "Deep Learning para Diagnóstico Médico",
+                    "Otimização de Algoritmos Genéticos",
+                    "Análise Preditiva com Machine Learning",
+                    "Sistemas Distribuídos e Escalabilidade",
+                    "Computação Quântica e Aplicações",
+                    "Redes de Sensores Inteligentes",
+                    "Inteligência Artificial em Finanças",
+                    "Análise de Sentimentos em Redes Sociais",
+                    "Realidade Aumentada e Virtual",
+                    "Ética em Inteligência Artificial",
+                    "Aprendizagem por Reforço Profundo"
+            };
 
-            // Publicação 3: Algoritmos Evolutivos em Machine Learning (Bruno)
-            Publication pub3 = publicationBean.createWithoutFile(
-                    "Algoritmos Evolutivos em Machine Learning",
-                    "Discussão sobre otimização baseada em evolução aplicada ao machine learning.",
-                    ScientificArea.HUMANITIES,
-                    LocalDate.of(2024, 11, 5),
-                    Arrays.asList("Bruno Costa"),
-                    brunoC,
-                    "algoritmos_evolutivos.pdf",
-                    FileType.PDF,
-                    Arrays.asList(tagMachineLearning.getId(), tagIA.getId(), tagAlgoritmos.getId())
-            );
+            String[] descriptions = {
+                    "Exploração detalhada de métodos modernos de IA.",
+                    "Aplicação prática de técnicas de ML em projetos reais.",
+                    "Uso de redes neuronais para diagnóstico médico automatizado.",
+                    "Técnicas avançadas para processar grandes volumes de dados.",
+                    "Implementação de blockchain em sistemas de saúde.",
+                    "Estratégias de segurança para dispositivos IoT conectados.",
+                    "Arquiteturas cloud para processamento distribuído.",
+                    "Aplicações de visão computacional em robótica autónoma.",
+                    "Técnicas modernas de NLP e suas aplicações.",
+                    "Deep learning aplicado ao diagnóstico de doenças.",
+                    "Otimização usando algoritmos evolutivos.",
+                    "Modelos preditivos para análise de tendências.",
+                    "Design de sistemas distribuídos de alta performance.",
+                    "Introdução à computação quântica e potenciais aplicações.",
+                    "Redes de sensores para monitorização ambiental.",
+                    "IA aplicada a trading e análise financeira.",
+                    "Análise automatizada de opiniões em redes sociais.",
+                    "Tecnologias emergentes em AR/VR.",
+                    "Considerações éticas no desenvolvimento de IA.",
+                    "Aprendizagem por reforço em ambientes complexos."
+            };
 
-            // Publicação 4: Nova técnica revolucionária (Joana B - Exemplo 2)
-            Publication pub4 = publicationBean.createWithoutFile(
-                    "Nova Técnica de Otimização para Projeto X",
-                    "Técnica inovadora que pode revolucionar a abordagem ao Projeto X.",
-                    ScientificArea.MATHEMATICS,
-                    LocalDate.now(),
-                    Arrays.asList("Dr. Investigador Externo"),
-                    joanaB,
-                    "nova_tecnica_projeto_x.pdf",
-                    FileType.PDF,
-                    Arrays.asList(tagProjetoX.getId(), tagIA.getId())
-            );
+            for (int i = 0; i < 20; i++) {
+                // Selecionar autor aleatório
+                User author = allUsers.get(random.nextInt(allUsers.size()));
 
-            // Publicação 5: Artigo de referência com erro (Exemplo 3)
-            Publication pub5 = publicationBean.createWithoutFile(
-                    "Implementação de Algoritmo de Referência",
-                    "Artigo de referência para implementação de algoritmo usado nos Projetos X e Y.",
-                    ScientificArea.BIOLOGY,
-                    LocalDate.of(2024, 9, 15),
-                    Arrays.asList("Autor Principal", "Co-autor"),
-                    anaF,
-                    "algoritmo_referencia.pdf",
-                    FileType.PDF,
-                    Arrays.asList(tagProjetoX.getId(), tagProjetoY.getId(), tagAlgoritmos.getId())
-            );
+                // Selecionar área científica (ciclando pelo enum)
+                ScientificArea area = areas[i % areas.length];
 
-            // Publicação 6: Redes Neuronais Convolucionais (recente)
-            Publication pub6 = publicationBean.createWithoutFile(
-                    "Redes Neuronais Convolucionais",
-                    "Exploração detalhada de redes neuronais convolucionais e suas aplicações.",
-                    ScientificArea.SOCIAL_SCIENCES,
-                    LocalDate.of(2024, 12, 25),
-                    Arrays.asList("Ana Ferreira", "João Silva"),
-                    anaF,
-                    "redes_neuronais.pdf",
-                    FileType.PDF,
-                    Arrays.asList(tagIA.getId(), tagMachineLearning.getId())
-            );
+                // Selecionar 2-4 tags aleatórias
+                int numTags = 2 + random.nextInt(3); // 2, 3 ou 4 tags
+                List<Tag> selectedTags = getRandomTags(allTags, numTags);
+                List<Long> tagIds = selectedTags.stream().map(Tag::getId).toList();
 
-            // Publicação 7: Aprendizagem por Reforço
-            Publication pub7 = publicationBean.createWithoutFile(
-                    "Aprendizagem por Reforço",
-                    "Discussão sobre o método de aprendizagem por reforço e suas vantagens práticas.",
-                    ScientificArea.ENGINEERING,
-                    LocalDate.of(2024, 12, 20),
-                    Arrays.asList("João Silva"),
-                    joaoA,
-                    "aprendizagem_reforco.pdf",
-                    FileType.PDF,
-                    Arrays.asList(tagIA.getId(), tagMachineLearning.getId())
-            );
+                // Data aleatória nos últimos 6 meses
+                LocalDate date = LocalDate.now().minusDays(random.nextInt(180));
 
-            // Publicação 8: Dataset de Ciência de Materiais (ZIP)
-            Publication pub8 = publicationBean.createWithoutFile(
-                    "Dataset Completo de Propriedades de Materiais",
-                    "Conjunto de dados científicos sobre propriedades térmicas e mecânicas de materiais.",
-                    ScientificArea.MATHEMATICS,
-                    LocalDate.of(2024, 11, 10),
-                    Arrays.asList("Manuel C", "Equipa de Investigação"),
-                    manuelC,
-                    "dataset_materiais.zip",
-                    FileType.ZIP,
-                    Arrays.asList(tagProjetoY.getId())
-            );
+                // Tipo de ficheiro aleatório
+                FileType fileType = random.nextBoolean() ? FileType.PDF : FileType.ZIP;
+                String extension = fileType == FileType.PDF ? ".pdf" : ".zip";
 
-            // Publicação 9: Publicação não visível (teste)
-            Publication pub9 = publicationBean.createWithoutFile(
-                    "Artigo Confidencial em Desenvolvimento",
-                    "Trabalho em progresso sobre nova abordagem.",
-                    ScientificArea.MEDICINE,
-                    LocalDate.now(),
-                    Arrays.asList("Bruno Costa"),
-                    brunoC,
-                    "confidencial.pdf",
-                    FileType.PDF,
-                    Arrays.asList(tagIA.getId())
-            );
-            publicationBean.hide(pub9.getId(), brunoC);
+                Publication pub = publicationBean.createWithoutFile(
+                        titles[i],
+                        descriptions[i],
+                        area,
+                        date,
+                        Arrays.asList(author.getName(), "Co-autor " + (i + 1)),
+                        author,
+                        "publication_" + (i + 1) + extension,
+                        fileType,
+                        tagIds
+                );
 
-            logger.info("✓ Created 9 publications");
+                allPublications.add(pub);
+            }
+
+            logger.info("✓ Created 20 publications");
 
             // ==================== COMMENTS ====================
-            logger.info("Creating comments...");
+            logger.info("Creating comments and ratings...");
 
-            // Comentários na pub1 (Análise de Algoritmos de IA)
-            Comment comment1 = commentBean.create(
-                    "Excelente artigo! Muito bem explicado.",
-                    anaF,
-                    pub1
-            );
+            String[] commentTexts = {
+                    "Excelente trabalho! Muito bem fundamentado.",
+                    "Poderia incluir mais referências bibliográficas.",
+                    "Abordagem muito interessante ao problema.",
+                    "Alguns conceitos poderiam ser melhor explicados.",
+                    "Artigo fundamental para a área.",
+                    "Resultados impressionantes!",
+                    "Metodologia bem estruturada.",
+                    "Faltam alguns detalhes na implementação.",
+                    "Contribuição significativa para o campo.",
+                    "Discussão muito clara e objetiva.",
+                    "Seria interessante explorar mais este tópico.",
+                    "Concordo plenamente com as conclusões.",
+                    "Trabalho inovador e bem executado.",
+                    "Algumas limitações não foram abordadas.",
+                    "Recomendo fortemente a leitura!",
+                    "Análise muito completa.",
+                    "Poderia incluir mais exemplos práticos.",
+                    "Resultados alinhados com a literatura.",
+                    "Excelente revisão do estado da arte.",
+                    "Algumas questões ficaram em aberto."
+            };
 
-            Comment comment2 = commentBean.create(
-                    "Poderia incluir mais referências sobre algoritmos genéticos.",
-                    brunoC,
-                    pub1
-            );
+            int totalComments = 0;
+            int totalRatings = 0;
 
-            // Comentário de Joana B na pub4 (Exemplo 2 do enunciado)
-            Comment comment3 = commentBean.create(
-                    "Parem com tudo! Esta nova técnica pode revolucionar a nossa abordagem ao Projeto X!",
-                    joanaB,
-                    pub4
-            );
+            for (Publication pub : allPublications) {
+                // Cada publicação recebe entre 1 e 5 comentários
+                int numComments = 1 + random.nextInt(5); // 1 a 5
 
-            // Comentário de Manuel C no artigo com erro (Exemplo 3)
-            Comment comment4 = commentBean.create(
-                    "ATENÇÃO: Detectei um erro grave neste artigo na secção 3.2. O algoritmo apresentado tem uma falha que pode levar a resultados incorretos. Estou a preparar um relatório detalhado.",
-                    manuelC,
-                    pub5
-            );
+                // Selecionar users aleatórios para comentar (sem repetição na mesma pub)
+                List<User> commenters = getRandomUsers(allUsers, numComments);
 
-            Comment comment5 = commentBean.create(
-                    "Obrigado pelo aviso, Manuel! Vou suspender a implementação até termos mais detalhes.",
-                    joaoA,
-                    pub5
-            );
+                for (int i = 0; i < numComments; i++) {
+                    User commenter = commenters.get(i);
+                    String commentText = commentTexts[random.nextInt(commentTexts.length)];
 
-            // Mais comentários
-            Comment comment6 = commentBean.create(
-                    "Muito interessante a abordagem apresentada.",
-                    joaoA,
-                    pub3
-            );
+                    // Criar comentário
+                    commentBean.create(commentText, commenter, pub);
+                    totalComments++;
 
-            Comment comment7 = commentBean.create(
-                    "Este trabalho é fundamental para o Projeto X.",
-                    joanaB,
-                    pub1
-            );
+                    // O mesmo user que comentou dá um rating (1-5)
+                    int ratingValue = 1 + random.nextInt(5); // 1 a 5
+                    ratingBean.createOrUpdate(ratingValue, commenter, pub.getId());
+                    totalRatings++;
+                }
+            }
 
-            // Comentário oculto (teste de visibilidade)
-            Comment comment8 = commentBean.create(
-                    "Comentário que será ocultado para teste.",
-                    brunoC,
-                    pub2
-            );
-            commentBean.hide(comment8.getId(), admin);
+            logger.info("✓ Created " + totalComments + " comments");
+            logger.info("✓ Created " + totalRatings + " ratings");
 
-            logger.info("✓ Created 8 comments (1 hidden)");
+            logger.info("Hiding some content for testing...");
 
-            // ==================== RATINGS ====================
-            logger.info("Creating ratings...");
+            // Ocultar 2 publicações aleatórias
+            List<Publication> pubsToHide = getRandomPublications(allPublications, 2);
+            for (Publication pub : pubsToHide) {
+                publicationBean.hide(pub.getId(), pub.getAuthor());
+            }
 
-            // Ratings para pub1 (média alta)
-            ratingBean.createOrUpdate(5, anaF, pub1.getId());
-            ratingBean.createOrUpdate(5, brunoC, pub1.getId());
-            ratingBean.createOrUpdate(4, manuelC, pub1.getId());
-            ratingBean.createOrUpdate(5, joanaB, pub1.getId());
+            List<Tag> tagsToHide = getRandomTags(allTags, 2);
+            for (Tag tag : tagsToHide) {
+                tagBean.hide(tag.getId(), admin1.getUsername());
+            }
 
-            // Ratings para pub2
-            ratingBean.createOrUpdate(4, joaoA, pub2.getId());
-            ratingBean.createOrUpdate(5, brunoC, pub2.getId());
-            ratingBean.createOrUpdate(4, manuelC, pub2.getId());
+            List<Comment> allComments = new ArrayList<>();
+            for (Publication pub : allPublications) {
+                allComments.addAll(pub.getComments());
+            }
 
-            // Ratings para pub3
-            ratingBean.createOrUpdate(5, joaoA, pub3.getId());
-            ratingBean.createOrUpdate(4, anaF, pub3.getId());
-
-            // Ratings para pub4 (técnica revolucionária)
-            ratingBean.createOrUpdate(5, joaoA, pub4.getId());
-            ratingBean.createOrUpdate(5, manuelC, pub4.getId());
-
-            // Ratings para pub5 (artigo com erro - ratings mais baixos)
-            ratingBean.createOrUpdate(2, joaoA, pub5.getId());
-            ratingBean.createOrUpdate(3, brunoC, pub5.getId());
-
-            // Ratings para pub6 (mais recente)
-            ratingBean.createOrUpdate(5, joaoA, pub6.getId());
-            ratingBean.createOrUpdate(5, brunoC, pub6.getId());
-            ratingBean.createOrUpdate(4, manuelC, pub6.getId());
-
-            // Ratings para pub7
-            ratingBean.createOrUpdate(4, anaF, pub7.getId());
-            ratingBean.createOrUpdate(5, brunoC, pub7.getId());
-
-            logger.info("✓ Created 20 ratings");
-
-            // ==================== SUMMARY ====================
-            logger.info("========================================");
-            logger.info("Database population completed!");
-            logger.info("========================================");
-            logger.info("Summary:");
-            logger.info("  • 6 Users (1 Admin, 1 Responsável, 4 Colaboradores)");
-            logger.info("  • 7 Tags");
-            logger.info("  • 9 Publications (1 hidden)");
-            logger.info("  • 8 Comments (1 hidden)");
-            logger.info("  • 20 Ratings");
-            logger.info("  • Multiple tag subscriptions");
-            logger.info("========================================");
-            logger.info("Test accounts:");
-            logger.info("  Admin:        admin / admin123");
-            logger.info("  Responsável:  joana / password123");
-            logger.info("  Colaborador:  joao / password123");
-            logger.info("  Colaborador:  manuel / password123");
-            logger.info("  Colaborador:  ana / password123");
-            logger.info("  Colaborador:  bruno / password123");
-            logger.info("========================================");
+            if (allComments.size() >= 2) {
+                List<Comment> commentsToHide = getRandomComments(allComments, 2);
+                for (Comment comment : commentsToHide) {
+                    commentBean.hide(comment.getId(), admin1);  // Admin pode ocultar comentários
+                }
+                logger.info("✓ Hidden 2 comments");
+            } else {
+                logger.warning("Not enough comments to hide");
+            }
 
         } catch (MyEntityExistsException | MyConstraintViolationException | MyEntityNotFoundException e) {
-            logger.severe("❌ Error populating database: " + e.getMessage());
+            logger.severe("Error populating database: " + e.getMessage());
             e.printStackTrace();
         } catch (Exception e) {
-            logger.severe("❌ Unexpected error: " + e.getMessage());
+            logger.severe("Unexpected error: " + e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    private List<Tag> getRandomTags(List<Tag> allTags, int count) {
+        List<Tag> shuffled = new ArrayList<>(allTags);
+        Collections.shuffle(shuffled, random);
+        return shuffled.subList(0, Math.min(count, shuffled.size()));
+    }
+
+    private List<User> getRandomUsers(List<User> allUsers, int count) {
+        List<User> shuffled = new ArrayList<>(allUsers);
+        Collections.shuffle(shuffled, random);
+        return shuffled.subList(0, Math.min(count, shuffled.size()));
+    }
+
+    private List<Publication> getRandomPublications(List<Publication> allPubs, int count) {
+        List<Publication> shuffled = new ArrayList<>(allPubs);
+        Collections.shuffle(shuffled, random);
+        return shuffled.subList(0, Math.min(count, shuffled.size()));
+    }
+
+    private List<Comment> getRandomComments(List<Comment> allComments, int count) {
+        List<Comment> shuffled = new ArrayList<>(allComments);
+        Collections.shuffle(shuffled, random);
+        return shuffled.subList(0, Math.min(count, shuffled.size()));
     }
 }
