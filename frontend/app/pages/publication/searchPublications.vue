@@ -1,7 +1,10 @@
 <!-- pages/publication/searchPublications.vue -->
 <template>
   <div class="search-publications">
-    <h1>Search Publications</h1>
+    <div class="publications-header">
+      <h1>Search Publications</h1>
+      <button @click="goLogout" class="btn-logout">Logout</button>
+    </div>
 
     <div class="search-controls">
       <div class="search-bar">
@@ -212,9 +215,20 @@ function clearTagFilter() {
   selectedTags.value = []
   loadPublications()
 }
+
+function goLogout() {
+    router.push(`/auth/login`)
+}
 </script>
 
 <style scoped>
+.publications-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
 .search-publications {
   padding: 20px;
   max-width: 1200px;
@@ -253,6 +267,19 @@ h1 {
 .search-input:focus {
   outline: none;
   border-color: #0077cc;
+}
+
+.btn-logout {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+}
+.btn-logout:hover {
+    background: #0056b3;
 }
 
 .btn-search {

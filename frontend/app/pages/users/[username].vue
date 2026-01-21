@@ -6,6 +6,8 @@
         <template v-else>
             <div class="profile-header">
                 <h1>{{ user.username }}</h1>
+                <button @click="goBack" class="btn-back">← Back to Users</button>
+                <button @click="goToHistory" class="btn-history">View History</button>
             </div>
 
             <div class="profile-card">
@@ -190,6 +192,14 @@ async function deletePost(id) {
 function goToPost(postId) {
     router.push(`/publication/${postId}`)
 }
+
+function goToHistory() {
+    router.push(`/users/${route.params.username}-history`)
+}
+
+function goBack() {
+    router.push(`/users`)
+}
 </script>
 
 <style scoped>
@@ -206,8 +216,13 @@ function goToPost(postId) {
     margin-bottom: 24px;
 }
 
+.btn-history {
+    background: #28a745;
+    color: white;
+}
+
 .profile-header h1 {
-    margin: 0;
+    margin-right: 550px;
 }
 
 /* Profile card */
@@ -240,6 +255,21 @@ function goToPost(postId) {
     padding: 6px 10px;
     border-radius: 4px;
     border: 1px solid #ddd;
+}
+
+.btn-back {
+    background: #6c757d;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+
+}
+
+.btn-back:hover {
+    background: #5a6268;
 }
 
 .btn-save {

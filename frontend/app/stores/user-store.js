@@ -125,6 +125,24 @@ export const useUserStore = defineStore("userStore", () => {
         })
     }
 
+    // ---------------- HISTORY ----------------
+
+    // Get user history (ADMINISTRADOR)
+    async function getUserHistory(username) {
+        return await $fetch(`${api}/history/${username}`, {
+            method: "GET",
+            headers: getHeaders()
+        })
+    }
+
+    // Get my history
+    async function getMyHistory() {
+        return await $fetch(`${api}/history/me`, {
+            method: "GET",
+            headers: getHeaders()
+        })
+    }
+
     // ---------------- EXPORT ----------------
     return {
         getAll,
@@ -138,6 +156,8 @@ export const useUserStore = defineStore("userStore", () => {
         getMyPosts,
         deleteMyPost,
         updateMe,
-        changeMyPassword
+        changeMyPassword,
+        getUserHistory,
+        getMyHistory
     }
 })
