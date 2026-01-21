@@ -19,9 +19,42 @@
           <option value="rating">Rating</option>
         </select>
 
-        <div class="tags-button">
+        <div class="nav-buttons">
           <button @click="goToTags" class="btn-tags">Go to Tags</button>
+          <button @click="goToUsers" class="btn-users">Go to Users</button>
         </div>
+      </div>
+    </div>
+
+    <div class="tag-filter-section">
+      <div class="tag-filter-header">
+        <h3>Filter by Tags</h3>
+        <button
+            v-if="selectedTags.length > 0"
+            @click="clearTagFilter"
+            class="btn-clear-filter"
+        >
+          Clear Filter ({{ selectedTags.length }})
+        </button>
+      </div>
+
+      <div v-if="loadingTags" class="loading-tags">Loading tags...</div>
+
+      <div v-else-if="availableTags.length === 0" class="no-tags">
+        No tags available
+      </div>
+
+      <div v-else class="tags-list">
+        <button
+            v-for="tag in availableTags"
+            :key="tag.id"
+            @click="toggleTag(tag.id)"
+            class="tag-chip"
+            :class="{ active: selectedTags.includes(tag.id) }"
+        >
+          {{ tag.name }}
+          <span v-if="selectedTags.includes(tag.id)" class="check-icon">✓</span>
+        </button>
       </div>
     </div>
 
@@ -57,9 +90,11 @@
 
 <script setup>
 import { usePublicationStore } from '~/stores/publication-store';
+import { useTagStore } from '~/stores/tag-store';
 
 const publicationStore = usePublicationStore()
 const router = useRouter()
+const tagStore = useTagStore()
 
 const searchQuery = ref('')
 const sortBy = ref('')
@@ -67,13 +102,23 @@ const publications = ref([])
 const loading = ref(false)
 const error = ref('')
 
+const availableTags = ref([])
+const loadingTags = ref(false)
+const selectedTags = ref([])
+
 onMounted(() => {
+  loadTags()
   loadPublications()
 })
 
 function goToTags() {
   router.push('/tags')
 }
+
+function goToUsers() {
+  router.push('/users')
+}
+
 
 
 async function loadPublications() {
@@ -114,6 +159,58 @@ function goToDetails(id) {
 function truncate(text, length) {
   if (!text) return ''
   return text.length > length ? text.substring(0, length) + '...' : text
+}
+
+async function loadTags() {
+  loadingTags.value = true
+  try {
+    availableTags.value = await tagStore.getAll()
+  } catch (e) {
+    console.error('Failed to load tags:', e)
+  } finally {
+    loadingTags.value = false
+  }
+}
+
+async function toggleTag(tagId) {
+  const index = selectedTags.value.indexOf(tagId)
+
+  if (index > -1) {
+    // Remove tag
+    selectedTags.value.splice(index, 1)
+  } else {
+    // Add tag
+    selectedTags.value.push(tagId)
+  }
+
+  // Clear search when using tag filter
+  searchQuery.value = ''
+
+  // Filter publications
+  await filterBySelectedTags()
+}
+
+async function filterBySelectedTags() {
+  if (selectedTags.value.length === 0) {
+    await loadPublications()
+    return
+  }
+
+  loading.value = true
+  error.value = ''
+
+  try {
+    publications.value = await publicationStore.filterByTags(selectedTags.value)
+  } catch (e) {
+    error.value = e.message || 'Failed to filter publications'
+  } finally {
+    loading.value = false
+  }
+}
+
+function clearTagFilter() {
+  selectedTags.value = []
+  loadPublications()
 }
 </script>
 

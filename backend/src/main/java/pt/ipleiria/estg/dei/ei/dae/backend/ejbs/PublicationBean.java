@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.ArrayList;
 
 @Stateless
 public class PublicationBean {
@@ -250,6 +251,45 @@ public class PublicationBean {
                         Publication.class
                 )
                 .setParameter("area", area)
+                .getResultList();
+    }
+
+    public List<Publication> filterByTags(List<Long> tagIds) {
+        if (tagIds == null || tagIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+        // Retorna publicações que têm TODAS as tags selecionadas
+        return em.createQuery(
+                        "SELECT p FROM Publication p " +
+                                "JOIN p.tags t " +
+                                "WHERE t.id IN :tagIds " +
+                                "GROUP BY p " +
+                                "HAVING COUNT(DISTINCT t.id) = :tagCount " +
+                                "ORDER BY p.publicationDate DESC",
+                        Publication.class
+                )
+                .setParameter("tagIds", tagIds)
+                .setParameter("tagCount", (long) tagIds.size())
+                .getResultList();
+    }
+
+    public List<Publication> filterByTagsVisible(List<Long> tagIds) {
+        if (tagIds == null || tagIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+        // Igual ao acima mas apenas publicações visíveis
+        return em.createQuery(
+                        "SELECT p FROM Publication p " +
+                                "JOIN p.tags t " +
+                                "WHERE t.id IN :tagIds " +
+                                "AND p.visible = true " +
+                                "GROUP BY p " +
+                                "HAVING COUNT(DISTINCT t.id) = :tagCount " +
+                                "ORDER BY p.publicationDate DESC",
+                        Publication.class
+                )
+                .setParameter("tagIds", tagIds)
+                .setParameter("tagCount", (long) tagIds.size())
                 .getResultList();
     }
 
