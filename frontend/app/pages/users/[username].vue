@@ -2,7 +2,7 @@
     <div class="user-profile">
         <div class="loading" v-if="loading">Loading...</div>
         <div class="error" v-else-if="error">{{ error }}</div>
-        
+
         <template v-else>
             <div class="profile-header">
                 <h1>{{ user.username }}</h1>
@@ -38,15 +38,15 @@
             <!-- Posts -->
             <div class="posts-section">
                 <h2>Posts</h2>
-                
+
                 <div class="empty" v-if="posts.length === 0">No posts yet</div>
-                
+
                 <div v-else class="posts-list">
                     <div v-for="post in posts" :key="post.id" class="post-card">
                         <div class="post-title" @click="goToPost(post.id)" style="cursor: pointer;">
                             {{ post.title }}
                         </div>
-                        
+
                         <div class="post-actions" v-if="isMe">
                             <button class="btn-delete-post" @click.stop="deletePost(post.id)">
                                 Delete Post
@@ -57,21 +57,25 @@
             </div>
 
             <!-- My profile actions -->
-            <div v-if="isMe" class="profile-card">
-                <h3>Update Profile</h3>
-                <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
+            <div class="profile-card">
+                <div v-if="canAdminEdit">
+                    <h3>Edit User (Admin)</h3>
+
                     <input v-model="email" placeholder="Email" />
                     <input v-model="name" placeholder="Name" />
-                    <button @click="updateMe" class="btn-save">Save</button>
+
+                    <button @click="adminUpdateUser" class="btn-save">
+                        Save Changes
+                    </button>
                 </div>
 
-                <h3>Change Password</h3>
-                <div style="display: flex; flex-direction: column; gap: 10px;">
-                    <input type="password" v-model="oldPassword" placeholder="Old Password" />
-                    <input type="password" v-model="newPassword" placeholder="New Password" />
-                    <button @click="changePassword" class="btn-save">Change Password</button>
+                <div v-else>
+                    <div class="profile-field"><span>Email:</span> {{ user.email }}</div>
+                    <div class="profile-field"><span>Role:</span> {{ user.role }}</div>
+                    <div class="profile-field" v-if="user.name"><span>Name:</span> {{ user.name }}</div>
                 </div>
             </div>
+
         </template>
     </div>
 </template>
@@ -106,20 +110,39 @@ const isAdmin = computed(() =>
     authStore.user?.role === 'ADMINISTRADOR'
 )
 
+const canAdminEdit = computed(() =>
+    isAdmin.value && !isMe.value
+)
+
+async function loadPosts() {
+    if (isMe.value) {
+        posts.value = await userStore.getMyPosts()
+    } else {
+        posts.value = await userStore.getUserPosts(route.params.username)
+    }
+}
+
+
+async function loadUserProfile() {
+    if (isMe.value) {
+        user.value = await userStore.getMe()
+    } else {
+        user.value = await userStore.getByUsername(route.params.username)
+    }
+}
+
 onMounted(async () => {
     loading.value = true
     error.value = null
-    
+
     try {
-        user.value = await userStore.getByUsername(route.params.username)
+        await loadUserProfile()
+
         role.value = user.value.role
         email.value = user.value.email || ''
         name.value = user.value.name || ''
 
-        // Load posts
-        posts.value = isMe.value
-            ? await userStore.getMyPosts()
-            : await userStore.getUserPosts(route.params.username)
+        await loadPosts()
     } catch (e) {
         error.value = 'Failed to load user profile'
         console.error(e)
@@ -127,6 +150,8 @@ onMounted(async () => {
         loading.value = false
     }
 })
+
+
 
 async function changeRole() {
     try {
@@ -148,6 +173,24 @@ async function toggleStatus() {
     }
 }
 
+async function adminUpdateUser() {
+    try {
+        await userStore.update(user.value.username, {
+            email: email.value,
+            name: name.value
+        })
+
+        user.value.email = email.value
+        user.value.name = name.value
+
+        alert('User updated successfully')
+    } catch (e) {
+        error.value = 'Failed to update user'
+        console.error(e)
+    }
+}
+
+
 async function updateMe() {
     try {
         await userStore.updateMe({ email: email.value, name: name.value })
@@ -165,7 +208,7 @@ async function changePassword() {
         alert('Please fill in both password fields')
         return
     }
-    
+
     try {
         await userStore.changeMyPassword(oldPassword.value, newPassword.value)
         oldPassword.value = ''
@@ -179,7 +222,7 @@ async function changePassword() {
 
 async function deletePost(id) {
     if (!confirm('Delete this post?')) return
-    
+
     try {
         await userStore.deleteMyPost(id)
         posts.value = posts.value.filter(p => p.id !== id)

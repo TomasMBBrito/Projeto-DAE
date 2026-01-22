@@ -199,6 +199,22 @@ public class UserService {
     }
 
     @GET
+    @Path("/me")
+    @RolesAllowed({"COLABORADOR", "RESPONSAVEL", "ADMINISTRADOR"})
+    public Response getMe() {
+        try {
+            String username = securityContext.getUserPrincipal().getName();
+            User user = userBean.find(username);
+            return Response.ok(UserDTO.from(user)).build();
+        } catch (MyEntityNotFoundException e) {
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity(Map.of("message", e.getMessage()))
+                    .build();
+        }
+    }
+
+
+    @GET
     @Path("/me/posts")
     @RolesAllowed({"COLABORADOR", "RESPONSAVEL", "ADMINISTRADOR"})
     public Response getMyPosts() {

@@ -103,7 +103,7 @@ async function onSearch() {
         } finally {
             loading.value = false
         }
-    }, 300) // 300ms debounce
+    }, 300)
 }
 
 function goProfile(username) {
