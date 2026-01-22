@@ -44,7 +44,7 @@ public class HistoryBean {
 
     public List<History> getHistoryByType(ActivityType activityType) {
         return em.createQuery(
-                        "SELECT h FROM History h WHERE h.activityType = :type ORDER BY h.timestamp DESC",
+                        "SELECT h FROM History h WHERE h.action = :type ORDER BY h.timestamp DESC",
                         History.class)
                 .setParameter("type", activityType)
                 .getResultList();

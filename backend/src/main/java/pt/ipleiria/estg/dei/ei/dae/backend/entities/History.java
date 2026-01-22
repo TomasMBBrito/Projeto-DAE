@@ -21,7 +21,13 @@ import java.time.LocalDateTime;
     ),
     @NamedQuery(
             name = "getPublicationActivities",
-            query = "SELECT h FROM History h WHERE h.entity = 'Publication' AND h.entityId = :publicationId ORDER BY h.timestamp DESC"
+            query = "SELECT h FROM History h WHERE " +
+                    "(h.entity = 'Publication' AND h.entityId = :publicationId) OR " +
+                    "(h.entity = 'Comment' AND h.entityId IN " +
+                    "  (SELECT c.id FROM Comment c WHERE c.publication.id = :publicationId)) OR " +
+                    "(h.entity = 'Rating' AND h.entityId IN " +
+                    "  (SELECT r.id FROM Rating r WHERE r.publication.id = :publicationId)) " +
+                    "ORDER BY h.timestamp DESC"
     )
 })
 public class History implements Serializable {

@@ -22,6 +22,10 @@
         {{ loginError }}
       </div>
 
+      <div class="forgot-password">
+        <NuxtLink to="/auth/forgot-password">Esqueceu a password?</NuxtLink>
+      </div>
+
     </div>
   </div>
 </template>
@@ -31,8 +35,7 @@ import { useAuthStore } from '~/stores/auth-store';
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
-const config = useRuntimeConfig()
-const api = config.public.apiBase
+const authStore = useAuthStore()
 
 const loginFormData = reactive({
   username: "",
@@ -40,10 +43,9 @@ const loginFormData = reactive({
 })
 
 const loginError = ref('')
+const loading = ref(false)
 
-
-const authStore = useAuthStore();
-const { token, user } = storeToRefs(authStore)
+const { token} = storeToRefs(authStore)
 
 const messages = ref([])
 
@@ -52,76 +54,32 @@ function reset() {
   messages.value = []
   loginFormData.username = ""
   loginFormData.password = ""
+  loginError.value = ""
 }
 
 async function login() {
-  loginError.value = ''
-
-  try {
-    const response = await $fetch.raw(`${api}/auth/login`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Accept: 'application/json'
-      },
-      body: loginFormData
-    })
-
-    // SUCCESS
-    if (response.status === 200) {
-      const authHeader = response.headers.get('authorization')
-
-      if (!authHeader) {
-        loginError.value = 'Login failed. Please try again.'
-        return
-      }
-
-      token.value = authHeader.replace('Bearer ', '')
-      getUserInfo()
-      // Tentativa de push para apanhar possiveis erros de roteamento
-      try {
-        await router.push('/publication/searchPublications')
-      } catch (navError) {
-        console.error('Navigation error:', navError)
-        loginError.value = 'An application error occurred. Please contact support or try refreshing the page.'
-      }
-      return
-    }
-
-  } catch (error) {
-    // HTTP ERRORS LAND HERE
-    const status = error?.response?.status
-
-    if (status === 401 || status === 404) {
-      loginError.value = 'Invalid username or password'
-    } else {
-      loginError.value = 'Unable to connect to the server'
-    }
+  if (!loginFormData.username || !loginFormData.password) {
+    loginError.value = 'Por favor preencha todos os campos'
+    return
   }
-}
 
+  loginError.value = ''
+  loading.value = true
 
-
-
-
-async function getUserInfo() {
-  try {
-    await $fetch(`${api}/auth/user`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-        Authorization: `Bearer ${token.value}`
-      },
-      onResponse({ request, response, options }) {
-        if (response.status == 200) {
-          user.value = response._data
-        }
-      }
-    })
-  } catch (e) {
-    console.error('user info request failed: ', e)
-    messages.value.push({ error: e.message })
+ try {
+    await authStore.login(loginFormData.username, loginFormData.password)
+    
+    // Redirect on success
+    try {
+      await router.push('/publication/searchPublications')
+    } catch (navError) {
+      console.error('Navigation error:', navError)
+      loginError.value = 'An application error occurred. Please contact support or try refreshing the page.'
+    }
+  } catch (error) {
+    loginError.value = error.message
+  } finally {
+    loading.value = false
   }
 }
 </script>
@@ -234,6 +192,21 @@ pre {
   border-radius: 6px;
   font-size: 14px;
   text-align: center;
+}
+
+.forgot-password {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.forgot-password a {
+  color: #0077cc;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.forgot-password a:hover {
+  text-decoration: underline;
 }
 
 </style>
