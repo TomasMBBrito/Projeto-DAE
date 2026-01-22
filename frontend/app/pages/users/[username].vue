@@ -57,24 +57,39 @@
             </div>
 
             <!-- My profile actions -->
-            <div class="profile-card">
-                <div v-if="canAdminEdit">
-                    <h3>Edit User (Admin)</h3>
+            <!-- My profile actions -->
+            <div class="profile-card" v-if="isMe">
+                <h3>Update Your Profile</h3>
 
+                <div class="profile-field">
+                    <label>Email:</label>
                     <input v-model="email" placeholder="Email" />
+                </div>
+
+                <div class="profile-field">
+                    <label>Name:</label>
                     <input v-model="name" placeholder="Name" />
-
-                    <button @click="adminUpdateUser" class="btn-save">
-                        Save Changes
-                    </button>
                 </div>
 
-                <div v-else>
-                    <div class="profile-field"><span>Email:</span> {{ user.email }}</div>
-                    <div class="profile-field"><span>Role:</span> {{ user.role }}</div>
-                    <div class="profile-field" v-if="user.name"><span>Name:</span> {{ user.name }}</div>
+                <button @click="updateMe" class="btn-save">Save Profile</button>
+
+                <h3>Change Password</h3>
+
+                <div class="profile-field">
+                    <input v-model="oldPassword" type="password" placeholder="Old Password" />
                 </div>
+                <div class="profile-field">
+                    <input v-model="newPassword" type="password" placeholder="New Password" />
+                </div>
+
+                <button @click="changePassword" class="btn-save">Change Password</button>
+
+                <h3>Emails</h3>
+                <ul>
+                    <li v-for="emailItem in myEmails" :key="emailItem.id">{{ emailItem.subject }}</li>
+                </ul>
             </div>
+
 
         </template>
     </div>
@@ -101,6 +116,16 @@ const name = ref('')
 const role = ref('')
 const oldPassword = ref('')
 const newPassword = ref('')
+
+const myEmails = ref([])
+
+async function loadEmails() {
+    try {
+        myEmails.value = await userStore.getMyEmails()
+    } catch (e) {
+        console.error('Failed to load emails', e)
+    }
+}
 
 const isMe = computed(() =>
     route.params.username === authStore.user?.username
@@ -137,12 +162,14 @@ onMounted(async () => {
 
     try {
         await loadUserProfile()
-
         role.value = user.value.role
         email.value = user.value.email || ''
         name.value = user.value.name || ''
-
         await loadPosts()
+
+        if (isMe.value) {
+            await loadEmails()
+        }
     } catch (e) {
         error.value = 'Failed to load user profile'
         console.error(e)
@@ -150,6 +177,7 @@ onMounted(async () => {
         loading.value = false
     }
 })
+
 
 
 
