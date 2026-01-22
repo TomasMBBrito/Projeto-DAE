@@ -152,6 +152,16 @@ export const useUserStore = defineStore("userStore", () => {
         })
     }
 
+    async function getMyEmails() {
+
+        const response = await $fetch(`${api}/users/me/emails`, {
+            method: 'GET',
+            headers: getHeaders()
+        })
+
+        return response
+    }
+
     // ---------------- EXPORT ----------------
     return {
         getAll,
@@ -168,6 +178,7 @@ export const useUserStore = defineStore("userStore", () => {
         updateMe,
         changeMyPassword,
         getUserHistory,
-        getMyHistory
+        getMyHistory,
+        getMyEmails
     }
 })

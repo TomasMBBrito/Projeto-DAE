@@ -69,7 +69,7 @@ public class UserDTO implements Serializable {
         return newPassword;
     }
 
-    public void setNewpassword(String newpassword) {
+    public void setNewPassword(String newpassword) {
         this.newPassword = newpassword;
     }
 

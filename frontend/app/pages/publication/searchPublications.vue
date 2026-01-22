@@ -5,8 +5,10 @@
     <nav class="navbar">
       <div class="navbar-brand">
         <h1>Search Publications</h1>
+        <button class="btn-create" @click="goToCreate">Create Publication</button>
       </div>
       <div class="navbar-actions">
+        <button @click="goToEmails" class="btn-nav">Emails</button>
         <button @click="goToProfile" class="btn-nav">Profile</button>
         <button @click="goToTags" class="btn-nav">Tags</button>
         <button @click="goToUsers" class="btn-nav">Users</button>
@@ -75,8 +77,10 @@
     <div v-else class="publications-list">
       <div v-for="pub in publications" :key="pub.id" class="publication-card" @click="goToDetails(pub.id)">
         <h3>{{ pub.title }}</h3>
-        <p class="authors">{{ pub.authors }}</p>
+        <p class="authors">Submitted by: {{ pub.submitterUsername }}</p>
         <p class="summary">{{ truncate(pub.summary, 150) }}</p>
+
+        <button @click.stop="goToHistory(pub.id)" class="btn-history">View History</button>
 
         <div class="publication-meta">
           <span class="meta-item">
@@ -88,6 +92,7 @@
           <span class="meta-item">
             Rating: {{ pub.averageRating ? pub.averageRating.toFixed(1) : 'N/A' }}
           </span>
+          <span class="meta-item" v-if="pub.visible == false"> <b>hidden</b> </span>
         </div>
       </div>
     </div>
@@ -127,11 +132,23 @@ function goToUsers() {
   router.push('/users')
 }
 
+function goToHistory(id) {
+    router.push(`/publication/${id}-history`)
+}
+
+function goToEmails() {
+  router.push('/mails')
+}
+
 function goToProfile() {
   const username = authStore.user?.username || authStore.username
   if (username) {
     router.push(`/users/${username}`)
   }
+}
+
+function goToCreate() {
+  router.push('/publication/createPublication')
 }
 
 async function loadPublications() {
@@ -500,5 +517,36 @@ function goLogout() {
 .meta-item {
   font-size: 13px;
   color: #666;
+}
+
+.btn-create {
+  padding: 12px 24px;
+  margin-top: 10px;
+  background: #1453d1;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 700;
+  box-shadow: 0 2px 6px rgba(40,167,69,0.2);
+}
+
+.btn-create:hover {
+  background: #0a3fab;
+}
+
+.btn-history {
+  padding: 8px 16px;
+  background: #28a745;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  margin-bottom: 15px;
+}
+
+.btn-history:hover {
+  background: #218838;
 }
 </style>

@@ -133,16 +133,6 @@
                     </div>
                     <button @click="changePassword" class="btn-primary">Update Password</button>
                 </div>
-
-                <!-- Emails -->
-                <div class="settings-card" v-if="myEmails.length > 0">
-                    <h3>Email Notifications</h3>
-                    <div class="emails-list">
-                        <div v-for="emailItem in myEmails" :key="emailItem.id" class="email-item">
-                            {{ emailItem.subject }}
-                        </div>
-                    </div>
-                </div>
             </div>
         </template>
     </div>
@@ -169,16 +159,6 @@ const name = ref('')
 const role = ref('')
 const oldPassword = ref('')
 const newPassword = ref('')
-
-const myEmails = ref([])
-
-async function loadEmails() {
-    try {
-        myEmails.value = await userStore.getMyEmails()
-    } catch (e) {
-        console.error('Failed to load emails', e)
-    }
-}
 
 const isMe = computed(() =>
     route.params.username === authStore.user?.username
@@ -218,10 +198,6 @@ onMounted(async () => {
         email.value = user.value.email || ''
         name.value = user.value.name || ''
         await loadPosts()
-
-        if (isMe.value) {
-            await loadEmails()
-        }
     } catch (e) {
         error.value = 'Failed to load user profile'
         console.error(e)

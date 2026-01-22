@@ -31,7 +31,7 @@ Content-Type: application/json
 
 
 ############################################################################################
-@token = Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJhZG1pbjEiLCJyb2xlIjoiQURNSU5JU1RSQURPUiIsImlhdCI6MTc2OTEwNTQwNywiZXhwIjoxNzY5MTA5MDA3fQ.gM2cEXKRM85RzgrOMkD3vkpQnwzIE23oaepSkr_ddzVKQ1Tm--f73-v-2boTLd0m
+@token = Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJhZG1pbjEiLCJyb2xlIjoiQURNSU5JU1RSQURPUiIsImlhdCI6MTc2OTEyMjUzOSwiZXhwIjoxNzY5MTI2MTM5fQ.WEtKMbvLgIlUKw7k445IDgLUV9qzQ8ek6hOVtyzLWm98wCFT_ULDuSDpYkfT4bhu
 
 
 ### EP-AUTH: Get Current User
@@ -167,7 +167,7 @@ GET {{baseUrl}}/history/me
 Authorization: {{token}}
 
 ### EP19: Consultar histórico de uma das minhas publicações
-GET {{baseUrl}}/history/me/posts/1
+GET {{baseUrl}}/history/me/posts/21
 Authorization: {{token}}
 
 ### EP20: Consultar histórico de uma publicação (ADMIN)
