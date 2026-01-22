@@ -190,7 +190,7 @@ public class UserService {
     public Response getUserPosts(@PathParam("username") String username) throws MyEntityNotFoundException {
         try {
             List<Publication> posts = publicationBean.getByUser(username);
-            return Response.ok(PublicationDTO.toAdminList(posts)).build();
+            return Response.ok(PublicationDTO.toUserPostsList(posts)).build();
         } catch (MyEntityNotFoundException e) {
             return Response.status(Response.Status.NOT_FOUND)
                     .entity(Map.of("message", e.getMessage()))

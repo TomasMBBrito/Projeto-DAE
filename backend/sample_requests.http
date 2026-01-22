@@ -31,7 +31,7 @@ Content-Type: application/json
 
 
 ############################################################################################
-@token = Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJhZG1pbjEiLCJyb2xlIjoiQURNSU5JU1RSQURPUiIsImlhdCI6MTc2OTA5ODk5NCwiZXhwIjoxNzY5MTAyNTk0fQ.nH7S54jj0KJfunqhQ0PRf0er5RtCXLMbaczDYV6ioA2RdK-FSbC_uY6dFYGZQ9QK
+@token = Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJhZG1pbjEiLCJyb2xlIjoiQURNSU5JU1RSQURPUiIsImlhdCI6MTc2OTEwNTQwNywiZXhwIjoxNzY5MTA5MDA3fQ.gM2cEXKRM85RzgrOMkD3vkpQnwzIE23oaepSkr_ddzVKQ1Tm--f73-v-2boTLd0m
 
 
 ### EP-AUTH: Get Current User
@@ -102,7 +102,7 @@ Content-Type: application/json
 }
 
 ### EP08: Consultar publicações de um utilizador (RESPONSAVEL/ADMIN)
-GET {{baseUrl}}/users/joao/posts
+GET {{baseUrl}}/users/colab8/posts
 Authorization: {{token}}
 
 ### EP09: Consultar minhas publicações

@@ -154,11 +154,11 @@ public class TagService {
         try {
             String username = securityContext.getUserPrincipal().getName();
             Tag updatedTag = tagBean.update(tagId, tagDTO.getName(), username);
-
+            TagDTO tagDTO_res = TagDTO.from(updatedTag);
             return Response.ok()
                     .entity(Map.of(
                             "message", "Tag updated successfully",
-                            "tag", updatedTag
+                            "tag", tagDTO_res
                     ))
                     .build();
 

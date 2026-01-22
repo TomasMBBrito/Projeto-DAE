@@ -39,6 +39,12 @@ public class PublicationDTO implements Serializable {
         this.tagIds = new ArrayList<>();
     }
 
+    public PublicationDTO(String title,boolean visible) {
+        this();
+        this.title = title;
+        this.visible = visible;
+    }
+
     public PublicationDTO(Long id, String title, String author, String summary) {
         this();
         this.id = id;
