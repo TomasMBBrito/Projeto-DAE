@@ -1,10 +1,18 @@
 <!-- pages/publication/searchPublications.vue -->
 <template>
   <div class="search-publications">
-    <div class="publications-header">
-      <h1>Search Publications</h1>
-      <button @click="goLogout" class="btn-logout">Logout</button>
-    </div>
+    <!-- Navbar -->
+    <nav class="navbar">
+      <div class="navbar-brand">
+        <h1>Search Publications</h1>
+      </div>
+      <div class="navbar-actions">
+        <button @click="goToProfile" class="btn-nav">Profile</button>
+        <button @click="goToTags" class="btn-nav">Tags</button>
+        <button @click="goToUsers" class="btn-nav">Users</button>
+        <button @click="goLogout" class="btn-logout">Logout</button>
+      </div>
+    </nav>
 
     <div class="search-controls">
       <div class="search-bar">
@@ -21,11 +29,6 @@
           <option value="comments">Comments</option>
           <option value="rating">Rating</option>
         </select>
-
-        <div class="nav-buttons">
-          <button @click="goToTags" class="btn-tags">Go to Tags</button>
-          <button @click="goToUsers" class="btn-users">Go to Users</button>
-        </div>
       </div>
     </div>
 
@@ -94,10 +97,12 @@
 <script setup>
 import { usePublicationStore } from '~/stores/publication-store';
 import { useTagStore } from '~/stores/tag-store';
+import { useAuthStore } from '~/stores/auth-store';
 
 const publicationStore = usePublicationStore()
 const router = useRouter()
 const tagStore = useTagStore()
+const authStore = useAuthStore()
 
 const searchQuery = ref('')
 const sortBy = ref('')
@@ -122,7 +127,12 @@ function goToUsers() {
   router.push('/users')
 }
 
-
+function goToProfile() {
+  const username = authStore.user?.username || authStore.username
+  if (username) {
+    router.push(`/users/${username}`)
+  }
+}
 
 async function loadPublications() {
   loading.value = true
@@ -218,27 +228,74 @@ function clearTagFilter() {
 }
 
 function goLogout() {
-    router.push(`/auth/login`)
+  router.push(`/auth/login`)
 }
 </script>
 
 <style scoped>
-.publications-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
+/* Global font */
+.search-publications {
+  font-family: "Inter", sans-serif;
 }
 
+/* Navbar Styles */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 0;
+  margin-bottom: 30px;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.navbar-brand h1 {
+  margin: 0;
+  color: #333;
+  font-size: 24px;
+}
+
+.navbar-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.btn-nav {
+  background: transparent;
+  color: #0077cc;
+  border: 1px solid #0077cc;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.btn-nav:hover {
+  background: #0077cc;
+  color: white;
+}
+
+.btn-logout {
+  background: #dc3545;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+
+.btn-logout:hover {
+  background: #c82333;
+}
+
+/* Main Content */
 .search-publications {
   padding: 20px;
   max-width: 1200px;
   margin: 0 auto;
-}
-
-h1 {
-  color: #333;
-  margin-bottom: 30px;
 }
 
 .search-controls {
@@ -268,19 +325,6 @@ h1 {
 .search-input:focus {
   outline: none;
   border-color: #0077cc;
-}
-
-.btn-logout {
-    background: #007bff;
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: 600;
-}
-.btn-logout:hover {
-    background: #0056b3;
 }
 
 .btn-search {
@@ -313,6 +357,80 @@ h1 {
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 14px;
+}
+
+.tag-filter-section {
+  margin-bottom: 30px;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.tag-filter-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.tag-filter-header h3 {
+  margin: 0;
+  font-size: 16px;
+  color: #333;
+}
+
+.btn-clear-filter {
+  padding: 6px 12px;
+  background: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.btn-clear-filter:hover {
+  background: #5a6268;
+}
+
+.loading-tags,
+.no-tags {
+  color: #666;
+  font-size: 14px;
+}
+
+.tags-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.tag-chip {
+  padding: 6px 12px;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.tag-chip:hover {
+  border-color: #0077cc;
+  background: #f0f8ff;
+}
+
+.tag-chip.active {
+  background: #0077cc;
+  color: white;
+  border-color: #0077cc;
+}
+
+.check-icon {
+  font-weight: bold;
 }
 
 .loading,

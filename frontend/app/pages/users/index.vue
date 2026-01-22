@@ -1,33 +1,52 @@
 <template>
     <div class="users-page">
-        <div class="users-header">
-            <h1>Users</h1>
+        <div class="page-header">
+            <h1>User Management</h1>
             <button @click="goBack" class="btn-back">← Back to Publications</button>
         </div>
         
         <!-- Admin tools -->
-        <div v-if="isAdmin" class="admin-tools">
-            <input v-model="search" placeholder="Search username..." @input="onSearch" />
-            <button @click="goCreate">+ Create User</button>
+        <div v-if="isAdmin" class="admin-section">
+            <div class="search-container">
+                <input 
+                    v-model="search" 
+                    placeholder="Search by username..." 
+                    @keyup.enter="onSearch"
+                    class="search-input"
+                />
+                <button @click="onSearch" class="btn-search">Search</button>
+            </div>
+            <button @click="goCreate" class="btn-create">+ Create User</button>
         </div>
         
-        <div class="loading" v-if="loading">Loading...</div>
+        <div class="loading" v-if="loading">Loading users...</div>
         <div class="error" v-else-if="error">{{ error }}</div>
         <div class="empty" v-else-if="displayUsers.length === 0">No users found</div>
         
-        <div v-else class="users-list">
+        <div v-else class="users-grid">
             <div v-for="user in displayUsers" :key="user.username" class="user-card">
                 <div 
                     @click="canViewProfiles ? goProfile(user.username) : null" 
-                    class="user-info"
+                    class="user-content"
                     :class="{ 'clickable': canViewProfiles }"
                 >
-                    <strong class="user-name">{{ user.username }}</strong>
-                    <span class="user-role">{{ user.role }}</span>
+                    <div class="user-avatar">
+                        {{ user.username.charAt(0).toUpperCase() }}
+                    </div>
+                    <div class="user-details">
+                        <div class="user-name">{{ user.username }}</div>
+                        <div class="user-role" :class="`role-${user.role.toLowerCase()}`">
+                            {{ user.role }}
+                        </div>
+                    </div>
                 </div>
                 <div v-if="isAdmin" class="user-actions">
-                    <button class="btn-edit" @click.stop="editUser(user)">Edit</button>
-                    <button class="btn-delete" @click.stop="deleteUser(user.username)">Delete</button>
+                    <button class="btn-action btn-edit" @click.stop="editUser(user)">
+                        Edit
+                    </button>
+                    <button class="btn-action btn-delete" @click.stop="deleteUser(user.username)">
+                        Delete
+                    </button>
                 </div>
             </div>
         </div>
@@ -49,7 +68,7 @@ const search = ref('')
 const searchResult = ref(null)
 const loading = ref(false)
 const error = ref(null)
-let searchTimeout = null
+const isSearching = ref(false)
 
 const isAdmin = computed(() =>
     authStore.user?.role === 'ADMINISTRADOR'
@@ -72,38 +91,34 @@ onMounted(async () => {
     }
 })
 
-// Display either search result or all users
 const displayUsers = computed(() => {
-    if (search.value && searchResult.value) {
+    if (isSearching.value && searchResult.value) {
         return [searchResult.value]
     }
     return users.value
 })
 
-// Debounced search using the endpoint
 async function onSearch() {
-    if (searchTimeout) {
-        clearTimeout(searchTimeout)
-    }
-    
     if (!search.value.trim()) {
         searchResult.value = null
+        isSearching.value = false
         return
     }
     
-    searchTimeout = setTimeout(async () => {
-        loading.value = true
+    loading.value = true
+    error.value = null
+    isSearching.value = true
+    
+    try {
+        const user = await userStore.getByUsername(search.value.trim())
+        searchResult.value = user
         error.value = null
-        try {
-            const user = await userStore.getByUsername(search.value.trim())
-            searchResult.value = user
-        } catch (e) {
-            searchResult.value = null
-            error.value = `User "${search.value}" not found`
-        } finally {
-            loading.value = false
-        }
-    }, 300)
+    } catch (e) {
+        searchResult.value = null
+        error.value = `User "${search.value}" not found`
+    } finally {
+        loading.value = false
+    }
 }
 
 function goProfile(username) {
@@ -115,13 +130,14 @@ function goCreate() {
 }
 
 async function deleteUser(username) {
-    if (!confirm('Delete user?')) return
+    if (!confirm(`Are you sure you want to delete user "${username}"?`)) return
     try {
         await userStore.remove(username)
         users.value = users.value.filter(u => u.username !== username)
         if (searchResult.value?.username === username) {
             searchResult.value = null
             search.value = ''
+            isSearching.value = false
         }
     } catch (e) {
         error.value = 'Failed to delete user'
@@ -139,138 +155,246 @@ function goBack() {
 </script>
 
 <style scoped>
+.users-page {
+    font-family: "Inter", sans-serif;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 30px 20px;
+    background: #f9fafb;
+    min-height: 100vh;
+}
 
-.users-header {
+/* Page Header */
+.page-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 10px;
+    margin-bottom: 35px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #e2e8f0;
 }
 
-.users-page {
-    max-width: 1100px;
-    margin: 0 auto;
+h1 {
+    margin: 0;
+    color: #1e293b;
+    font-size: 32px;
+    font-weight: 700;
+}
+
+.btn-back {
+    background: #3b82f6;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.btn-back:hover {
+    background: #2563eb;
+    transform: translateY(-1px);
+}
+
+/* Admin Section */
+.admin-section {
+    background: white;
     padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 25px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    display: flex;
+    gap: 12px;
+    align-items: center;
 }
 
-.admin-tools {
-    margin-bottom: 20px;
+.search-container {
+    flex: 1;
     display: flex;
     gap: 10px;
 }
 
-.admin-tools input {
+.search-input {
     flex: 1;
-    padding: 8px 12px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
+    padding: 12px 16px;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: all 0.2s;
 }
 
-.admin-tools input:focus {
+.search-input:focus {
     outline: none;
-    border-color: #007bff;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
-.admin-tools button {
-    background: #007bff;
+.btn-search {
+    background: #3b82f6;
     color: white;
     border: none;
-    padding: 8px 16px;
-    border-radius: 4px;
+    padding: 12px 24px;
+    border-radius: 6px;
     cursor: pointer;
     font-weight: 600;
+    font-size: 14px;
+    transition: all 0.2s;
 }
 
-.admin-tools button:hover {
-    background: #0056b3;
+.btn-search:hover {
+    background: #2563eb;
 }
 
-/* Users list */
-.users-list {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+.btn-create {
+    background: #10b981;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.btn-create:hover {
+    background: #059669;
+}
+
+/* Users Grid */
+.users-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 20px;
 }
 
 .user-card {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
     background: white;
-    padding: 14px 16px;
-    border-radius: 6px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    transition: background 0.2s;
-}
-
-.user-card:has(.user-info.clickable:hover) {
-    background: #f8f9fa;
-}
-
-.user-info {
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s;
     display: flex;
     flex-direction: column;
+    gap: 15px;
+}
+
+.user-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+.user-content {
+    display: flex;
+    align-items: center;
+    gap: 15px;
     flex: 1;
 }
 
-.user-info.clickable {
+.user-content.clickable {
     cursor: pointer;
+}
+
+.user-content.clickable:hover .user-name {
+    color: #3b82f6;
+}
+
+.user-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.user-details {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+    min-width: 0;
 }
 
 .user-name {
     font-weight: 600;
     font-size: 16px;
+    color: #1e293b;
+    transition: color 0.2s;
 }
 
 .user-role {
     font-size: 13px;
-    color: #666;
+    font-weight: 500;
+    padding: 4px 10px;
+    border-radius: 12px;
+    display: inline-block;
+    width: fit-content;
 }
 
-/* Admin actions */
+.role-administrador {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.role-responsavel {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.role-colaborador {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.role-utilizador {
+    background: #e5e7eb;
+    color: #374151;
+}
+
+/* User Actions */
 .user-actions {
     display: flex;
     gap: 8px;
+    padding-top: 10px;
+    border-top: 1px solid #e2e8f0;
+}
+
+.btn-action {
+    flex: 1;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.2s;
 }
 
 .btn-edit {
-    background: #28a745;
+    background: #10b981;
     color: white;
-}
-
-.btn-delete {
-    background: #dc3545;
-    color: white;
-}
-
-.btn-back {
-    background: #007bff;
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: 600;
-}
-.btn-back:hover {
-    background: #0056b3;
-}
-
-.btn-edit,
-.btn-delete {
-    border: none;
-    padding: 6px 12px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 13px;
 }
 
 .btn-edit:hover {
-    background: #218838;
+    background: #059669;
+}
+
+.btn-delete {
+    background: #ef4444;
+    color: white;
 }
 
 .btn-delete:hover {
-    background: #c82333;
+    background: #dc2626;
 }
 
 /* States */
@@ -278,14 +402,42 @@ function goBack() {
 .empty,
 .error {
     text-align: center;
-    padding: 40px;
-    color: #666;
+    padding: 60px 20px;
+    color: #64748b;
+    font-size: 16px;
 }
 
 .error {
-    background: #fee;
-    color: #dc3545;
-    border-radius: 6px;
-    padding: 20px;
+    background: #fef2f2;
+    color: #dc2626;
+    border-radius: 8px;
+    padding: 30px;
+    border: 1px solid #fecaca;
+}
+
+.empty {
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .users-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .admin-section {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .btn-create {
+        width: 100%;
+    }
+    
+    h1 {
+        font-size: 24px;
+    }
 }
 </style>

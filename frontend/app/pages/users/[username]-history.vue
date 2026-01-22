@@ -1,24 +1,50 @@
 <template>
     <div class="user-history">
-        <div class="loading" v-if="loading">Loading...</div>
-        <div class="error" v-else-if="error">{{ error }}</div>
+        <div class="loading" v-if="loading">Loading history...</div>
+        <div class="error" v-else-if="error">
+            <div class="error-icon">⚠</div>
+            <div class="error-content">{{ error }}</div>
+        </div>
         
         <template v-else>
-            <div class="history-header">
-                <h1>History - {{ username }}</h1>
+            <div class="page-header">
+                <div class="header-left">
+                    <div class="user-avatar">
+                        {{ username?.charAt(0).toUpperCase() }}
+                    </div>
+                    <div class="header-info">
+                        <h1>Activity History</h1>
+                        <p class="username">{{ username }}</p>
+                    </div>
+                </div>
                 <button @click="goBack" class="btn-back">← Back to Profile</button>
             </div>
 
             <div class="history-section">
-                <div class="empty" v-if="history.length === 0">No history available</div>
+                <div class="section-header">
+                    <h2>Recent Activity</h2>
+                    <span class="history-count">{{ history.length }} {{ history.length === 1 ? 'entry' : 'entries' }}</span>
+                </div>
+
+                <div class="empty-state" v-if="history.length === 0">
+                    <div class="empty-icon">📋</div>
+                    <p>No activity history available</p>
+                </div>
                 
-                <div v-else class="history-list">
+                <div v-else class="history-timeline">
                     <div v-for="(item, index) in history" :key="index" class="history-item">
-                        <div class="history-action">{{ formatAction(item.action) }}</div>
-                        <div class="history-description">{{ item.description }}</div>
-                        <div class="history-meta">
-                            <span class="history-timestamp">{{ formatTimestamp(item.timestamp) }}</span>
-                            <span class="history-user" v-if="item.user">• User: {{ item.user }}</span>
+                        <div class="timeline-marker"></div>
+                        <div class="history-card">
+                            <div class="history-header">
+                                <span class="history-action" :class="getActionClass(item.action)">
+                                    {{ formatAction(item.action) }}
+                                </span>
+                                <span class="history-timestamp">{{ formatTimestamp(item.timestamp) }}</span>
+                            </div>
+                            <div class="history-description">{{ item.description }}</div>
+                            <div class="history-footer" v-if="item.user">
+                                <span class="history-user">Performed by: {{ item.user }}</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -42,11 +68,8 @@ const history = ref([])
 const loading = ref(false)
 const error = ref(null)
 
-// Extract username from route - Nuxt will create route param 'username-history' 
-// which contains the full value like 'joao-history', so we extract the username
 const username = computed(() => {
     const param = route.params['username-history'] || route.params.username
-    // Remove '-history' suffix if present
     return typeof param === 'string' ? param.replace(/-history$/, '') : param
 })
 
@@ -65,7 +88,6 @@ onMounted(async () => {
     
     try {
         const user = username.value
-        // Use my history if viewing own profile, otherwise use admin endpoint
         if (isMe.value) {
             history.value = await userStore.getMyHistory()
         } else if (isAdmin.value) {
@@ -85,7 +107,13 @@ function formatTimestamp(timestamp) {
     if (!timestamp) return ''
     try {
         const date = new Date(timestamp)
-        return date.toLocaleString()
+        return date.toLocaleString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        })
     } catch (e) {
         return timestamp
     }
@@ -93,13 +121,28 @@ function formatTimestamp(timestamp) {
 
 function formatAction(action) {
     if (!action) return ''
-    // Convert SCREAMING_SNAKE_CASE to Title Case
-    // e.g., "COMMENT_HIDDEN" -> "Comment Hidden"
     return action
         .toLowerCase()
         .split('_')
         .map(word => word.charAt(0).toUpperCase() + word.slice(1))
         .join(' ')
+}
+
+function getActionClass(action) {
+    if (!action) return ''
+    const actionLower = action.toLowerCase()
+    
+    if (actionLower.includes('create') || actionLower.includes('add')) {
+        return 'action-create'
+    } else if (actionLower.includes('delete') || actionLower.includes('remove') || actionLower.includes('hidden')) {
+        return 'action-delete'
+    } else if (actionLower.includes('update') || actionLower.includes('edit') || actionLower.includes('change')) {
+        return 'action-update'
+    } else if (actionLower.includes('login') || actionLower.includes('logout')) {
+        return 'action-auth'
+    }
+    
+    return 'action-default'
 }
 
 function goBack() {
@@ -109,95 +152,272 @@ function goBack() {
 
 <style scoped>
 .user-history {
-    max-width: 900px;
+    font-family: "Inter", sans-serif;
+    max-width: 1000px;
     margin: 0 auto;
-    padding: 20px;
+    padding: 30px 20px;
+    background: #f9fafb;
+    min-height: 100vh;
+}
+
+/* Page Header */
+.page-header {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    margin-bottom: 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.user-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.header-info h1 {
+    margin: 0 0 4px 0;
+    color: #1e293b;
+    font-size: 28px;
+    font-weight: 700;
+}
+
+.username {
+    margin: 0;
+    color: #64748b;
+    font-size: 14px;
+}
+
+.btn-back {
+    background: #64748b;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.btn-back:hover {
+    background: #475569;
+}
+
+/* History Section */
+.history-section {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.section-header h2 {
+    margin: 0;
+    color: #1e293b;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.history-count {
+    color: #64748b;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* Timeline */
+.history-timeline {
+    position: relative;
+}
+
+.history-item {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.history-item:last-child {
+    margin-bottom: 0;
+}
+
+.timeline-marker {
+    display: none;
+}
+
+/* History Card */
+.history-card {
+    background: #f9fafb;
+    padding: 18px;
+    border-radius: 8px;
+    border-left: 3px solid #3b82f6;
+    transition: all 0.2s;
+}
+
+.history-card:hover {
+    background: #f1f5f9;
+    transform: translateX(4px);
 }
 
 .history-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 24px;
-}
-
-.history-header h1 {
-    margin: 0;
-}
-
-.btn-back {
-    background: #6c757d;
-    color: white;
-    padding: 8px 16px;
-    border-radius: 4px;
-    border: none;
-    cursor: pointer;
-    font-size: 14px;
-}
-
-.btn-back:hover {
-    background: #5a6268;
-}
-
-.history-section {
-    margin-bottom: 30px;
-}
-
-.history-list {
-    display: flex;
-    flex-direction: column;
+    margin-bottom: 10px;
     gap: 12px;
-}
-
-.history-item {
-    background: white;
-    padding: 16px;
-    border-radius: 6px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .history-action {
     font-weight: 600;
-    font-size: 16px;
-    margin-bottom: 8px;
-    color: #007bff;
+    font-size: 15px;
+    padding: 4px 12px;
+    border-radius: 12px;
+    display: inline-block;
+}
+
+.action-create {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.action-delete {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.action-update {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.action-auth {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.action-default {
+    background: #e5e7eb;
+    color: #374151;
+}
+
+.history-timestamp {
+    color: #64748b;
+    font-size: 13px;
+    white-space: nowrap;
 }
 
 .history-description {
     font-size: 14px;
-    color: #333;
+    color: #1e293b;
+    line-height: 1.5;
     margin-bottom: 8px;
 }
 
-.history-meta {
-    display: flex;
-    gap: 8px;
-    align-items: center;
+.history-footer {
     margin-top: 8px;
-    font-size: 12px;
-}
-
-.history-timestamp {
-    color: #666;
+    padding-top: 8px;
+    border-top: 1px solid #e2e8f0;
 }
 
 .history-user {
-    color: #888;
+    color: #64748b;
+    font-size: 12px;
+    font-style: italic;
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #64748b;
+}
+
+.empty-icon {
+    font-size: 48px;
+    margin-bottom: 12px;
+}
+
+.empty-state p {
+    margin: 0;
+    font-size: 16px;
 }
 
 /* States */
-.loading,
-.empty,
-.error {
+.loading {
     text-align: center;
-    padding: 40px;
-    color: #666;
+    padding: 60px 20px;
+    color: #64748b;
+    font-size: 16px;
 }
 
 .error {
-    background: #fee;
-    color: #dc3545;
-    border-radius: 6px;
-    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #fef2f2;
+    color: #dc2626;
+    border-radius: 12px;
+    padding: 30px;
+    border: 1px solid #fecaca;
+}
+
+.error-icon {
+    font-size: 24px;
+}
+
+.error-content {
+    flex: 1;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 20px;
+    }
+
+    .btn-back {
+        width: 100%;
+    }
+
+    .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .history-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .history-timestamp {
+        font-size: 12px;
+    }
 }
 </style>

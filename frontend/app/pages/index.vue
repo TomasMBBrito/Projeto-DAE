@@ -10,9 +10,7 @@
             Collaborate with your team, share insights, and stay updated on the latest research.
           </p>
           <div class="cta-buttons">
-            <nuxt-link to="/auth/login" class="btn-login">
-              Login to Platform
-            </nuxt-link>
+            <nuxt-link to="/auth/login" class="btn-login">Login to Platform</nuxt-link>
           </div>
         </div>
       </div>
@@ -71,16 +69,16 @@
   </div>
 </template>
 
-<script setup>
-// No login logic needed here anymore
-</script>
-
 <style scoped>
+/* Global font and background */
 .welcome-page {
-  background: #36393f;
+  font-family: "Inter", sans-serif;
+  background: #f9fafb;
+  color: #1e293b;
   min-height: 100vh;
 }
 
+/* Container */
 .container {
   max-width: 1200px;
   margin: 0 auto;
@@ -89,35 +87,27 @@
 
 /* Hero Section */
 .hero-section {
-  background: #202225;
-  padding: 120px 0;
-}
-
-.hero-content {
+  padding: 100px 0;
   text-align: center;
-  max-width: 800px;
-  margin: 0 auto;
-  color: #dcddde;
 }
 
 .main-title {
-  font-size: 56px;
+  font-size: 52px;
   font-weight: 700;
-  margin: 0 0 16px 0;
-  color: #ffffff;
+  margin-bottom: 16px;
 }
 
 .tagline {
-  font-size: 24px;
-  margin: 0 0 24px 0;
-  color: #b9bbbe;
+  font-size: 22px;
+  color: #475569;
+  margin-bottom: 24px;
 }
 
 .description {
   font-size: 18px;
+  color: #64748b;
   line-height: 1.6;
-  margin: 0 0 40px 0;
-  color: #b9bbbe;
+  margin-bottom: 40px;
 }
 
 .cta-buttons {
@@ -126,21 +116,18 @@
 }
 
 .btn-login {
-  padding: 16px 48px;
-  background: #ffffff;
-  color: #202225;
-  border: none;
-  border-radius: 4px;
-  font-size: 18px;
-  font-weight: 600;
+  padding: 14px 40px;
+  background: #3b82f6;
+  color: white;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 500;
   text-decoration: none;
-  cursor: pointer;
   transition: background 0.2s;
-  display: inline-block;
 }
 
 .btn-login:hover {
-  background: #dcddde;
+  background: #2563eb;
 }
 
 /* Features Section */
@@ -151,51 +138,51 @@
 .features-section h2 {
   text-align: center;
   font-size: 32px;
-  color: #ffffff;
-  margin: 0 0 50px 0;
+  margin-bottom: 50px;
+  color: #1e293b;
 }
 
 .features-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 24px;
 }
 
 .feature-card {
-  background: #2f3136;
+  background: white;
+  border: 1px solid #e2e8f0;
   padding: 24px;
   border-radius: 8px;
-  transition: transform 0.2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .feature-card:hover {
   transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
 }
 
 .feature-card h3 {
   font-size: 20px;
-  color: #ffffff;
-  margin: 0 0 12px 0;
+  margin-bottom: 12px;
+  color: #1e293b;
 }
 
 .feature-card p {
   font-size: 14px;
-  color: #b9bbbe;
   line-height: 1.6;
-  margin: 0;
+  color: #475569;
 }
 
 /* Research Areas */
 .research-areas {
-  background: #2f3136;
   padding: 60px 0;
+  text-align: center;
 }
 
 .research-areas h2 {
   font-size: 28px;
-  color: #ffffff;
-  margin: 0 0 30px 0;
-  text-align: center;
+  margin-bottom: 30px;
 }
 
 .areas-list {
@@ -206,34 +193,26 @@
 }
 
 .area-badge {
-  background: #202225;
-  color: #b9bbbe;
+  background: #e2e8f0;
+  color: #1e293b;
   padding: 8px 16px;
-  border-radius: 4px;
+  border-radius: 6px;
   font-size: 14px;
   font-weight: 500;
 }
 
 /* Responsive */
 @media (max-width: 768px) {
-  .hero-section {
-    padding: 80px 0;
-  }
-
   .main-title {
     font-size: 36px;
   }
 
   .tagline {
-    font-size: 20px;
+    font-size: 18px;
   }
 
   .description {
     font-size: 16px;
-  }
-
-  .features-section {
-    padding: 60px 0;
   }
 
   .features-grid {

@@ -1,6 +1,9 @@
 <template>
   <div class="tags-page">
-    <h1>Tags</h1>
+    <div class="page-header">
+      <h1>Tags</h1>
+      <button @click="goBack" class="btn-back">← Back to Publications</button>
+    </div>
 
     <!-- Error messages -->
     <div v-if="error" class="error">
@@ -254,18 +257,48 @@ async function retry() {
 function goToLogin() {
   router.push('/auth/login')
 }
+
+function goBack() {
+  router.push('/publication/searchPublications')
+}
 </script>
 
 <style scoped>
+/* Global font */
 .tags-page {
+  font-family: "Inter", sans-serif;
   padding: 20px;
   max-width: 1200px;
   margin: 0 auto;
 }
 
+/* Page Header */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
 h1 {
   color: #333;
-  margin-bottom: 30px;
+  margin: 0;
+}
+
+.btn-back {
+  padding: 10px 20px;
+  background: #0077cc;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  transition: background 0.2s;
+}
+
+.btn-back:hover {
+  background: #005fa3;
 }
 
 .loading,
