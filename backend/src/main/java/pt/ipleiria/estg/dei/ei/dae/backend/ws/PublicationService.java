@@ -2,6 +2,7 @@ package pt.ipleiria.estg.dei.ei.dae.backend.ws;
 
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.ejb.EJB;
+import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
@@ -15,6 +16,7 @@ import pt.ipleiria.estg.dei.ei.dae.backend.ejbs.*;
 import pt.ipleiria.estg.dei.ei.dae.backend.entities.*;
 import pt.ipleiria.estg.dei.ei.dae.backend.exceptions.MyEntityNotFoundException;
 import pt.ipleiria.estg.dei.ei.dae.backend.security.Authenticated;
+import pt.ipleiria.estg.dei.ei.dae.backend.services.AIService;
 
 import java.io.InputStream;
 import java.time.LocalDate;

@@ -9,6 +9,8 @@ import jakarta.persistence.PersistenceContext;
 import org.hibernate.Hibernate;
 import pt.ipleiria.estg.dei.ei.dae.backend.entities.*;
 import pt.ipleiria.estg.dei.ei.dae.backend.exceptions.MyEntityNotFoundException;
+import pt.ipleiria.estg.dei.ei.dae.backend.services.AIService;
+import pt.ipleiria.estg.dei.ei.dae.backend.utils.PdfTextExtractor;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -34,6 +36,9 @@ public class PublicationBean {
     @EJB
     private DocumentBean documentBean;
 
+    @Inject
+    private AIService aiService;
+
     public Publication create(String title, String description, ScientificArea scientificArea,
                               LocalDate publicationDate, List<String> authors, User submitter,
                               String fileName, FileType fileType,List<Long> tagIds,InputStream fileInputStream) throws MyEntityNotFoundException, IOException {
@@ -43,10 +48,36 @@ public class PublicationBean {
         }
 
         Document document = documentBean.create(fileName, submitter.getUsername(), fileInputStream, fileType);
+
+        String finalDescription = description;
+
+
+
+        if (fileType == FileType.PDF ) {
+            try {
+                //Extrai o texto do pdf
+                String pdfText = PdfTextExtractor.extractText(fileInputStream);
+
+                // Gera resumo do texto com AI
+                String aiSummary = aiService.generateSummary(pdfText);
+
+                finalDescription = aiSummary;
+
+            } catch (Exception e) {
+                // Se falhar, usa a descrição original
+                finalDescription = description != null && !description.trim().isEmpty()
+                        ? description
+                        : "Resumo não disponível (erro ao gerar com IA)";
+            }
+        }
+
+
+
+
         // Create publication
         Publication publication = new Publication(
                 title,
-                description,
+                finalDescription,
                 scientificArea,
                 document,
                 publicationDate,
@@ -83,6 +114,7 @@ public class PublicationBean {
         return publication;
     }
 
+    //Metodo apenas para criar publicações de teste sem ficheiro
     public Publication createWithoutFile(String title, String description, ScientificArea scientificArea,
                                          LocalDate publicationDate, List<String> authors, User submitter,
                                          String fileName, FileType fileType, List<Long> tagIds)
@@ -92,7 +124,7 @@ public class PublicationBean {
             throw new MyEntityNotFoundException("Submitter user not found");
         }
 
-        // Criar documento SEM ficheiro físico (apenas metadados)
+
         Document document = new Document(fileName, "dummy_path", fileType);
 
         // Criar publicação
