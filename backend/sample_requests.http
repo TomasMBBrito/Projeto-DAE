@@ -31,7 +31,7 @@ Content-Type: application/json
 
 
 ############################################################################################
-@token = Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJhZG1pbjEiLCJyb2xlIjoiQURNSU5JU1RSQURPUiIsImlhdCI6MTc2OTAzMDk2MCwiZXhwIjoxNzY5MDM0NTYwfQ.5WFjFsr3aZOWj9TwuwAKwpsA7iYwDXbN-5YuVWlMbDPr3zxLeuDJSS_YhTvwloEw
+@token = Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJhZG1pbjEiLCJyb2xlIjoiQURNSU5JU1RSQURPUiIsImlhdCI6MTc2OTA5ODk5NCwiZXhwIjoxNzY5MTAyNTk0fQ.nH7S54jj0KJfunqhQ0PRf0er5RtCXLMbaczDYV6ioA2RdK-FSbC_uY6dFYGZQ9QK
 
 
 ### EP-AUTH: Get Current User
@@ -225,7 +225,7 @@ GET {{baseUrl}}/posts
 Authorization: {{token}}
 
 ### EP29: Obter publicação específica
-GET {{baseUrl}}/posts/10
+GET {{baseUrl}}/posts/21
 Authorization: {{token}}
 
 ### Upload de publicação com ficheiro
@@ -237,10 +237,7 @@ Content-Type: multipart/form-data; boundary=boundary
 Content-Disposition: form-data; name="title"
 
 Análise de Algoritmos Genéticos
---boundary
-Content-Disposition: form-data; name="summary"
 
-Estudo sobre algoritmos genéticos e suas aplicações em IA.
 --boundary
 Content-Disposition: form-data; name="scientificArea"
 
@@ -258,13 +255,13 @@ Content-Disposition: form-data; name="tagIds"
 
 [1, 2]
 --boundary
-Content-Disposition: form-data; name="file"; filename="AlgoritmosGeneticos.pdf"
+Content-Disposition: form-data; name="file"; filename="AlgoritmosGeneticos.zip"
 Content-Type: application/zip
 
-< C:/Users/tomas/Desktop/AlgoritmosGeneticos.pdf
+< C:/Users/tomas/Desktop/AlgoritmosGeneticos.zip
 --boundary--
 
-### EP31: Atualizar resumo de publicação
+### EP31: Atualizar publicação
 PUT {{baseUrl}}/posts/7
 Authorization: {{token}}
 Content-Type: application/json

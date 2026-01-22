@@ -2,7 +2,6 @@ package pt.ipleiria.estg.dei.ei.dae.backend.ws;
 
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.ejb.EJB;
-import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
@@ -16,7 +15,6 @@ import pt.ipleiria.estg.dei.ei.dae.backend.ejbs.*;
 import pt.ipleiria.estg.dei.ei.dae.backend.entities.*;
 import pt.ipleiria.estg.dei.ei.dae.backend.exceptions.MyEntityNotFoundException;
 import pt.ipleiria.estg.dei.ei.dae.backend.security.Authenticated;
-import pt.ipleiria.estg.dei.ei.dae.backend.services.AIService;
 
 import java.io.InputStream;
 import java.time.LocalDate;
@@ -163,7 +161,12 @@ public class PublicationService {
             var formData = form.getFormDataMap();
 
             String title = formData.get("title").get(0).getBodyAsString();
-            String summary = formData.get("summary").get(0).getBodyAsString();
+
+            String summary = "";
+            if (formData.containsKey("summary") && !formData.get("summary").isEmpty()) {
+                summary = formData.get("summary").get(0).getBodyAsString();
+            }
+
             String scientificAreaStr = formData.get("scientificArea").get(0).getBodyAsString();
             String publicationDateStr = formData.get("publicationDate").get(0).getBodyAsString();
 
@@ -200,6 +203,8 @@ public class PublicationService {
                 }
             }
 
+            boolean ResumoaSerGerado = (summary == null || summary.trim().isEmpty());
+
             Publication publication = publicationBean.create(
                     title,
                     summary,
@@ -213,9 +218,24 @@ public class PublicationService {
                     fileInputStream
             );
 
-            return Response.status(Response.Status.CREATED)
-                    .entity(Map.of("message", "Publicação com id " + publication.getId() + " criada com sucesso."))
-                    .build();
+            if (ResumoaSerGerado) {
+                return Response.status(Response.Status.ACCEPTED) // 202 Accepted
+                        .entity(Map.of(
+                                "message", "Publicação criada com sucesso. O resumo está a ser gerado automaticamente em segundo plano.",
+                                "id", publication.getId(),
+                                "status", "processing",
+                                "description", publication.getDescription()
+                        ))
+                        .build();
+            } else {
+                return Response.status(Response.Status.CREATED) // 201 Created
+                        .entity(Map.of(
+                                "message", "Publicação com id " + publication.getId() + " criada com sucesso.",
+                                "id", publication.getId(),
+                                "status", "completed"
+                        ))
+                        .build();
+            }
 
         } catch (MyEntityNotFoundException e) {
             return Response.status(Response.Status.NOT_FOUND)
@@ -613,49 +633,49 @@ public class PublicationService {
 //    }
 
     // EP42: Regenera resumo com IA (placeholder - implementar integração com LLM)
-    @PUT
-    @Path("{id}/summary")
-    @RolesAllowed({"COLABORADOR", "RESPONSAVEL", "ADMINISTRADOR"})
-    public Response regenerateSummary(@PathParam("id") Long id, Map<String, Boolean> request) {
-        try {
-            if (request == null || !request.containsKey("regenerate")) {
-                return Response.status(Response.Status.BAD_REQUEST)
-                        .entity(Map.of("message", "Campo 'regenerate' é obrigatório"))
-                        .build();
-            }
-
-            String username = securityContext.getUserPrincipal().getName();
-            User user = userBean.find(username);
-            Publication publication = publicationBean.find(id);
-
-            if (publication == null) {
-                return Response.status(Response.Status.NOT_FOUND)
-                        .entity(Map.of("message", "Publicação não encontrada"))
-                        .build();
-            }
-
-            if (!publicationBean.canEdit(publication, user)) {
-                return Response.status(Response.Status.FORBIDDEN)
-                        .entity(Map.of("message", "Não tem permissão para editar esta publicação"))
-                        .build();
-            }
-
-            // TODO: Integrar com serviço de IA (LLM) para gerar novo resumo
-            String oldSummary = publication.getDescription();
-            String newSummary = "Métodos de inteligência artificial para otimização de tarefas complexas."; // Placeholder
-
-            publicationBean.updateDescription(id, newSummary, user);
-
-            return Response.ok()
-                    .entity(Map.of("message", "New: " + newSummary + " Old: " + oldSummary))
-                    .build();
-
-        } catch (MyEntityNotFoundException e) {
-            return Response.status(Response.Status.NOT_FOUND)
-                    .entity(Map.of("message", e.getMessage()))
-                    .build();
-        }
-    }
+//    @PUT
+//    @Path("{id}/summary")
+//    @RolesAllowed({"COLABORADOR", "RESPONSAVEL", "ADMINISTRADOR"})
+//    public Response regenerateSummary(@PathParam("id") Long id, Map<String, Boolean> request) {
+//        try {
+//            if (request == null || !request.containsKey("regenerate")) {
+//                return Response.status(Response.Status.BAD_REQUEST)
+//                        .entity(Map.of("message", "Campo 'regenerate' é obrigatório"))
+//                        .build();
+//            }
+//
+//            String username = securityContext.getUserPrincipal().getName();
+//            User user = userBean.find(username);
+//            Publication publication = publicationBean.find(id);
+//
+//            if (publication == null) {
+//                return Response.status(Response.Status.NOT_FOUND)
+//                        .entity(Map.of("message", "Publicação não encontrada"))
+//                        .build();
+//            }
+//
+//            if (!publicationBean.canEdit(publication, user)) {
+//                return Response.status(Response.Status.FORBIDDEN)
+//                        .entity(Map.of("message", "Não tem permissão para editar esta publicação"))
+//                        .build();
+//            }
+//
+//
+//            String oldSummary = publication.getDescription();
+//            String newSummary = "Métodos de inteligência artificial para otimização de tarefas complexas."; // Placeholder
+//
+//            publicationBean.updateDescription(id, newSummary, user);
+//
+//            return Response.ok()
+//                    .entity(Map.of("message", "New: " + newSummary + " Old: " + oldSummary))
+//                    .build();
+//
+//        } catch (MyEntityNotFoundException e) {
+//            return Response.status(Response.Status.NOT_FOUND)
+//                    .entity(Map.of("message", e.getMessage()))
+//                    .build();
+//        }
+//    }
 
     @GET
     @Path("filter/tags")
@@ -694,4 +714,4 @@ public class PublicationService {
                     .build();
         }
     }
-    }
+}

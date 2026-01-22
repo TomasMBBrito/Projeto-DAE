@@ -11,6 +11,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
 import java.io.StringReader;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 @Stateless
@@ -18,20 +19,26 @@ public class AIService {
 
     private static final Logger logger = Logger.getLogger(AIService.class.getName());
 
-    // URL do Ollama (dentro do Docker Compose)
     private static final String OLLAMA_URL = "http://ollama:11434/api/generate";
 
-    // Modelo a usar
     private static final String MODEL = "llama3.2";
+
+    private static final int CONNECT_TIMEOUT_SECONDS = 60;
+    private static final int READ_TIMEOUT_SECONDS = 600;
 
     public String generateSummary(String documentText) {
         logger.info("A gerar resumo com IA...");
 
-        // Limitar o texto (modelos têm limites de contexto)
-        String truncatedText = truncateText(documentText, 4000);
+        if (documentText == null || documentText.trim().isEmpty()) {
+            logger.warning("Texto do documento está vazio");
+            return "Resumo não disponível (documento vazio)";
+        }
 
-        // Criar o prompt em português
-        String prompt = "Faz um resumo conciso e informativo (máximo 300 palavras) do seguinte documento científico:\n\n"
+        // Limitar o texto (modelos têm limites de contexto)
+        String truncatedText = truncateText(documentText, 3000);
+
+        // Prompt do AI
+        String prompt = "Faz um resumo conciso e informativo (máximo 150 palavras) do seguinte documento científico:\n\n"
                 + truncatedText
                 + "\n\nResumo:";
 
@@ -39,15 +46,19 @@ public class AIService {
         JsonObject requestBody = Json.createObjectBuilder()
                 .add("model", MODEL)
                 .add("prompt", prompt)
-                .add("stream", false)  // Não queremos streaming
+                .add("stream", false)
                 .add("options", Json.createObjectBuilder()
-                        .add("temperature", 0.5)      // Menos criativo, mais factual
-                        .add("num_predict", 400)      // Máximo de tokens no resumo
+                        .add("temperature", 0.5)
+                        .add("num_predict", 300)
                 )
                 .build();
 
         // Fazer o pedido HTTP POST ao Ollama
-        Client client = ClientBuilder.newClient();
+        Client client = ClientBuilder.newBuilder()
+                .connectTimeout(CONNECT_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+                .readTimeout(READ_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+                .build();
+
         try {
             Response response = client.target(OLLAMA_URL)
                     .request(MediaType.APPLICATION_JSON)
