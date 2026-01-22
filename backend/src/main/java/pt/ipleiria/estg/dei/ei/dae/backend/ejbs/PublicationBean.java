@@ -3,6 +3,7 @@ package pt.ipleiria.estg.dei.ei.dae.backend.ejbs;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
+import jakarta.ejb.Asynchronous;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
 import jakarta.persistence.PersistenceContext;
@@ -11,21 +12,29 @@ import pt.ipleiria.estg.dei.ei.dae.backend.entities.*;
 import pt.ipleiria.estg.dei.ei.dae.backend.exceptions.MyEntityNotFoundException;
 import pt.ipleiria.estg.dei.ei.dae.backend.services.AIService;
 import pt.ipleiria.estg.dei.ei.dae.backend.utils.PdfTextExtractor;
+import pt.ipleiria.estg.dei.ei.dae.backend.utils.ZipTextExtractor;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.logging.Logger;
 
 @Stateless
 public class PublicationBean {
+
+    private static final Logger logger = Logger.getLogger(PublicationBean.class.getName());
 
     @PersistenceContext
     private EntityManager em;
 
     @EJB
     private HistoryBean historyBean;
+
+    @EJB
+    private UserBean userBean;
 
     @EJB
     private TagBean tagBean;
@@ -47,32 +56,61 @@ public class PublicationBean {
             throw new MyEntityNotFoundException("Submitter user not found");
         }
 
-        Document document = documentBean.create(fileName, submitter.getUsername(), fileInputStream, fileType);
+        byte[] fileBytes = fileInputStream.readAllBytes();
+
+        InputStream streamForDocument = new java.io.ByteArrayInputStream(fileBytes);
+
+        Document document = documentBean.create(fileName, submitter.getUsername(), streamForDocument, fileType);
 
         String finalDescription = description;
+        boolean needsAiGeneration = (description == null || description.trim().isEmpty());
 
-
-
-        if (fileType == FileType.PDF ) {
-            try {
-                //Extrai o texto do pdf
-                String pdfText = PdfTextExtractor.extractText(fileInputStream);
-
-                // Gera resumo do texto com AI
-                String aiSummary = aiService.generateSummary(pdfText);
-
-                finalDescription = aiSummary;
-
-            } catch (Exception e) {
-                // Se falhar, usa a descrição original
-                finalDescription = description != null && !description.trim().isEmpty()
-                        ? description
-                        : "Resumo não disponível (erro ao gerar com IA)";
-            }
+        if (needsAiGeneration) {
+            finalDescription = "A gerar resumo... Por favor aguarde";
         }
 
-
-
+//        if(description == null || description.trim().isEmpty()) {
+//            try {
+//                if (fileType == FileType.PDF) {
+//                    InputStream streamForAI = new ByteArrayInputStream(fileBytes);
+//                    String pdfText = PdfTextExtractor.extractText(streamForAI);
+//
+//                    if (pdfText != null && !pdfText.trim().isEmpty()) {
+//
+//                        String aiSummary = aiService.generateSummary(pdfText);
+//
+//                        if (aiSummary != null && !aiSummary.trim().isEmpty()) {
+//                            finalDescription = aiSummary;
+//                        } else {
+//                            finalDescription = "Resumo automático não disponível - Por favor adicione uma descrição manualmente";
+//                        }
+//                    } else {
+//                        finalDescription = "Não foi possível extrair texto do PDF";
+//                    }
+//
+//                } else if (fileType == FileType.ZIP) {
+//                    InputStream streamForZip = new ByteArrayInputStream(fileBytes);
+//                    String zipText = ZipTextExtractor.extractTextFromPDFs(streamForZip);
+//
+//                    if (zipText != null && !zipText.trim().isEmpty()) {
+//
+//                        String aiSummary = aiService.generateSummary(zipText);
+//
+//                        if (aiSummary != null && !aiSummary.trim().isEmpty()) {
+//                            finalDescription = aiSummary;
+//                        } else {
+//                            finalDescription = "Resumo automático não disponível - Por favor adicione uma descrição manualmente";
+//                        }
+//                    } else {
+//                        finalDescription = "Ficheiro ZIP - nenhum PDF encontrado para análise";
+//                    }
+//                }
+//
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//                finalDescription = "Resumo não disponível (erro ao processar: " + e.getMessage() + ")";
+//            }
+//        }
 
         // Create publication
         Publication publication = new Publication(
@@ -87,8 +125,6 @@ public class PublicationBean {
         publication.setAuthors(authors);
         publication.setDocument(document);
         document.setPublication(publication);
-
-
 
         em.persist(publication);
         em.flush(); // Ensure publication gets an ID before creating document
@@ -110,6 +146,11 @@ public class PublicationBean {
                 publication.getId(),
                 submitter
         );
+
+        if (needsAiGeneration) {
+            logger.info("Iniciando geração assíncrona de resumo para publicação ID: " + publication.getId());
+            generateSummaryAsync(publication.getId(), fileBytes, fileType, submitter.getUsername());
+        }
 
         return publication;
     }
@@ -566,5 +607,69 @@ public class PublicationBean {
                 id,
                 performedBy
         );
+    }
+
+    @Asynchronous
+    public void generateSummaryAsync(Long publicationId, byte[] fileBytes,
+                                              FileType fileType, String submitterUsername) {
+        try {
+            String resumoAI = null;
+            String textoDocumento = null;
+
+            // Extrair texto de ficheiros
+            if (fileType == FileType.PDF) {
+                InputStream streamForAI = new ByteArrayInputStream(fileBytes);
+                textoDocumento = PdfTextExtractor.extractText(streamForAI);
+
+            } else if (fileType == FileType.ZIP) {
+                InputStream streamForZip = new ByteArrayInputStream(fileBytes);
+                textoDocumento = ZipTextExtractor.extractTextFromPDFs(streamForZip);
+            }
+
+            // Gerar resumo
+            if (textoDocumento != null && !textoDocumento.trim().isEmpty()) {
+                resumoAI = aiService.generateSummary(textoDocumento);
+            }
+
+            // Atualizar a publicação com o resumo gerado
+            Publication publication = find(publicationId);
+            if (publication != null) {
+                if (resumoAI != null && !resumoAI.trim().isEmpty()) {
+                    publication.setDescription(resumoAI);
+                } else {
+                    publication.setDescription("Resumo automático não disponível - Por favor adicione uma descrição manualmente");
+                    logger.warning("Não foi possível gerar resumo para publicação ID: " + publicationId);
+                }
+
+                em.merge(publication);
+
+                User submitter = userBean.find(submitterUsername);
+                if (submitter != null) {
+                    historyBean.logActivity(
+                            ActivityType.PUBLICATION_UPDATED,
+                            "AI summary generated for publication: " + publication.getTitle(),
+                            "Publication",
+                            publicationId,
+                            submitter
+                    );
+                }
+            }
+
+        } catch (Exception e) {
+            logger.severe("Erro ao gerar resumo assíncrono para publicação ID " + publicationId + ": " + e.getMessage());
+            e.printStackTrace();
+
+            // Atualizar com mensagem de erro
+            try {
+                Publication publication = find(publicationId);
+                if (publication != null) {
+                    publication.setDescription("Erro ao gerar resumo automático. Por favor, adicione uma descrição manualmente.");
+                    em.merge(publication);
+                }
+            } catch (Exception ex) {
+                logger.severe("Erro ao atualizar publicação com mensagem de erro: " + ex.getMessage());
+                ex.printStackTrace();
+            }
+        }
     }
 }
