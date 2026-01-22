@@ -11,6 +11,16 @@ services:
     image: ghusta/fakesmtp
     ports:
       - "2525:25"
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: dae_ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    restart: unless-stopped
+
   webserver:
     build: .
     ports:
@@ -29,3 +39,5 @@ services:
     depends_on:
       - db
       - smtp
+volumes:
+  ollama_data:

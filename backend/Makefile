@@ -37,3 +37,18 @@ monitor: deploy logs
 
 mails:
 	docker compose exec --workdir /var/mail smtp bash
+
+ollama-pull:
+	docker compose exec ollama ollama pull llama3.2
+
+ollama-bash:
+	docker compose exec ollama bash
+
+ollama-test:
+	docker compose exec ollama ollama run llama3.2
+
+ollama-logs:
+	docker compose logs -f ollama
+
+ollama-models:
+	docker compose exec ollama ollama list
