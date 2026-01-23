@@ -31,7 +31,7 @@ export const usePublicationStore = defineStore("publicationStore", () => {
         const authStore = useAuthStore()
         
         // Debug: verifica se tem token
-        console.log('Token:', authStore.token)
+        //console.log('Token:', authStore.token)
         
         if (!authStore.token) {
             throw new Error('Not authenticated')
@@ -127,6 +127,26 @@ export const usePublicationStore = defineStore("publicationStore", () => {
         return response
     }
 
+    async function toggleCommentVisibility(publicationId, commentId, isVisible) {
+        const authStore = useAuthStore()
+        
+        if (!authStore.token) {
+            throw new Error('Not authenticated')
+        }
+
+        const response = await $fetch(`${api}/posts/${publicationId}/comments/${commentId}`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${authStore.token}`,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: { visible: isVisible }
+        })
+
+        return response
+    }
+
     async function addComment(publicationId, content) {
         const authStore = useAuthStore()
         
@@ -196,6 +216,7 @@ export const usePublicationStore = defineStore("publicationStore", () => {
         search,
         filterByTags,
         getComments,
+        toggleCommentVisibility,
         addComment,
         addRating,
         getHistory

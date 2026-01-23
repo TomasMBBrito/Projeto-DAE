@@ -59,10 +59,21 @@
         </div>
 
         <div v-else class="comments-list">
-          <div v-for="comment in comments" :key="comment.id" class="comment">
+          <div v-for="comment in comments" :key="comment.id" class="comment" :class="{ hidden: !comment.visible }">
             <div class="comment-header">
-              <span class="comment-author">{{ comment.authorName }}</span>
-              <span class="comment-date">{{ formatDate(comment.createdAt) }}</span>
+              <div class="comment-info">
+                <span class="comment-author">{{ comment.author }}</span>
+                <span class="comment-date">{{ formatDate(comment.createdAt) }}</span>
+                <span v-if="!comment.visible" class="hidden-badge">Hidden</span>
+              </div>
+              <button
+                v-if="isAdmin" 
+                @click="toggleVisibility(comment)" 
+                class="btn-toggle-visibility"
+                :title="comment.visible ? 'Hide comment' : 'Show comment'"
+              >
+                {{ comment.visible ? 'Hide' : 'Show' }}
+              </button>
             </div>
             <p class="comment-content">{{ comment.content }}</p>
           </div>
@@ -74,10 +85,12 @@
 
 <script setup>
 import { usePublicationStore } from '~/stores/publication-store';
+import { useAuthStore } from '~/stores/auth-store';
 
 const route = useRoute()
 const router = useRouter()
 const publicationStore = usePublicationStore()
+const authStore = useAuthStore()
 
 const publication = ref(null)
 const comments = ref([])
@@ -88,6 +101,10 @@ const userRating = ref(0)
 const ratingMessage = ref('')
 
 const publicationId = computed(() => parseInt(route.params.id))
+
+const isAdmin = computed(() =>
+    authStore.user?.role === 'ADMINISTRADOR'
+)
 
 onMounted(() => {
   loadPublication()
@@ -100,6 +117,7 @@ async function loadPublication() {
   
   try {
     publication.value = await publicationStore.getById(publicationId.value)
+    console.log(publication.value)
   } catch (e) {
     error.value = e.message || 'Failed to load publication'
   } finally {
@@ -110,6 +128,7 @@ async function loadPublication() {
 async function loadComments() {
   try {
     comments.value = await publicationStore.getComments(publicationId.value)
+    //console.log(comments.value)
   } catch (e) {
     console.error('Failed to load comments:', e)
   }
@@ -124,6 +143,21 @@ async function postComment() {
     await loadComments()
   } catch (e) {
     alert('Failed to post comment: ' + e.message)
+  }
+}
+
+async function toggleVisibility(comment) {
+  try {
+    const newVisibility = !comment.visible
+    await publicationStore.toggleCommentVisibility(
+      publicationId.value, 
+      comment.id, 
+      newVisibility
+    )
+    // Atualiza localmente
+    comment.visible = newVisibility
+  } catch (e) {
+    alert('Failed to toggle comment visibility: ' + e.message)
   }
 }
 
@@ -337,6 +371,7 @@ function formatDate(date) {
 .comment-header {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   margin-bottom: 8px;
 }
 
@@ -356,5 +391,46 @@ function formatDate(date) {
   line-height: 1.5;
   color: #333;
   font-size: 14px;
+}
+
+.hidden-badge {
+  background: #ff9800;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.comment.hidden {
+  opacity: 0.6;
+  background: #f0f0f0;
+  border-left-color: #999;
+}
+
+.comment-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.btn-toggle-visibility {
+  background: none;
+  border: 1px solid #ddd;
+  padding: 4px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.2s;
+}
+
+.btn-toggle-visibility:hover {
+  background: #f0f0f0;
+  border-color: #0077cc;
+}
+
+.comment.hidden .comment-content {
+  color: #666;
 }
 </style>

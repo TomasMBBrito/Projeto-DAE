@@ -83,6 +83,7 @@ onMounted(async () => {
     loading.value = true
     try {
         users.value = await userStore.getAll()
+        //console.log(users.value)
     } catch (e) {
         error.value = 'Failed to load users'
         console.error(e)
