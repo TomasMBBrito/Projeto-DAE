@@ -21,17 +21,6 @@
             <span>{{ subscribers.length }} subscribers</span>
           </div>
         </div>
-
-        <div v-if="canEdit" class="tag-header-actions">
-          <button
-            @click="toggleVisibility"
-            class="btn-toggle"
-            :disabled="actionLoading"
-            :title="tag.visible ? 'Hide tag' : 'Show tag'"
-          >
-            {{ tag.visible ? '👁️ Hide' : '👁️‍🗨️ Show' }}
-          </button>
-        </div>
       </div>
 
       <!-- Publications Section -->
@@ -162,20 +151,6 @@ async function loadSubscribers() {
     console.error('Failed to load subscribers:', e)
   } finally {
     subscribersLoading.value = false
-  }
-}
-
-async function toggleVisibility() {
-  actionLoading.value = true
-  
-  try {
-    const newVisibility = !tag.value.visible
-    await tagStore.toggleVisibility(tagId.value, newVisibility)
-    tag.value.visible = newVisibility
-  } catch (e) {
-    alert('Failed to toggle visibility: ' + e.message)
-  } finally {
-    actionLoading.value = false
   }
 }
 

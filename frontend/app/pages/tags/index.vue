@@ -286,6 +286,7 @@ async function saveEdit(tagId) {
 
 function viewDetails(tagId) {
   router.push(`/tags/${tagId}`)
+}
 // ---------------- Toggle Visibility ----------------
 async function toggleVisibility(tagId, currentVisibility) {
   actionLoading[tagId] = true
@@ -305,10 +306,6 @@ async function toggleVisibility(tagId, currentVisibility) {
 // Retry / Login
 async function retry() {
   await loadData()
-}
-
-function viewDetails(tagId) {
-  router.push(`/tags/${tagId}`)
 }
 
 function goToLogin() {
@@ -496,7 +493,7 @@ h1 {
 .btn-details,
 .btn-save,
 .btn-cancel,
-.btn-details {
+.btn-details,
 .btn-toggle-visibility {
   border: none;
   padding: 8px 16px;
