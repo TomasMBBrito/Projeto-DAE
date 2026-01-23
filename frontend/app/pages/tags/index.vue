@@ -34,8 +34,8 @@
     </div>
 
     <!-- Tag List -->
-    <div v-if="filteredTags.length > 0" class="tags-list">
-      <div v-for="tag in filteredTags" :key="tag.id" class="tag-card" :class="{ 'tag-hidden': !tag.visible }">
+    <div v-if="tags.length > 0" class="tags-list">
+      <div v-for="tag in tags" :key="tag.id" class="tag-card" :class="{ 'tag-hidden': !tag.visible }">
         <div class="tag-info">
           <span v-if="editingTagId !== tag.id" class="tag-name">
             {{ tag.name }}
@@ -53,13 +53,6 @@
         <div class="tag-actions">
           <!-- Edit buttons (only for responsavel/administrador) -->
           <template v-if="canEdit">
-            <button
-            v-if="editingTagId !== tag.id"
-            class="btn-details"
-            @click="viewDetails(tag.id)"
-          >
-            View Details
-          </button>
             <button
               v-if="editingTagId !== tag.id"
               class="btn-edit"
@@ -90,8 +83,8 @@
             </button>
           </template>
 
-          <!-- Subscribe/Unsubscribe buttons (only for visible tags or all users who aren't editing) -->
-          <template v-if="tag.visible && editingTagId !== tag.id">
+          <!-- Subscribe/Unsubscribe buttons (visible to all users when not editing) -->
+          <template v-if="editingTagId !== tag.id">
             <button
               v-if="!isSubscribed(tag.id)"
               class="btn-subscribe"
@@ -151,17 +144,6 @@ const canEdit = computed(() => {
   return role === 'responsavel' || role === 'administrador'
 })
 
-// Filter tags based on user role
-const filteredTags = computed(() => {
-  if (canEdit.value) {
-    // Admins and Responsaveis see all tags
-    return tags.value
-  } else {
-    // Colaboradores only see visible tags (if visible is undefined, assume true for backwards compatibility)
-    return tags.value.filter(tag => tag.visible !== false)
-  }
-})
-
 onMounted(async () => {
   await loadData()
 })
@@ -188,7 +170,9 @@ async function loadData() {
 
 async function loadTags() {
   tags.value = await tagStore.getAll()
-  //console.log(tags.value)
+  console.log('Loaded tags:', tags.value)
+  console.log('User role:', authStore.user?.role)
+  console.log('Can edit:', canEdit.value)
 }
 
 async function loadSubscribed() {
@@ -284,9 +268,6 @@ async function saveEdit(tagId) {
   }
 }
 
-function viewDetails(tagId) {
-  router.push(`/tags/${tagId}`)
-}
 // ---------------- Toggle Visibility ----------------
 async function toggleVisibility(tagId, currentVisibility) {
   actionLoading[tagId] = true
@@ -490,10 +471,8 @@ h1 {
 .btn-subscribe,
 .btn-unsubscribe,
 .btn-edit,
-.btn-details,
 .btn-save,
 .btn-cancel,
-.btn-details,
 .btn-toggle-visibility {
   border: none;
   padding: 8px 16px;
@@ -614,27 +593,5 @@ h1 {
   border-radius: 12px;
   font-size: 12px;
   font-weight: 600;
-}
-
-.btn-details {
-  background: #f0f0f0;
-  color: #333;
-  border: 2px solid #ddd;
-}
-
-.btn-details:hover {
-  background: #e0e0e0;
-  border-color: #ccc;
-}
-
-.btn-details {
-  background: #f0f0f0;
-  color: #333;
-  border: 2px solid #ddd;
-}
-
-.btn-details:hover {
-  background: #e0e0e0;
-  border-color: #ccc;
 }
 </style>

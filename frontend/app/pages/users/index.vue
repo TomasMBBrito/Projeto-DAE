@@ -83,13 +83,13 @@ function canViewProfile(username) {
     const role = authStore.user?.role
     const currentUsername = authStore.user?.username
     
-    // Admin and Responsavel can view all profiles
-    if (role === 'ADMINISTRADOR' || role === 'RESPONSAVEL') {
+    // Admin can view all profiles
+    if (role === 'ADMINISTRADOR') {
         return true
     }
     
-    // Colaborador can only view their own profile
-    if (role === 'COLABORADOR' && username === currentUsername) {
+    // Responsavel and Colaborador can only view their own profile
+    if ((role === 'RESPONSAVEL' || role === 'COLABORADOR') && username === currentUsername) {
         return true
     }
     
@@ -100,7 +100,6 @@ onMounted(async () => {
     loading.value = true
     try {
         users.value = await userStore.getAll()
-        //console.log(users.value)
     } catch (e) {
         error.value = 'Failed to load users'
         console.error(e)
