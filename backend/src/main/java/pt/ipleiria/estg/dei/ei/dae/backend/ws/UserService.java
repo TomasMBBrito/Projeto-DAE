@@ -44,7 +44,7 @@ public class UserService {
     @GET
     @Path("/")
     @RolesAllowed({"COLABORADOR", "RESPONSAVEL", "ADMINISTRADOR"})
-    public Response getUsers() throws MyEntityNotFoundException {
+    public Response getUsers() {
         try {
             String username = securityContext.getUserPrincipal().getName();
             User user = userBean.find(username);
