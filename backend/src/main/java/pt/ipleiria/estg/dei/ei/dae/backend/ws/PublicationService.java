@@ -291,33 +291,7 @@ public class PublicationService {
         }
     }
 
-    // EP32: Elimina uma publicação
-    @DELETE
-    @Path("{id}")
-    @RolesAllowed({"COLABORADOR", "RESPONSAVEL", "ADMINISTRADOR"})
-    public Response deletePublication(@PathParam("id") Long id) {
-        try {
-            String username = securityContext.getUserPrincipal().getName();
-            User user = userBean.find(username);
-
-            publicationBean.delete(id, user);
-
-            return Response.ok()
-                    .entity(Map.of("message", "Publicação com id " + id + " eliminada com sucesso."))
-                    .build();
-
-        } catch (MyEntityNotFoundException e) {
-            return Response.status(Response.Status.NOT_FOUND)
-                    .entity(Map.of("message", e.getMessage()))
-                    .build();
-        } catch (IllegalArgumentException e) {
-            return Response.status(Response.Status.FORBIDDEN)
-                    .entity(Map.of("message", e.getMessage()))
-                    .build();
-        }
-    }
-
-    // EP33: Altera a visibilidade da publicação
+    // EP32: Altera a visibilidade da publicação
     @PUT
     @Path("{id}/state")
     @RolesAllowed({"COLABORADOR", "RESPONSAVEL", "ADMINISTRADOR"})
@@ -358,7 +332,7 @@ public class PublicationService {
         }
     }
 
-    // EP34: Consulta os comentários de uma publicação
+    // EP33: Consulta os comentários de uma publicação
     @GET
     @Path("{id}/comments")
     @RolesAllowed({"COLABORADOR", "RESPONSAVEL", "ADMINISTRADOR"})
@@ -388,7 +362,7 @@ public class PublicationService {
         }
     }
 
-    // EP35: Comenta uma publicação
+    // EP34: Comenta uma publicação
     @POST
     @Path("{id}/comments")
     @RolesAllowed({"COLABORADOR", "RESPONSAVEL", "ADMINISTRADOR"})
@@ -417,7 +391,7 @@ public class PublicationService {
         }
     }
 
-    // EP36: Altera a visibilidade de um comentário
+    // EP35: Altera a visibilidade de um comentário
     @PUT
     @Path("{id}/comments/{comment_id}")
     @RolesAllowed({"COLABORADOR", "RESPONSAVEL", "ADMINISTRADOR"})
@@ -462,6 +436,7 @@ public class PublicationService {
         }
     }
 
+    //EP36
     @PUT
     @Path("{id}/comments/{comment_id}/text")
     @RolesAllowed({"COLABORADOR", "RESPONSAVEL", "ADMINISTRADOR"})
@@ -643,6 +618,7 @@ public class PublicationService {
         return Response.ok(dtos).build();
     }
 
+    //EP41
     @GET
     @Path("filter/tags")
     @RolesAllowed({"COLABORADOR", "RESPONSAVEL", "ADMINISTRADOR"})
