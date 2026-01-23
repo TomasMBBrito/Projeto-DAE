@@ -78,7 +78,6 @@ public class UserService {
             String currentUsername = securityContext.getUserPrincipal().getName();
             User performingUser = userBean.find(currentUsername);
 
-            //userBean.delete(username, performingUser);
             if(userBean.hasActivity(username)) {
                 userBean.deactivate(username,performingUser);
             }else{

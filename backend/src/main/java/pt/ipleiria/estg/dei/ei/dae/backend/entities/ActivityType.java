@@ -1,14 +1,12 @@
 package pt.ipleiria.estg.dei.ei.dae.backend.entities;
 
 public enum ActivityType {
-    // Publicações
     PUBLICATION_CREATED,
     PUBLICATION_UPDATED,
     PUBLICATION_DELETED,
     PUBLICATION_HIDDEN,
     PUBLICATION_SHOWN,
 
-    // Tags
     TAG_CREATED,
     TAG_DELETED,
     TAG_ADDED_TO_PUBLICATION,
@@ -17,19 +15,16 @@ public enum ActivityType {
     TAG_UNSUBSCRIBED,
     TAG_UPDATED,
 
-    // Comentários
     COMMENT_CREATED,
     COMMENT_UPDATED,
     COMMENT_DELETED,
     COMMENT_HIDDEN,
     COMMENT_SHOWN,
 
-    // Ratings
     RATING_CREATED,
     RATING_UPDATED,
     RATING_DELETED,
 
-    // Utilizadores
     USER_CREATED,
     USER_UPDATED,
     USER_DELETED,

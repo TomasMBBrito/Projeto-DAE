@@ -137,13 +137,11 @@ async function loadPublication() {
     const pub = await publicationStore.getById(publicationId.value)
     originalPublication.value = pub
 
-    // Check if user can edit
     if (!canEdit(pub)) {
       loadError.value = 'You do not have permission to edit this publication'
       return
     }
 
-    // Populate form
     form.value = {
       title: pub.title || '',
       summary: pub.summary || '',
@@ -152,7 +150,6 @@ async function loadPublication() {
       authors: pub.authors && pub.authors.length > 0 ? pub.authors.join(',') : ''
     }
 
-    // Store original tag IDs
     if (pub.tags && pub.tags.length > 0) {
       originalTagIds.value = pub.tags.map(t => t.id)
       selectedTags.value = [...originalTagIds.value]
@@ -206,12 +203,10 @@ async function handleSubmit() {
   submitting.value = true
 
   try {
-    // Parse authors
     const authors = form.value.authors && form.value.authors.trim() !== ''
         ? form.value.authors.split(',').map(a => a.trim()).filter(a => a !== '')
         : []
 
-    // Update publication
     await publicationStore.update(publicationId.value, {
       title: form.value.title,
       summary: form.value.summary,
@@ -220,12 +215,10 @@ async function handleSubmit() {
       authors: authors
     })
 
-    // Handle tag changes
     await updateTags()
 
     success.value = 'Publication updated successfully!'
 
-    // Redirect after short delay
     setTimeout(() => {
       router.push(`/publication/${publicationId.value}`)
     }, 1500)
@@ -239,13 +232,10 @@ async function handleSubmit() {
 }
 
 async function updateTags() {
-  // Find tags to add (in selectedTags but not in originalTagIds)
   const tagsToAdd = selectedTags.value.filter(id => !originalTagIds.value.includes(id))
 
-  // Find tags to remove (in originalTagIds but not in selectedTags)
   const tagsToRemove = originalTagIds.value.filter(id => !selectedTags.value.includes(id))
 
-  // Add new tags
   for (const tagId of tagsToAdd) {
     try {
       await publicationStore.addTag(publicationId.value, tagId)
@@ -254,7 +244,6 @@ async function updateTags() {
     }
   }
 
-  // Remove tags (only if user has permission - RESPONSAVEL or ADMINISTRADOR)
   if (authStore.user?.role === 'RESPONSAVEL' || authStore.user?.role === 'ADMINISTRADOR') {
     for (const tagId of tagsToRemove) {
       try {

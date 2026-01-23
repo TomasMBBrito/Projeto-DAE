@@ -19,7 +19,6 @@ public class RatingBean {
 
     public Rating createOrUpdate(int value, User user, Long publicationId) throws MyEntityNotFoundException {
 
-        // Buscar a publicação gerenciada (managed)
         Publication publication = em.find(Publication.class, publicationId);
 
         if (publication == null) {
@@ -36,7 +35,6 @@ public class RatingBean {
 
 
         if (existing != null) {
-            // Update existing rating
             existing.setValue(value);
 
             historyBean.logActivity(
@@ -49,7 +47,6 @@ public class RatingBean {
 
             return existing;
         } else {
-            // Create new rating
             Rating rating = new Rating(value, user, publication);
             em.persist(rating);
 
@@ -103,7 +100,6 @@ public class RatingBean {
 
 
     public boolean canDelete(Rating rating, User user) {
-        // Only the rating author can delete
         return rating.getUser().getUsername().equals(user.getUsername());
     }
 }

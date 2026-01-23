@@ -42,7 +42,6 @@ public class TagService {
     @RolesAllowed({"COLABORADOR", "RESPONSAVEL", "ADMINISTRADOR"})
     public Response listTags() {
         try {
-            //String role = securityContext.getUserPrincipal().getName();
             boolean isAdmin = securityContext.isUserInRole("RESPONSAVEL") ||
                     securityContext.isUserInRole("ADMINISTRADOR");
 
@@ -191,7 +190,6 @@ public class TagService {
 
             String username = securityContext.getUserPrincipal().getName();
 
-            //tagBean.delete(tagId, performedBy);
             tagBean.hide(tagId,username);
 
             return Response.ok()

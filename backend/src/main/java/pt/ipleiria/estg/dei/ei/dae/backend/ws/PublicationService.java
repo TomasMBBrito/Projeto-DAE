@@ -65,7 +65,6 @@ public class PublicationService {
             return Response.ok(dtos).build();
         }
 
-        //Ordena publicações
         boolean isAdminOrResponsavel = securityContext.isUserInRole("RESPONSAVEL") ||
                 securityContext.isUserInRole("ADMINISTRADOR");
 
@@ -73,7 +72,6 @@ public class PublicationService {
                 ? publicationBean.getAll()
                 : publicationBean.getAllVisible();
 
-        // Ordena conforme critério
         switch (sortBy.toLowerCase()) {
             case "recent":
                 publications.sort((p1, p2) -> p2.getPublicationDate().compareTo(p1.getPublicationDate()));
@@ -106,7 +104,6 @@ public class PublicationService {
         return Response.ok(dtos).build();
     }
 
-    // EP29: Obtém uma publicação específica
     @GET
     @Path("{id}")
     @RolesAllowed({"COLABORADOR", "RESPONSAVEL", "ADMINISTRADOR"})
@@ -137,7 +134,6 @@ public class PublicationService {
                     .entity(Map.of("message", e.getMessage()))
                     .build();
         } catch (Exception e) {
-            // Log the actual error for debugging
             e.printStackTrace();
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity(Map.of("message", "Server error: " + e.getMessage()))
@@ -145,7 +141,6 @@ public class PublicationService {
         }
     }
 
-    // EP30: Cria uma nova publicação
     @POST
     @Path("/")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
@@ -172,7 +167,6 @@ public class PublicationService {
             String fileName = filePart.getFileName();
             InputStream fileInputStream = filePart.getBody(InputStream.class, null);
 
-            // Verifica o tipo de ficheiro (PDF ou ZIP)
             FileType fileType = fileName.toLowerCase().endsWith(".pdf")
                     ? FileType.PDF
                     : FileType.ZIP;
@@ -246,7 +240,6 @@ public class PublicationService {
         }
     }
 
-    // EP31: Atualiza o resumo/descrição da publicação
     @PUT
     @Path("{id}")
     @RolesAllowed({"COLABORADOR", "RESPONSAVEL", "ADMINISTRADOR"})
@@ -262,14 +255,12 @@ public class PublicationService {
                         .build();
             }
 
-            // Verifica se o utilizador pode editar
             if (!publicationBean.canEdit(publication, user)) {
                 return Response.status(Response.Status.FORBIDDEN)
                         .entity(Map.of("message", "Não tem permissão para editar esta publicação"))
                         .build();
             }
 
-            // Atualiza apenas o resumo/descrição
             publicationBean.update(
                     id,
                     publicationDTO.getTitle(),
@@ -291,7 +282,6 @@ public class PublicationService {
         }
     }
 
-    // EP32: Altera a visibilidade da publicação
     @PUT
     @Path("{id}/state")
     @RolesAllowed({"COLABORADOR", "RESPONSAVEL", "ADMINISTRADOR"})
@@ -332,7 +322,6 @@ public class PublicationService {
         }
     }
 
-    // EP33: Consulta os comentários de uma publicação
     @GET
     @Path("{id}/comments")
     @RolesAllowed({"COLABORADOR", "RESPONSAVEL", "ADMINISTRADOR"})
@@ -362,7 +351,6 @@ public class PublicationService {
         }
     }
 
-    // EP34: Comenta uma publicação
     @POST
     @Path("{id}/comments")
     @RolesAllowed({"COLABORADOR", "RESPONSAVEL", "ADMINISTRADOR"})
@@ -391,7 +379,6 @@ public class PublicationService {
         }
     }
 
-    // EP35: Altera a visibilidade de um comentário
     @PUT
     @Path("{id}/comments/{comment_id}")
     @RolesAllowed({"COLABORADOR", "RESPONSAVEL", "ADMINISTRADOR"})
@@ -410,7 +397,6 @@ public class PublicationService {
                         .build();
             }
 
-            // Verifica permissões (autor do comentário ou Responsável/Admin)
             if (!commentBean.canEdit(comment, user)) {
                 return Response.status(Response.Status.FORBIDDEN)
                         .entity(Map.of("message", "Não tem permissão para alterar este comentário"))
@@ -436,7 +422,6 @@ public class PublicationService {
         }
     }
 
-    //EP36
     @PUT
     @Path("{id}/comments/{comment_id}/text")
     @RolesAllowed({"COLABORADOR", "RESPONSAVEL", "ADMINISTRADOR"})
@@ -461,7 +446,6 @@ public class PublicationService {
                         .build();
             }
 
-            // CORREÇÃO: Use o mesmo método canEdit usado em toggleCommentVisibility
             if (!commentBean.canEdit(comment, user)) {
                 return Response.status(Response.Status.FORBIDDEN)
                         .entity(Map.of("message", "Não tem permissão para editar este comentário"))
@@ -491,7 +475,6 @@ public class PublicationService {
         }
     }
 
-    // EP37: Avalia uma publicação
     @POST
     @Path("{id}/ratings")
     @RolesAllowed({"COLABORADOR", "RESPONSAVEL", "ADMINISTRADOR"})
@@ -517,7 +500,6 @@ public class PublicationService {
         }
     }
 
-    // EP38: Associa uma tag a uma publicação
     @POST
     @Path("{id}/tags/{tag_id}")
     @RolesAllowed({"COLABORADOR", "RESPONSAVEL", "ADMINISTRADOR"})
@@ -554,7 +536,6 @@ public class PublicationService {
         }
     }
 
-    // EP39: Desassocia uma tag de uma publicação
     @DELETE
     @Path("{id}/tags/{tag_id}")
     @RolesAllowed({"RESPONSAVEL", "ADMINISTRADOR"})
@@ -591,7 +572,6 @@ public class PublicationService {
         }
     }
 
-    // EP40: Pesquisa publicações
     @GET
     @Path("search")
     @RolesAllowed({"COLABORADOR", "RESPONSAVEL", "ADMINISTRADOR"})
@@ -616,7 +596,6 @@ public class PublicationService {
         return Response.ok(dtos).build();
     }
 
-    //EP41
     @GET
     @Path("filter/tags")
     @RolesAllowed({"COLABORADOR", "RESPONSAVEL", "ADMINISTRADOR"})
@@ -628,7 +607,6 @@ public class PublicationService {
                         .build();
             }
 
-            // Parse tag IDs from comma-separated string
             List<Long> tagIds = Arrays.stream(tagIdsParam.split(","))
                     .map(String::trim)
                     .map(Long::parseLong)

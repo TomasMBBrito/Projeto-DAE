@@ -26,7 +26,6 @@ public class PublicationDTO implements Serializable {
     private String filename;
     private List<Long> tagIds;
 
-    // Stats
     private Double averageRating;
     private int ratingCount;
     private int commentCount;
@@ -76,7 +75,6 @@ public class PublicationDTO implements Serializable {
         this.publicationDate = publicationDate.toString();
     }
 
-    // Getters e Setters
     public long getId() {
         return id;
     }
@@ -266,7 +264,6 @@ public class PublicationDTO implements Serializable {
     public static PublicationDTO forSearchWithComment(Publication pub) {
         String lastComment = null;
         if (pub.getComments() != null && !pub.getComments().isEmpty()) {
-            // Comentário mais recente visivel
             lastComment = pub.getComments().stream()
                     .filter(Comment::isVisible)
                     .max(Comparator.comparing(Comment::getCreatedAt))

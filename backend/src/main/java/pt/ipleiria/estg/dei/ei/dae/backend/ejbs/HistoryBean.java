@@ -22,7 +22,6 @@ public class HistoryBean {
             em.persist(history);
 
         } catch (Exception e) {
-            // Don't let logging errors break the main operation
             e.printStackTrace();
         }
     }

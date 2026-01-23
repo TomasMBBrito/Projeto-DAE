@@ -25,24 +25,19 @@ public class DocumentBean {
             throws IOException {
 
         try {
-            // Criar diretório para o utilizador se não existir
             var targetDirectoryPath = Paths.get(UPLOAD_DIR, username);
             if (!Files.exists(targetDirectoryPath)) {
                 Files.createDirectories(targetDirectoryPath);
             }
 
-            // Guardar ficheiro com nome único
             var targetFilePath = targetDirectoryPath.resolve("file_" + UUID.randomUUID());
             Files.copy(stream, targetFilePath, StandardCopyOption.REPLACE_EXISTING);
 
-            // Criar documento
             var document = new Document(filename, targetFilePath.toString(), fileType);
-            //em.persist(document);
 
             return document;
 
         } catch (IOException e) {
-            // Log detalhado do erro
             System.err.println("Error creating directory or saving file: " + e.getMessage());
             e.printStackTrace();
             throw new IOException("Failed to upload file: " + e.getMessage(), e);

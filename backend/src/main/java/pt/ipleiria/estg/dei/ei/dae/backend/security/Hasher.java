@@ -9,11 +9,10 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 
 public class Hasher {
-    private static final int ITERATIONS = 65536; // recommended >= 50k
-    private static final int KEY_LENGTH = 256; // bits
+    private static final int ITERATIONS = 65536;
+    private static final int KEY_LENGTH = 256;
     private static final String ALGORITHM = "PBKDF2WithHmacSHA256";
 
-    // Hash a password with a random salt
     public static String hash(String password) {
         try {
             byte[] salt = getSalt();
@@ -25,7 +24,6 @@ public class Hasher {
         }
     }
 
-    // Verify a password against a stored hash
     public static boolean verify(String plainTextPassword, String storedHash) {
         try {
             String[] parts = storedHash.split(":");

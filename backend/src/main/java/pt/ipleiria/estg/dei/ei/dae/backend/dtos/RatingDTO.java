@@ -27,7 +27,6 @@ public class RatingDTO implements Serializable {
         this.publicationId = publicationId;
     }
 
-    // Getters and Setters
     public Long getId() {
         return id;
     }

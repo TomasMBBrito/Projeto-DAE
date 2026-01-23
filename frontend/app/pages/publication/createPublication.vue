@@ -14,7 +14,6 @@
 
     <div class="form-container">
       <form @submit.prevent="handleSubmit" class="pub-form" enctype="multipart/form-data">
-        <!-- Basic Information Section -->
         <div class="form-section">
           <h2 class="section-title">Basic Information</h2>
 
@@ -34,7 +33,6 @@
           </div>
         </div>
 
-        <!-- Publication Details Section -->
         <div class="form-section">
           <h2 class="section-title">Publication Details</h2>
 
@@ -71,7 +69,6 @@
           </div>
         </div>
 
-        <!-- Tags Section -->
         <div class="form-section">
           <h2 class="section-title">Tags</h2>
           <p class="section-description">Select relevant tags for this publication</p>
@@ -93,7 +90,6 @@
           </div>
         </div>
 
-        <!-- File Upload Section -->
         <div class="form-section">
           <h2 class="section-title">Document Upload</h2>
           <p class="section-description">Upload your publication document (PDF or ZIP)</p>
@@ -120,7 +116,6 @@
           </div>
         </div>
 
-        <!-- Action Buttons -->
         <div class="form-actions">
           <button type="submit" :disabled="submitting" class="btn-submit">
             <span v-if="submitting">
@@ -137,7 +132,6 @@
           </button>
         </div>
 
-        <!-- Messages -->
         <div v-if="error" class="message message-error">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="12" r="10"></circle>
@@ -310,7 +304,6 @@ async function handleSubmit() {
   background: #f5f7fa;
 }
 
-/* Navbar */
 .navbar {
   display: flex;
   justify-content: space-between;
@@ -373,7 +366,6 @@ async function handleSubmit() {
   box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
 }
 
-/* Form Container */
 .form-container {
   background: white;
   padding: 40px;
@@ -387,7 +379,6 @@ async function handleSubmit() {
   gap: 32px;
 }
 
-/* Form Sections */
 .form-section {
   padding: 24px;
   background: #f8f9fa;
@@ -408,7 +399,6 @@ async function handleSubmit() {
   font-size: 14px;
 }
 
-/* Form Rows */
 .form-row {
   display: flex;
   flex-direction: column;
@@ -466,7 +456,6 @@ async function handleSubmit() {
   font-style: italic;
 }
 
-/* Tags Section */
 .no-tags-message {
   padding: 20px;
   text-align: center;
@@ -514,7 +503,6 @@ async function handleSubmit() {
   font-size: 16px;
 }
 
-/* File Upload */
 .file-upload-area {
   margin-top: 12px;
 }
@@ -559,7 +547,6 @@ async function handleSubmit() {
   color: #718096;
 }
 
-/* Action Buttons */
 .form-actions {
   display: flex;
   gap: 16px;

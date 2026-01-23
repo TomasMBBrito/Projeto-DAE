@@ -37,7 +37,6 @@ public class TagDTO implements Serializable {
         this.subscriberCount = subscriberCount;
     }
 
-    // Getters and Setters
     public Long getId() {
         return id;
     }
