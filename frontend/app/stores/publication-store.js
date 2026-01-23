@@ -195,7 +195,7 @@ export const usePublicationStore = defineStore("publicationStore", () => {
             throw new Error('Not authenticated')
         }
 
-        const response = await $fetch(`${api}/posts/${publicationId}/comments/${commentId}`, {
+        const response = await $fetch(`${api}/posts/${publicationId}/comments/${commentId}/text`, {
             method: 'PUT',
             headers: {
                 'Authorization': `Bearer ${authStore.token}`,
@@ -228,7 +228,6 @@ export const usePublicationStore = defineStore("publicationStore", () => {
         return response
     }
 
-    // ✅ CORRIGIDO - Método getHistory que decide qual endpoint usar
     async function getHistory(publicationId) {
         const authStore = useAuthStore()
 
@@ -240,7 +239,6 @@ export const usePublicationStore = defineStore("publicationStore", () => {
             throw new Error('Publication ID is required')
         }
 
-        // Usa endpoint correto baseado no role
         const isAdmin = authStore.user?.role === 'ADMINISTRADOR'
         const endpoint = isAdmin
             ? `${api}/history/posts/${publicationId}`
@@ -293,7 +291,6 @@ export const usePublicationStore = defineStore("publicationStore", () => {
         return response
     }
 
-    // 🆕 Mostrar/ocultar publicação
     async function toggleVisibility(id, isVisible) {
         const authStore = useAuthStore()
 

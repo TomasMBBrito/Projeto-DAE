@@ -455,20 +455,18 @@ public class PublicationService {
                         .build();
             }
 
-
             if (comment.getPublication().getId() != publicationId) {
                 return Response.status(Response.Status.BAD_REQUEST)
                         .entity(Map.of("message", "Comentário não pertence a esta publicação"))
                         .build();
             }
 
-
-            if (!comment.getUser().getUsername().equals(username)) {
+            // CORREÇÃO: Use o mesmo método canEdit usado em toggleCommentVisibility
+            if (!commentBean.canEdit(comment, user)) {
                 return Response.status(Response.Status.FORBIDDEN)
-                        .entity(Map.of("message", "Apenas o autor pode editar o comentário"))
+                        .entity(Map.of("message", "Não tem permissão para editar este comentário"))
                         .build();
             }
-
 
             if (commentDTO.getContent() == null || commentDTO.getContent().trim().isEmpty()) {
                 return Response.status(Response.Status.BAD_REQUEST)
