@@ -34,8 +34,8 @@
     </div>
 
     <!-- Tag List -->
-    <div v-if="tags.length > 0" class="tags-list">
-      <div v-for="tag in tags" :key="tag.id" class="tag-card" :class="{ 'tag-hidden': !tag.visible }">
+    <div v-if="filteredTags.length > 0" class="tags-list">
+      <div v-for="tag in filteredTags" :key="tag.id" class="tag-card" :class="{ 'tag-hidden': !tag.visible }">
         <div class="tag-info">
           <span v-if="editingTagId !== tag.id" class="tag-name">
             {{ tag.name }}
@@ -83,8 +83,8 @@
             </button>
           </template>
 
-          <!-- Subscribe/Unsubscribe buttons (visible to all users when not editing) -->
-          <template v-if="editingTagId !== tag.id">
+          <!-- Subscribe/Unsubscribe buttons (only for visible tags or all users who aren't editing) -->
+          <template v-if="tag.visible && editingTagId !== tag.id">
             <button
               v-if="!isSubscribed(tag.id)"
               class="btn-subscribe"
@@ -142,6 +142,17 @@ const newTagName = ref('')
 const canEdit = computed(() => {
   const role = authStore.user?.role?.toLowerCase()
   return role === 'responsavel' || role === 'administrador'
+})
+
+// Filter tags based on user role
+const filteredTags = computed(() => {
+  if (canEdit.value) {
+    // Admins and Responsaveis see all tags
+    return tags.value
+  } else {
+    // Colaboradores only see visible tags (if visible is undefined, assume true for backwards compatibility)
+    return tags.value.filter(tag => tag.visible !== false)
+  }
 })
 
 onMounted(async () => {

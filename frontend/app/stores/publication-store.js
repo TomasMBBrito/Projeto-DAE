@@ -6,6 +6,27 @@ export const usePublicationStore = defineStore("publicationStore", () => {
     const config = useRuntimeConfig()
     const api = config.public.apiBase
 
+    async function create(formData) {
+        const authStore = useAuthStore()
+
+        if (!authStore.token) {
+            throw new Error('Not authenticated')
+        }
+
+        const response = await $fetch(`${api}/posts`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${authStore.token}`,
+                // ⚠️ NÃO definir Content-Type aqui
+                // o browser trata automaticamente o multipart/form-data
+                'Accept': 'application/json'
+            },
+            body: formData
+        })
+
+        return response
+    }
+
     async function getAll(sortBy = '') {
         const authStore = useAuthStore()
         
@@ -146,13 +167,37 @@ export const usePublicationStore = defineStore("publicationStore", () => {
         return response
     }
 
+    async function getHistory(publicationId) {
+    const authStore = useAuthStore()
+
+    if (!authStore.token) {
+        throw new Error('Not authenticated')
+    }
+
+    if (!publicationId) {
+        throw new Error('Publication ID is required')
+    }
+
+    const response = await $fetch(`${api}/history/posts/${publicationId}`, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${authStore.token}`,
+            'Accept': 'application/json'
+        }
+    })
+
+    return response
+}
+
     return {
+        create,
         getAll,
         getById,
         search,
         filterByTags,
         getComments,
         addComment,
-        addRating
+        addRating,
+        getHistory
     }
 })
