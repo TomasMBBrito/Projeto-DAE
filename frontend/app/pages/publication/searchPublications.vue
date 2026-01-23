@@ -80,7 +80,9 @@
         <p class="authors">Submitted by: {{ pub.submitterUsername }}</p>
         <p class="summary">{{ truncate(pub.summary, 150) }}</p>
 
-        <button @click.stop="goToHistory(pub.id)" class="btn-history">View History</button>
+        <span v-if="canEdit(pub)">
+          <button @click.stop="goToHistory(pub.id)" class="btn-history">View History</button>
+        </span>
 
         <div class="publication-meta">
           <span class="meta-item">
@@ -92,7 +94,7 @@
           <span class="meta-item">
             Rating: {{ pub.averageRating ? pub.averageRating.toFixed(1) : 'N/A' }}
           </span>
-          <span class="meta-item" v-if="pub.visible == false"> <b>hidden</b> </span>
+          <span class="meta-item" v-if="pub.visible == false && canEdit(pub)"> <b>hidden</b> </span>
         </div>
       </div>
     </div>
@@ -123,6 +125,12 @@ onMounted(() => {
   loadTags()
   loadPublications()
 })
+
+function canEdit(publication){
+  const username = authStore.user?.username
+  const role = authStore.user?.role?.toLowerCase()
+  return role === 'responsavel' || role === 'administrador' || publication.submitterUsername === username
+}
 
 function goToTags() {
   router.push('/tags')
@@ -157,7 +165,7 @@ async function loadPublications() {
 
   try {
     publications.value = await publicationStore.getAll(sortBy.value)
-    //console.log(publications.value)
+    console.log(publications.value)
   } catch (e) {
     error.value = e.message || 'Failed to load publications'
   } finally {

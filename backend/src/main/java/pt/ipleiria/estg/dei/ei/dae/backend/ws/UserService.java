@@ -19,7 +19,6 @@ import pt.ipleiria.estg.dei.ei.dae.backend.exceptions.MyEntityExistsException;
 import pt.ipleiria.estg.dei.ei.dae.backend.exceptions.MyEntityNotFoundException;
 import pt.ipleiria.estg.dei.ei.dae.backend.security.Authenticated;
 
-import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 
@@ -45,7 +44,7 @@ public class UserService {
     @GET
     @Path("/")
     @RolesAllowed({"COLABORADOR", "RESPONSAVEL", "ADMINISTRADOR"})
-    public Response getUsers() throws MyEntityNotFoundException {
+    public Response getUsers() {
         try {
             String username = securityContext.getUserPrincipal().getName();
             User user = userBean.find(username);
@@ -187,10 +186,10 @@ public class UserService {
     @GET
     @RolesAllowed({"RESPONSAVEL", "ADMINISTRADOR"})
     @Path("/{username}/posts")
-    public Response getUserPosts(@PathParam("username") String username) throws MyEntityNotFoundException {
+    public Response getUserPosts(@PathParam("username") String username) {
         try {
             List<Publication> posts = publicationBean.getByUser(username);
-            return Response.ok(PublicationDTO.toUserPostsList(posts)).build();
+            return Response.ok(PublicationDTO.toPublicationList(posts)).build();
         } catch (MyEntityNotFoundException e) {
             return Response.status(Response.Status.NOT_FOUND)
                     .entity(Map.of("message", e.getMessage()))
@@ -221,7 +220,7 @@ public class UserService {
         try {
             String username = securityContext.getUserPrincipal().getName();
             List<Publication> posts = publicationBean.getByUser(username);
-            return Response.ok(PublicationDTO.toUserPostsList(posts)).build();
+            return Response.ok(PublicationDTO.toPublicationList(posts)).build();
         } catch (MyEntityNotFoundException e) {
             return Response.status(Response.Status.NOT_FOUND)
                     .entity(Map.of("message", e.getMessage()))

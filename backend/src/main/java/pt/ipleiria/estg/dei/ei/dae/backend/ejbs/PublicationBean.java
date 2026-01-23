@@ -300,12 +300,20 @@ public class PublicationBean {
         if(em.find(User.class, username) == null){
             throw new MyEntityNotFoundException("User not found: " + username);
         }
-        return em.createQuery(
+        List<Publication> publications = em.createQuery(
                         "SELECT p FROM Publication p WHERE p.author.username = :username ORDER BY p.publicationDate DESC",
                         Publication.class
                 )
                 .setParameter("username", username)
                 .getResultList();
+
+        publications.forEach(p -> {
+            Hibernate.initialize(p.getComments());
+            Hibernate.initialize(p.getRatings());
+            Hibernate.initialize(p.getTags());
+        });
+
+        return publications;
     }
 
     public List<Publication> getByTag(String tagName) {
