@@ -229,6 +229,28 @@ public class UserService {
     }
 
     @DELETE
+    @Path("/{username}/posts/{postId}")
+    @RolesAllowed({"ADMINISTRADOR"})
+    public Response deletePost(@PathParam("username") String username, @PathParam("postId") Long postId) {
+        try {
+            User user = userBean.find(username);
+
+            publicationBean.delete(postId, user);
+            return Response.ok(Map.of(
+                    "message", "O seu post com id " + postId + " foi eliminado com sucesso!!"
+            )).build();
+        } catch (MyEntityNotFoundException e) {
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity(Map.of("message", e.getMessage()))
+                    .build();
+        } catch (IllegalArgumentException e) {
+            return Response.status(Response.Status.FORBIDDEN)
+                    .entity(Map.of("message", e.getMessage()))
+                    .build();
+        }
+    }
+
+    @DELETE
     @Path("/me/posts/{postId}")
     @RolesAllowed({"COLABORADOR", "RESPONSAVEL", "ADMINISTRADOR"})
     public Response deleteMyPost(@PathParam("postId") Long postId) {
