@@ -65,7 +65,7 @@ async function loadEmails() {
 
   try {
     emails.value = await userStore.getMyEmails()
-    console.log(emails.value)
+    //console.log(emails.value)
   } catch (e) {
     error.value = e.message || 'Failed to load emails'
   } finally {

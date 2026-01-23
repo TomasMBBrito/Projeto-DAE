@@ -157,7 +157,7 @@ async function loadPublications() {
 
   try {
     publications.value = await publicationStore.getAll(sortBy.value)
-    console.log(publications.value)
+    //console.log(publications.value)
   } catch (e) {
     error.value = e.message || 'Failed to load publications'
   } finally {
@@ -537,7 +537,7 @@ function goLogout() {
 
 .btn-history {
   padding: 8px 16px;
-  background: #28a745;
+  background: #1453d1;
   color: white;
   border: none;
   border-radius: 4px;
@@ -547,6 +547,6 @@ function goLogout() {
 }
 
 .btn-history:hover {
-  background: #218838;
+  background: #0a3fab;
 }
 </style>

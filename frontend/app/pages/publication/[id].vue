@@ -59,7 +59,7 @@
         </div>
 
         <div v-else class="comments-list">
-          <div v-for="comment in comments" :key="comment.id" class="comment">
+          <div v-for="comment in comments" :key="comment.id" class="comment" :class="{ hidden: !comment.visible }">
             <div class="comment-header">
               <div class="comment-info">
                 <span class="comment-author">{{ comment.author }}</span>
@@ -84,10 +84,12 @@
 
 <script setup>
 import { usePublicationStore } from '~/stores/publication-store';
+import { useAuthStore } from '~/stores/auth-store';
 
 const route = useRoute()
 const router = useRouter()
 const publicationStore = usePublicationStore()
+const authStore = useAuthStore()
 
 const publication = ref(null)
 const comments = ref([])
@@ -98,6 +100,10 @@ const userRating = ref(0)
 const ratingMessage = ref('')
 
 const publicationId = computed(() => parseInt(route.params.id))
+
+const isAdmin = computed(() =>
+    authStore.user?.role === 'ADMINISTRADOR'
+)
 
 onMounted(() => {
   loadPublication()
@@ -110,6 +116,7 @@ async function loadPublication() {
   
   try {
     publication.value = await publicationStore.getById(publicationId.value)
+    console.log(publication.value)
   } catch (e) {
     error.value = e.message || 'Failed to load publication'
   } finally {
@@ -120,6 +127,7 @@ async function loadPublication() {
 async function loadComments() {
   try {
     comments.value = await publicationStore.getComments(publicationId.value)
+    //console.log(comments.value)
   } catch (e) {
     console.error('Failed to load comments:', e)
   }

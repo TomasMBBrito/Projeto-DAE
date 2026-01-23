@@ -26,9 +26,9 @@
         <div v-else class="users-grid">
             <div v-for="user in displayUsers" :key="user.username" class="user-card">
                 <div 
-                    @click="canViewProfiles ? goProfile(user.username) : null" 
+                    @click="canViewProfile(user.username) ? goProfile(user.username) : null" 
                     class="user-content"
-                    :class="{ 'clickable': canViewProfiles }"
+                    :class="{ 'clickable': canViewProfile(user.username) }"
                 >
                     <div class="user-avatar">
                         {{ user.username.charAt(0).toUpperCase() }}
@@ -76,13 +76,31 @@ const isAdmin = computed(() =>
 
 const canViewProfiles = computed(() => {
     const role = authStore.user?.role
-    return role === 'ADMINISTRADOR' || role === 'RESPONSAVEL' || role === 'COLABORADOR'
+    return role === 'ADMINISTRADOR' || role === 'RESPONSAVEL'
 })
+
+function canViewProfile(username) {
+    const role = authStore.user?.role
+    const currentUsername = authStore.user?.username
+    
+    // Admin and Responsavel can view all profiles
+    if (role === 'ADMINISTRADOR' || role === 'RESPONSAVEL') {
+        return true
+    }
+    
+    // Colaborador can only view their own profile
+    if (role === 'COLABORADOR' && username === currentUsername) {
+        return true
+    }
+    
+    return false
+}
 
 onMounted(async () => {
     loading.value = true
     try {
         users.value = await userStore.getAll()
+        //console.log(users.value)
     } catch (e) {
         error.value = 'Failed to load users'
         console.error(e)

@@ -34,29 +34,22 @@
     </div>
 
     <!-- Tag List -->
-    <div v-if="tags.length > 0" class="tags-list">
-      <div v-for="tag in tags" :key="tag.id" class="tag-card">
+    <div v-if="filteredTags.length > 0" class="tags-list">
+      <div v-for="tag in filteredTags" :key="tag.id" class="tag-card" :class="{ 'tag-hidden': !tag.visible }">
         <div class="tag-info">
-          <div>
-            <span v-if="editingTagId !== tag.id" class="tag-name">
-              {{ tag.name }}
-              <span v-if="tag.visible === false" class="tag-hidden-badge">Hidden</span>
-            </span>
-            <input
-              v-else
-              v-model="editingTagName"
-              class="tag-input"
-              @keyup.enter="saveEdit(tag.id)"
-              @keyup.esc="cancelEdit"
-            />
-          </div>
-          
-          <div v-if="canEdit && editingTagId !== tag.id" class="tag-stats">
-            <span class="tag-stat">{{ tag.publicationCount || 0 }} publications</span>
-            <span class="tag-separator">•</span>
-            <span class="tag-stat">{{ tag.subscriberCount || 0 }} subscribers</span>
-          </div>
+          <span v-if="editingTagId !== tag.id" class="tag-name">
+            {{ tag.name }}
+            <span v-if="!tag.visible && canEdit" class="hidden-badge">Hidden</span>
+          </span>
+          <input
+            v-else
+            v-model="editingTagName"
+            class="tag-input"
+            @keyup.enter="saveEdit(tag.id)"
+            @keyup.esc="cancelEdit"
+          />
         </div>
+
         <div class="tag-actions">
           <!-- Edit buttons (only for responsavel/administrador) -->
           <template v-if="canEdit">
@@ -84,25 +77,38 @@
                 Cancel
               </button>
             </template>
+
+            <!-- Hide/Show button -->
+            <button
+              v-if="editingTagId !== tag.id"
+              class="btn-toggle-visibility"
+              :class="{ 'btn-show': !tag.visible, 'btn-hide': tag.visible }"
+              :disabled="actionLoading[tag.id]"
+              @click="toggleVisibility(tag.id, tag.visible)"
+            >
+              {{ actionLoading[tag.id] ? 'Loading...' : (tag.visible ? 'Hide' : 'Show') }}
+            </button>
           </template>
 
-          <!-- Subscribe/Unsubscribe buttons -->
-          <button
-            v-if="!isSubscribed(tag.id) && editingTagId !== tag.id"
-            class="btn-subscribe"
-            :disabled="actionLoading[tag.id]"
-            @click="handleSubscribe(tag.id)"
-          >
-            {{ actionLoading[tag.id] ? 'Loading...' : 'Subscribe' }}
-          </button>
-          <button
-            v-else-if="editingTagId !== tag.id"
-            class="btn-unsubscribe"
-            :disabled="actionLoading[tag.id]"
-            @click="handleUnsubscribe(tag.id)"
-          >
-            {{ actionLoading[tag.id] ? 'Loading...' : 'Unsubscribe' }}
-          </button>
+          <!-- Subscribe/Unsubscribe buttons (only for visible tags or all users who aren't editing) -->
+          <template v-if="tag.visible && editingTagId !== tag.id">
+            <button
+              v-if="!isSubscribed(tag.id)"
+              class="btn-subscribe"
+              :disabled="actionLoading[tag.id]"
+              @click="handleSubscribe(tag.id)"
+            >
+              {{ actionLoading[tag.id] ? 'Loading...' : 'Subscribe' }}
+            </button>
+            <button
+              v-else
+              class="btn-unsubscribe"
+              :disabled="actionLoading[tag.id]"
+              @click="handleUnsubscribe(tag.id)"
+            >
+              {{ actionLoading[tag.id] ? 'Loading...' : 'Unsubscribe' }}
+            </button>
+          </template>
         </div>
       </div>
     </div>
@@ -145,6 +151,17 @@ const canEdit = computed(() => {
   return role === 'responsavel' || role === 'administrador'
 })
 
+// Filter tags based on user role
+const filteredTags = computed(() => {
+  if (canEdit.value) {
+    // Admins and Responsaveis see all tags
+    return tags.value
+  } else {
+    // Colaboradores only see visible tags (if visible is undefined, assume true for backwards compatibility)
+    return tags.value.filter(tag => tag.visible !== false)
+  }
+})
+
 onMounted(async () => {
   await loadData()
 })
@@ -171,7 +188,7 @@ async function loadData() {
 
 async function loadTags() {
   tags.value = await tagStore.getAll()
-  console.log(tags.value)
+  //console.log(tags.value)
 }
 
 async function loadSubscribed() {
@@ -262,6 +279,24 @@ async function saveEdit(tagId) {
   } catch (e) {
     console.error('Update failed:', e)
     error.value = 'Failed to update tag: ' + (e.message || 'Unknown error')
+  } finally {
+    actionLoading[tagId] = false
+  }
+}
+
+function viewDetails(tagId) {
+  router.push(`/tags/${tagId}`)
+// ---------------- Toggle Visibility ----------------
+async function toggleVisibility(tagId, currentVisibility) {
+  actionLoading[tagId] = true
+  error.value = null
+
+  try {
+    await tagStore.updateStatus(tagId, !currentVisibility)
+    await loadTags()
+  } catch (e) {
+    console.error('Toggle visibility failed:', e)
+    error.value = 'Failed to change tag visibility: ' + (e.message || 'Unknown error')
   } finally {
     actionLoading[tagId] = false
   }
@@ -460,7 +495,9 @@ h1 {
 .btn-edit,
 .btn-details,
 .btn-save,
-.btn-cancel {
+.btn-cancel,
+.btn-details {
+.btn-toggle-visibility {
   border: none;
   padding: 8px 16px;
   border-radius: 4px;
@@ -504,6 +541,32 @@ h1 {
   border-color: #ccc;
 }
 
+.btn-toggle-visibility {
+  min-width: 80px;
+}
+
+.btn-hide {
+  background: #fbbf24;
+  color: white;
+  border: 2px solid #fbbf24;
+}
+
+.btn-hide:hover:not(:disabled) {
+  background: #f59e0b;
+  border-color: #f59e0b;
+}
+
+.btn-show {
+  background: #10b981;
+  color: white;
+  border: 2px solid #10b981;
+}
+
+.btn-show:hover:not(:disabled) {
+  background: #059669;
+  border-color: #059669;
+}
+
 .btn-subscribe {
   background: white;
   color: #0077cc;
@@ -533,37 +596,38 @@ h1 {
 .btn-unsubscribe:disabled,
 .btn-edit:disabled,
 .btn-save:disabled,
-.btn-cancel:disabled {
+.btn-cancel:disabled,
+.btn-toggle-visibility:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-.tag-hidden-badge {
+/* Hidden tag styling */
+.tag-card.tag-hidden {
+  opacity: 0.6;
+  background: #f5f5f5;
+}
+
+.hidden-badge {
   display: inline-block;
   margin-left: 10px;
   padding: 2px 8px;
-  background: #ff6b6b;
+  background: #fbbf24;
   color: white;
-  font-size: 11px;
+  border-radius: 12px;
+  font-size: 12px;
   font-weight: 600;
-  border-radius: 3px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-.tag-stats {
-  display: flex;
-  gap: 15px;
-  margin-top: 6px;
-  font-size: 13px;
-  color: #666;
 }
 
-.tag-stat {
-  color: #666;
+.btn-details {
+  background: #f0f0f0;
+  color: #333;
+  border: 2px solid #ddd;
 }
 
-.tag-separator {
-  color: #ccc;
+.btn-details:hover {
+  background: #e0e0e0;
+  border-color: #ccc;
 }
 
 .btn-details {
