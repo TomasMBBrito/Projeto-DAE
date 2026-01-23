@@ -57,7 +57,7 @@ export const useTagStore = defineStore("tagStore", () => {
         return await $fetch(`${api}/tags/${tagId}`, {
             method: 'PUT',
             headers: getHeaders(),
-            body: { name}
+            body: { name }
         })
     }
 
@@ -68,9 +68,18 @@ export const useTagStore = defineStore("tagStore", () => {
         })
     }
 
+    // Update tag visibility status
+    async function updateStatus(tagId, visible) {
+        return await $fetch(`${api}/tags/${tagId}/status`, {
+            method: 'PUT',
+            headers: getHeaders(),
+            body: { visible }
+        })
+    }
+
+    // ---------------- SUBSCRIPTIONS ----------------
     // Get my subscribed tags
     async function getSubscribed() {
-        console.log(authStore.user.role)
         return await $fetch(`${api}/me/tags/`, {
             method: 'GET',
             headers: getHeaders()
@@ -100,6 +109,7 @@ export const useTagStore = defineStore("tagStore", () => {
         getSubscribers,
         create,
         update,
+        updateStatus,
         remove,
         getSubscribed,
         subscribe,
