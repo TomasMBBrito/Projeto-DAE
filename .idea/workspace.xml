@@ -8,8 +8,6 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/src/main/java/pt/ipleiria/estg/dei/ei/dae/backend/ws/PublicationService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/pt/ipleiria/estg/dei/ei/dae/backend/ws/PublicationService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/app/pages/publication/[id].vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/app/pages/publication/[id].vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/app/pages/publication/createPublication.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/app/pages/publication/createPublication.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/app/pages/publication/searchPublications.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/app/pages/publication/searchPublications.vue" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/app/stores/publication-store.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/app/stores/publication-store.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />

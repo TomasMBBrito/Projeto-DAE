@@ -260,14 +260,21 @@ function cancelEdit() {
 }
 
 async function saveEdit(comment) {
-  if (!editText.value.trim()) return
+  if (!editText.value.trim()) {
+    alert('Comment cannot be empty')
+    return
+  }
 
   try {
     await publicationStore.editComment(publicationId.value, comment.id, editText.value)
-    comment.content = editText.value
+    await loadComments()
+
     editingCommentId.value = null
     editText.value = ''
+
+    alert('Comment updated successfully!')
   } catch (e) {
+    console.error('Failed to edit comment:', e)
     alert('Failed to edit comment: ' + e.message)
   }
 }
