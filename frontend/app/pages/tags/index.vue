@@ -61,6 +61,13 @@
           <!-- Edit buttons (only for responsavel/administrador) -->
           <template v-if="canEdit">
             <button
+            v-if="editingTagId !== tag.id"
+            class="btn-details"
+            @click="viewDetails(tag.id)"
+          >
+            View Details
+          </button>
+            <button
               v-if="editingTagId !== tag.id"
               class="btn-edit"
               :disabled="actionLoading[tag.id]"
@@ -265,6 +272,10 @@ async function retry() {
   await loadData()
 }
 
+function viewDetails(tagId) {
+  router.push(`/tags/${tagId}`)
+}
+
 function goToLogin() {
   router.push('/auth/login')
 }
@@ -447,6 +458,7 @@ h1 {
 .btn-subscribe,
 .btn-unsubscribe,
 .btn-edit,
+.btn-details,
 .btn-save,
 .btn-cancel {
   border: none;
@@ -552,5 +564,16 @@ h1 {
 
 .tag-separator {
   color: #ccc;
+}
+
+.btn-details {
+  background: #f0f0f0;
+  color: #333;
+  border: 2px solid #ddd;
+}
+
+.btn-details:hover {
+  background: #e0e0e0;
+  border-color: #ccc;
 }
 </style>

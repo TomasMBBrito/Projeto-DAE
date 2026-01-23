@@ -61,8 +61,18 @@
         <div v-else class="comments-list">
           <div v-for="comment in comments" :key="comment.id" class="comment">
             <div class="comment-header">
-              <span class="comment-author">{{ comment.authorName }}</span>
-              <span class="comment-date">{{ formatDate(comment.createdAt) }}</span>
+              <div class="comment-info">
+                <span class="comment-author">{{ comment.author }}</span>
+                <span class="comment-date">{{ formatDate(comment.createdAt) }}</span>
+                <span v-if="!comment.visible" class="hidden-badge">Hidden</span>
+              </div>
+              <button 
+                @click="toggleVisibility(comment)" 
+                class="btn-toggle-visibility"
+                :title="comment.visible ? 'Hide comment' : 'Show comment'"
+              >
+                {{ comment.visible ? 'Hide' : 'Show' }}
+              </button>
             </div>
             <p class="comment-content">{{ comment.content }}</p>
           </div>
@@ -124,6 +134,21 @@ async function postComment() {
     await loadComments()
   } catch (e) {
     alert('Failed to post comment: ' + e.message)
+  }
+}
+
+async function toggleVisibility(comment) {
+  try {
+    const newVisibility = !comment.visible
+    await publicationStore.toggleCommentVisibility(
+      publicationId.value, 
+      comment.id, 
+      newVisibility
+    )
+    // Atualiza localmente
+    comment.visible = newVisibility
+  } catch (e) {
+    alert('Failed to toggle comment visibility: ' + e.message)
   }
 }
 
@@ -337,7 +362,14 @@ function formatDate(date) {
 .comment-header {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   margin-bottom: 8px;
+}
+
+.comment-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .comment-author {
@@ -351,10 +383,39 @@ function formatDate(date) {
   font-size: 12px;
 }
 
+.comment.hidden .comment-content {
+  color: #666;
+}
+
 .comment-content {
   margin: 0;
   line-height: 1.5;
   color: #333;
   font-size: 14px;
+}
+
+.hidden-badge {
+  background: #ff9800;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.btn-toggle-visibility {
+  background: none;
+  border: 1px solid #ddd;
+  padding: 4px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.2s;
+}
+
+.btn-toggle-visibility:hover {
+  background: #f0f0f0;
+  border-color: #0077cc;
 }
 </style>

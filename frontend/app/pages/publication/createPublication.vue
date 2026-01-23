@@ -68,7 +68,7 @@
 
         <div class="form-row">
           <label>File (PDF)</label>
-          <input ref="fileInput" type="file" accept=".pdf" />
+          <input ref="fileInput" type="file" accept=".pdf,.zip" />
         </div>
 
         <div class="form-actions">
