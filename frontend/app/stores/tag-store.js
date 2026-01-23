@@ -24,6 +24,20 @@ export const useTagStore = defineStore("tagStore", () => {
         })
     }
 
+    async function getById(tagId) {
+        return await $fetch(`${api}/tags/${tagId}`, {
+            method: 'GET',
+            headers: getHeaders()
+        })
+    }
+
+    async function getPublications(tagId) {
+        return await $fetch(`${api}/tags/${tagId}/posts`, {
+            method: 'GET',
+            headers: getHeaders()
+        })
+    }
+
     async function getSubscribers(tagId) {
         return await $fetch(`${api}/tags/${tagId}/subscribers`, {
             method: 'GET',
@@ -91,6 +105,7 @@ export const useTagStore = defineStore("tagStore", () => {
 
     return {
         getAll,
+        getById,
         getSubscribers,
         create,
         update,
@@ -98,6 +113,7 @@ export const useTagStore = defineStore("tagStore", () => {
         remove,
         getSubscribed,
         subscribe,
-        unsubscribe
+        unsubscribe,
+        getPublications
     }
 })
