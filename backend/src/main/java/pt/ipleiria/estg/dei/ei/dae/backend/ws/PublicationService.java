@@ -462,6 +462,62 @@ public class PublicationService {
         }
     }
 
+    @PUT
+    @Path("{id}/comments/{comment_id}/text")
+    @RolesAllowed({"COLABORADOR", "RESPONSAVEL", "ADMINISTRADOR"})
+    public Response updateCommentContent(
+            @PathParam("id") Long publicationId,
+            @PathParam("comment_id") Long commentId,
+            CommentDTO commentDTO) {
+        try {
+            String username = securityContext.getUserPrincipal().getName();
+            User user = userBean.find(username);
+
+            Comment comment = commentBean.find(commentId);
+            if (comment == null) {
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity(Map.of("message", "Comentário não encontrado"))
+                        .build();
+            }
+
+
+            if (comment.getPublication().getId() != publicationId) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity(Map.of("message", "Comentário não pertence a esta publicação"))
+                        .build();
+            }
+
+
+            if (!comment.getUser().getUsername().equals(username)) {
+                return Response.status(Response.Status.FORBIDDEN)
+                        .entity(Map.of("message", "Apenas o autor pode editar o comentário"))
+                        .build();
+            }
+
+
+            if (commentDTO.getContent() == null || commentDTO.getContent().trim().isEmpty()) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity(Map.of("message", "O conteúdo do comentário não pode estar vazio"))
+                        .build();
+            }
+
+            commentBean.update(commentId, commentDTO.getContent(), user);
+
+            return Response.ok()
+                    .entity(Map.of("message", "Comentário com id " + commentId + " atualizado com sucesso."))
+                    .build();
+
+        } catch (MyEntityNotFoundException e) {
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity(Map.of("message", e.getMessage()))
+                    .build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(Map.of("message", "Erro ao atualizar comentário: " + e.getMessage()))
+                    .build();
+        }
+    }
+
     // EP37: Avalia uma publicação
     @POST
     @Path("{id}/ratings")

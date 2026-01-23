@@ -77,7 +77,7 @@ public class TagService {
                         .build();
             }
 
-            List<PublicationDTO> publications = PublicationDTO.toPublicationList(tag.getPublications());
+            List<PublicationDTO> publications = PublicationDTO.toTagPostList(tag.getPublications());
 
             return Response.ok(publications).build();
         } catch (Exception e) {

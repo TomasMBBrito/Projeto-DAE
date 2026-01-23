@@ -101,6 +101,7 @@ public class TagBean {
         Tag tag = find(id);
         if (tag != null) {
             Hibernate.initialize(tag.getPublications());
+
         }
         return tag;
     }

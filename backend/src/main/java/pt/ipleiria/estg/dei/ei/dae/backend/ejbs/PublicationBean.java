@@ -69,49 +69,6 @@ public class PublicationBean {
             finalDescription = "A gerar resumo... Por favor aguarde";
         }
 
-//        if(description == null || description.trim().isEmpty()) {
-//            try {
-//                if (fileType == FileType.PDF) {
-//                    InputStream streamForAI = new ByteArrayInputStream(fileBytes);
-//                    String pdfText = PdfTextExtractor.extractText(streamForAI);
-//
-//                    if (pdfText != null && !pdfText.trim().isEmpty()) {
-//
-//                        String aiSummary = aiService.generateSummary(pdfText);
-//
-//                        if (aiSummary != null && !aiSummary.trim().isEmpty()) {
-//                            finalDescription = aiSummary;
-//                        } else {
-//                            finalDescription = "Resumo automático não disponível - Por favor adicione uma descrição manualmente";
-//                        }
-//                    } else {
-//                        finalDescription = "Não foi possível extrair texto do PDF";
-//                    }
-//
-//                } else if (fileType == FileType.ZIP) {
-//                    InputStream streamForZip = new ByteArrayInputStream(fileBytes);
-//                    String zipText = ZipTextExtractor.extractTextFromPDFs(streamForZip);
-//
-//                    if (zipText != null && !zipText.trim().isEmpty()) {
-//
-//                        String aiSummary = aiService.generateSummary(zipText);
-//
-//                        if (aiSummary != null && !aiSummary.trim().isEmpty()) {
-//                            finalDescription = aiSummary;
-//                        } else {
-//                            finalDescription = "Resumo automático não disponível - Por favor adicione uma descrição manualmente";
-//                        }
-//                    } else {
-//                        finalDescription = "Ficheiro ZIP - nenhum PDF encontrado para análise";
-//                    }
-//                }
-//
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//                finalDescription = "Resumo não disponível (erro ao processar: " + e.getMessage() + ")";
-//            }
-//        }
-
         // Create publication
         Publication publication = new Publication(
                 title,

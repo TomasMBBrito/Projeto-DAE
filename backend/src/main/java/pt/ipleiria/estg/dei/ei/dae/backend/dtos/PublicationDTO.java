@@ -197,6 +197,16 @@ public class PublicationDTO implements Serializable {
         this.tags = tags;
     }
 
+    public static PublicationDTO forTagPostList(Publication pub) {
+        return new PublicationDTO(
+                pub.getId(),
+                pub.getTitle(),
+                pub.getAuthor() != null ? pub.getAuthor().getUsername() : null,
+                pub.getDescription(),
+                pub.isVisible()
+        );
+    }
+
 
     public static PublicationDTO forPublicationList(Publication pub) {
         PublicationDTO dto = new PublicationDTO(
@@ -289,6 +299,11 @@ public class PublicationDTO implements Serializable {
         return dto;
     }
 
+    public static List<PublicationDTO> toTagPostList(List<Publication> publications) {
+        return publications.stream()
+                .map(PublicationDTO::forTagPostList)
+                .collect(Collectors.toList());
+    }
 
     public static List<PublicationDTO> toPublicationList(List<Publication> publications) {
         return publications.stream()

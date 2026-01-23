@@ -135,6 +135,7 @@ async function loadPublications() {
   
   try {
     publications.value = await tagStore.getPublications(tagId.value)
+    console.log(publications.value)
   } catch (e) {
     console.error('Failed to load publications:', e)
   } finally {
