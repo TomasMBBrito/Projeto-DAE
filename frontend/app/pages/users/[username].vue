@@ -93,7 +93,7 @@
                         <div class="post-content" @click="goToPost(post.id)">
                             <div class="post-title">{{ post.title }}</div>
                         </div>
-                        <div class="post-actions" v-if="isMe">
+                        <div class="post-actions" v-if="isMe || isAdmin">
                             <button class="btn-delete-post" @click.stop="deletePost(post.id)">
                                 Delete
                             </button>
@@ -232,17 +232,12 @@ async function adminUpdateUser() {
         return
     }
 
-    console.log('Updating user:', user.value.username, { email: email.value, name: name.value })
-
     try {
         const response = await userStore.update(user.value.username, {
             email: email.value,
             name: name.value
         })
 
-        console.log('Update response:', response)
-
-        // Update local user object
         user.value.email = email.value
         user.value.name = name.value
 
@@ -286,7 +281,15 @@ async function deletePost(id) {
     if (!confirm('Delete this post?')) return
 
     try {
-        await userStore.deleteMyPost(id)
+        // If viewing own profile, use /me/posts endpoint
+        // If admin viewing another user's profile, use /{username}/posts endpoint
+        if (isMe.value) {
+            await userStore.deleteMyPost(id)
+        } else if (isAdmin.value) {
+            await userStore.deleteUserPost(user.value.username, id)
+        }
+        
+        // Remove from local list
         posts.value = posts.value.filter(p => p.id !== id)
     } catch (e) {
         error.value = 'Failed to delete post'
@@ -667,22 +670,6 @@ function goBack() {
 
 .btn-primary:hover {
     background: #2563eb;
-}
-
-/* Emails List */
-.emails-list {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.email-item {
-    padding: 12px;
-    background: white;
-    border-radius: 6px;
-    border-left: 3px solid #3b82f6;
-    font-size: 14px;
-    color: #1e293b;
 }
 
 /* Empty State */

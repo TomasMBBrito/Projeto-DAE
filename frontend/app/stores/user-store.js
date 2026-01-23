@@ -97,6 +97,15 @@ export const useUserStore = defineStore("userStore", () => {
         })
     }
 
+    // Delete another user's post (ADMINISTRADOR only)
+    async function deleteUserPost(username, postId) {
+        return await $fetch(`${api}/users/${username}/posts/${postId}`, {
+            method: "DELETE",
+            headers: getHeaders()
+        })
+    }
+
+
     // Delete my post
     async function deleteMyPost(postId) {
         return await $fetch(`${api}/users/me/posts/${postId}`, {
@@ -175,6 +184,7 @@ export const useUserStore = defineStore("userStore", () => {
         getUserPosts,
         getMyPosts,
         deleteMyPost,
+        deleteUserPost,
         updateMe,
         changeMyPassword,
         getUserHistory,
