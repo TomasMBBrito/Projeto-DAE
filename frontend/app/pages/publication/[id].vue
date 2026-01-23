@@ -11,14 +11,47 @@
       <div class="publication-header">
         <div class="header-top">
           <h1>{{ publication.title }}</h1>
-          <button
-              v-if="canEdit"
-              @click="goToEdit"
-              class="btn-edit-publication"
-          >
-            Edit Publication
-          </button>
+          <div class="action-buttons">
+            <button
+                v-if="canEdit"
+                @click="goToHistory"
+                class="btn-history-pub"
+                title="View History"
+            >
+              History
+            </button>
+
+            <button
+                v-if="canEdit"
+                @click="togglePublicationVisibility"
+                class="btn-toggle-pub"
+                :title="publication.visible ? 'Hide Publication' : 'Show Publication'"
+            >
+              {{ publication.visible ? 'Hide' : 'Show' }}
+            </button>
+
+            <button
+                v-if="canEdit"
+                @click="goToEdit"
+                class="btn-edit-publication"
+            >
+              Edit
+            </button>
+
+            <button
+                v-if="canEdit"
+                @click="deletePublication"
+                class="btn-delete-publication"
+            >
+              Delete
+            </button>
+          </div>
         </div>
+
+        <div v-if="!publication.visible && canEdit" class="visibility-warning">
+          This publication is currently hidden
+        </div>
+
         <p class="authors">By {{ publication.authors && publication.authors.length > 0 ? publication.authors.join(', ') : (publication.authors || 'Unknown') }}</p>
         <div class="meta-info">
           <span>Area: {{ publication.scientificArea }}</span>
@@ -26,7 +59,6 @@
           <span>Average Rating: {{ publication.averageRating ? publication.averageRating.toFixed(1) : 'N/A' }}</span>
         </div>
 
-        <!-- Tags Section -->
         <div v-if="publication.tags && publication.tags.length > 0" class="tags-section">
           <h3>Tags</h3>
           <div class="tags-list">
@@ -92,7 +124,7 @@
               </div>
               <button
                   v-if="canEditComment(comment)"
-                  @click="toggleVisibility(comment)"
+                  @click="toggleCommentVisibilityFunc(comment)"
                   class="btn-toggle-visibility"
                   :title="comment.visible ? 'Hide comment' : 'Show comment'"
               >
@@ -125,11 +157,13 @@
 
 <script setup>
 import { usePublicationStore } from '~/stores/publication-store';
+import { useUserStore } from '~/stores/user-store';
 import { useAuthStore } from '~/stores/auth-store';
 
 const route = useRoute()
 const router = useRouter()
 const publicationStore = usePublicationStore()
+const userStore = useUserStore()
 const authStore = useAuthStore()
 
 const publication = ref(null)
@@ -201,7 +235,7 @@ async function postComment() {
   }
 }
 
-async function toggleVisibility(comment) {
+async function toggleCommentVisibilityFunc(comment) {
   try {
     const newVisibility = !comment.visible
     await publicationStore.toggleCommentVisibility(
@@ -236,6 +270,39 @@ async function saveEdit(comment) {
   } catch (e) {
     alert('Failed to edit comment: ' + e.message)
   }
+}
+
+async function togglePublicationVisibility() {
+  if (!confirm(`Are you sure you want to ${publication.value.visible ? 'hide' : 'show'} this publication?`)) {
+    return
+  }
+
+  try {
+    const newVisibility = !publication.value.visible
+    await publicationStore.toggleVisibility(publicationId.value, newVisibility)
+    publication.value.visible = newVisibility
+    alert(`Publication ${newVisibility ? 'shown' : 'hidden'} successfully!`)
+  } catch (e) {
+    alert('Failed to toggle visibility: ' + e.message)
+  }
+}
+
+async function deletePublication() {
+  if (!confirm('Are you sure you want to DELETE this publication? This action cannot be undone!')) {
+    return
+  }
+
+  try {
+    await userStore.deleteMyPost(publicationId.value)
+    alert('Publication deleted successfully!')
+    router.push('/publication/searchPublications')
+  } catch (e) {
+    alert('Failed to delete publication: ' + e.message)
+  }
+}
+
+function goToHistory() {
+  router.push(`/publication/${publicationId.value}-history`)
 }
 
 async function ratePublication(rating) {
@@ -326,6 +393,42 @@ function formatDate(date) {
   flex: 1;
 }
 
+.action-buttons {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.btn-history-pub {
+  padding: 10px 16px;
+  background: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.btn-history-pub:hover {
+  background: #5a6268;
+}
+
+.btn-toggle-pub {
+  padding: 10px 16px;
+  background: #ffc107;
+  color: #333;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.btn-toggle-pub:hover {
+  background: #e0a800;
+}
+
 .btn-edit-publication {
   padding: 10px 20px;
   background: #0077cc;
@@ -339,6 +442,31 @@ function formatDate(date) {
 
 .btn-edit-publication:hover {
   background: #005fa3;
+}
+
+.btn-delete-publication {
+  padding: 10px 20px;
+  background: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.btn-delete-publication:hover {
+  background: #c82333;
+}
+
+.visibility-warning {
+  background: #fff3cd;
+  border: 1px solid #ffc107;
+  color: #856404;
+  padding: 10px 15px;
+  border-radius: 4px;
+  margin-bottom: 15px;
+  font-weight: 600;
 }
 
 .authors {
