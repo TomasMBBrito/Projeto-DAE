@@ -67,7 +67,7 @@ public class TagService {
 
     @GET
     @Path("/{tag_id}/posts")
-    @RolesAllowed({"COLABORADOR", "RESPONSAVEL", "ADMINISTRADOR"})
+    @RolesAllowed({"RESPONSAVEL", "ADMINISTRADOR"})
     public Response getTagPublications(@PathParam("tag_id") Long tagId) {
         try {
             Tag tag = tagBean.findWithPublications(tagId);
@@ -77,7 +77,7 @@ public class TagService {
                         .build();
             }
 
-            List<PublicationDTO> publications = PublicationDTO.toUserPostsList(tag.getPublications());
+            List<PublicationDTO> publications = PublicationDTO.toPublicationList(tag.getPublications());
 
             return Response.ok(publications).build();
         } catch (Exception e) {

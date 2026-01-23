@@ -60,9 +60,7 @@ public class PublicationService {
                     ? publicationBean.getAllWithAllDetails()
                     : publicationBean.getAllVisibleWithAllDetails();
 
-            List<PublicationDTO> dtos = isAdminOrResponsavel
-                    ? PublicationDTO.toAdminList(publications)
-                    : PublicationDTO.toCollaboratorList(publications);
+            List<PublicationDTO> dtos = PublicationDTO.toPublicationList(publications);
 
             return Response.ok(dtos).build();
         }
@@ -588,94 +586,6 @@ public class PublicationService {
 
         return Response.ok(dtos).build();
     }
-
-    // EP41: Ordena publicações
-//    @GET
-//    @Path("/")
-//    @RolesAllowed({"COLABORADOR", "RESPONSAVEL", "ADMINISTRADOR"})
-//    public Response getSortedPublications(@QueryParam("sort") String sortBy) {
-//        if (sortBy == null) {
-//            return getPublications(); // EP28
-//        }
-//
-//        boolean isAdminOrResponsavel = securityContext.isUserInRole("RESPONSAVEL") ||
-//                securityContext.isUserInRole("ADMINISTRADOR");
-//
-//        List<Publication> publications = isAdminOrResponsavel
-//                ? publicationBean.getAll()
-//                : publicationBean.getAllVisible();
-//
-//        // Ordena conforme critério
-//        switch (sortBy.toLowerCase()) {
-//            case "recent":
-//                publications.sort((p1, p2) -> p2.getPublicationDate().compareTo(p1.getPublicationDate()));
-//                break;
-//            case "comments":
-//                publications.sort((p1, p2) -> Integer.compare(p2.getComments().size(), p1.getComments().size()));
-//                break;
-//            case "rating":
-//                publications.sort((p1, p2) -> {
-//                    Double avg1 = p1.getAverageRating();
-//                    Double avg2 = p2.getAverageRating();
-//                    if (avg1 == null) avg1 = 0.0;
-//                    if (avg2 == null) avg2 = 0.0;
-//                    return Double.compare(avg2, avg1);
-//                });
-//                break;
-//            default:
-//                return Response.status(Response.Status.BAD_REQUEST)
-//                        .entity(Map.of("message", "Critério de ordenação inválido"))
-//                        .build();
-//        }
-//
-//        List<PublicationDTO> dtos = PublicationDTO.forSort(publications);
-//        return Response.ok(dtos).build();
-//    }
-
-    // EP42: Regenera resumo com IA (placeholder - implementar integração com LLM)
-//    @PUT
-//    @Path("{id}/summary")
-//    @RolesAllowed({"COLABORADOR", "RESPONSAVEL", "ADMINISTRADOR"})
-//    public Response regenerateSummary(@PathParam("id") Long id, Map<String, Boolean> request) {
-//        try {
-//            if (request == null || !request.containsKey("regenerate")) {
-//                return Response.status(Response.Status.BAD_REQUEST)
-//                        .entity(Map.of("message", "Campo 'regenerate' é obrigatório"))
-//                        .build();
-//            }
-//
-//            String username = securityContext.getUserPrincipal().getName();
-//            User user = userBean.find(username);
-//            Publication publication = publicationBean.find(id);
-//
-//            if (publication == null) {
-//                return Response.status(Response.Status.NOT_FOUND)
-//                        .entity(Map.of("message", "Publicação não encontrada"))
-//                        .build();
-//            }
-//
-//            if (!publicationBean.canEdit(publication, user)) {
-//                return Response.status(Response.Status.FORBIDDEN)
-//                        .entity(Map.of("message", "Não tem permissão para editar esta publicação"))
-//                        .build();
-//            }
-//
-//
-//            String oldSummary = publication.getDescription();
-//            String newSummary = "Métodos de inteligência artificial para otimização de tarefas complexas."; // Placeholder
-//
-//            publicationBean.updateDescription(id, newSummary, user);
-//
-//            return Response.ok()
-//                    .entity(Map.of("message", "New: " + newSummary + " Old: " + oldSummary))
-//                    .build();
-//
-//        } catch (MyEntityNotFoundException e) {
-//            return Response.status(Response.Status.NOT_FOUND)
-//                    .entity(Map.of("message", e.getMessage()))
-//                    .build();
-//        }
-//    }
 
     @GET
     @Path("filter/tags")

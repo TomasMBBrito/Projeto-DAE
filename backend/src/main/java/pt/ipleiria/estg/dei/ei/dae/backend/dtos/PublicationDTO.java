@@ -198,22 +198,7 @@ public class PublicationDTO implements Serializable {
     }
 
 
-    public static PublicationDTO forCollaborator(Publication pub) {
-        PublicationDTO dto = new PublicationDTO(
-                pub.getId(),
-                pub.getTitle(),
-                pub.getAuthor() != null ? pub.getAuthor().getUsername() : null,
-                pub.getDescription()
-        );
-        dto.setScientificArea(pub.getScientificArea());
-        dto.setPublicationDate(pub.getPublicationDate() != null ? pub.getPublicationDate().toString() : null);
-        dto.setCommentCount(pub.getComments().size());
-        dto.setAverageRating(pub.getAverageRating());
-        return dto;
-    }
-
-
-    public static PublicationDTO forAdminList(Publication pub) {
+    public static PublicationDTO forPublicationList(Publication pub) {
         PublicationDTO dto = new PublicationDTO(
                 pub.getId(),
                 pub.getTitle(),
@@ -305,30 +290,9 @@ public class PublicationDTO implements Serializable {
     }
 
 
-    public static PublicationDTO forUserPosts(Publication pub) {
-        PublicationDTO dto = new PublicationDTO(
-                pub.getId(),
-                pub.getTitle(),
-                pub.getAuthor() != null ? pub.getAuthor().getUsername() : null,
-                pub.getDescription(),
-                pub.isVisible()
-        );
-        dto.setScientificArea(pub.getScientificArea());
-        dto.setPublicationDate(pub.getPublicationDate() != null ? pub.getPublicationDate().toString() : null);
-        return dto;
-    }
-
-
-    public static List<PublicationDTO> toCollaboratorList(List<Publication> publications) {
+    public static List<PublicationDTO> toPublicationList(List<Publication> publications) {
         return publications.stream()
-                .map(PublicationDTO::forCollaborator)
-                .collect(Collectors.toList());
-    }
-
-
-    public static List<PublicationDTO> toAdminList(List<Publication> publications) {
-        return publications.stream()
-                .map(PublicationDTO::forAdminList)
+                .map(PublicationDTO::forPublicationList)
                 .collect(Collectors.toList());
     }
 
@@ -350,13 +314,6 @@ public class PublicationDTO implements Serializable {
     public static List<PublicationDTO> toSortedList(List<Publication> publications) {
         return publications.stream()
                 .map(PublicationDTO::forSort)
-                .collect(Collectors.toList());
-    }
-
-
-    public static List<PublicationDTO> toUserPostsList(List<Publication> publications) {
-        return publications.stream()
-                .map(PublicationDTO::forUserPosts)
                 .collect(Collectors.toList());
     }
 }
