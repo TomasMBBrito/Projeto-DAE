@@ -5,11 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c7cffce6-2d0d-4c10-8c8d-6814661ac849" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/frontend/app/pages/publication/details/[id].vue" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/pt/ipleiria/estg/dei/ei/dae/backend/ejbs/PublicationBean.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/pt/ipleiria/estg/dei/ei/dae/backend/ejbs/PublicationBean.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/src/main/java/pt/ipleiria/estg/dei/ei/dae/backend/ws/PublicationService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/pt/ipleiria/estg/dei/ei/dae/backend/ws/PublicationService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/app/pages/publication/searchPublications.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/app/pages/publication/searchPublications.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/app/pages/tags/index.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/app/pages/tags/index.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/app/pages/publication/[id].vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/app/pages/publication/[id].vue" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/app/stores/publication-store.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/app/stores/publication-store.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -21,6 +20,7 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="JavaScript File" />
+        <option value="Vue Composition API Component" />
       </list>
     </option>
   </component>
@@ -66,6 +66,11 @@
     "to.speed.mode.migration.done": "true",
     "ts.external.directory.path": "/home/caramelooo/Documents/intelij/plugins/javascript-plugin/jsLanguageServicesImpl/external",
     "vue.rearranger.settings.migration": "true"
+  },
+  "keyToStringList": {
+    "vue.recent.templates": [
+      "Vue Composition API Component"
+    ]
   }
 }]]></component>
   <component name="RecentsManager">
@@ -94,6 +99,7 @@
       <workItem from="1768917256373" duration="92000" />
       <workItem from="1768917355273" duration="2000" />
       <workItem from="1768917373424" duration="5266000" />
+      <workItem from="1769179261068" duration="9685000" />
     </task>
     <servers />
   </component>
@@ -106,7 +112,6 @@
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/frontend/app/stores/publication-store.js</url>
           <line>1</line>
-          <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="1" />
         </line-breakpoint>
       </breakpoints>
