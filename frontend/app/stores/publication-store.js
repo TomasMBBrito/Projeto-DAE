@@ -188,6 +188,26 @@ export const usePublicationStore = defineStore("publicationStore", () => {
         return response
     }
 
+    async function editComment(publicationId, commentId, content) {
+        const authStore = useAuthStore()
+
+        if (!authStore.token) {
+            throw new Error('Not authenticated')
+        }
+
+        const response = await $fetch(`${api}/posts/${publicationId}/comments/${commentId}`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${authStore.token}`,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: { content }
+        })
+
+        return response
+    }
+
     async function addRating(publicationId, rating) {
         const authStore = useAuthStore()
 
@@ -304,6 +324,7 @@ export const usePublicationStore = defineStore("publicationStore", () => {
         getComments,
         toggleCommentVisibility,
         addComment,
+        editComment,
         addRating,
         getHistory,
         addTag,
