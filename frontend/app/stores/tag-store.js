@@ -54,8 +54,6 @@ export const useTagStore = defineStore("tagStore", () => {
         })
     }
 
-    // ---------------- NEW ----------------
-
     // Get my subscribed tags
     async function getSubscribed() {
         console.log(authStore.user.role)

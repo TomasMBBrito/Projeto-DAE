@@ -37,16 +37,26 @@
     <div v-if="tags.length > 0" class="tags-list">
       <div v-for="tag in tags" :key="tag.id" class="tag-card">
         <div class="tag-info">
-          <span v-if="editingTagId !== tag.id" class="tag-name">{{ tag.name }}</span>
-          <input
-            v-else
-            v-model="editingTagName"
-            class="tag-input"
-            @keyup.enter="saveEdit(tag.id)"
-            @keyup.esc="cancelEdit"
-          />
+          <div>
+            <span v-if="editingTagId !== tag.id" class="tag-name">
+              {{ tag.name }}
+              <span v-if="tag.visible === false" class="tag-hidden-badge">Hidden</span>
+            </span>
+            <input
+              v-else
+              v-model="editingTagName"
+              class="tag-input"
+              @keyup.enter="saveEdit(tag.id)"
+              @keyup.esc="cancelEdit"
+            />
+          </div>
+          
+          <div v-if="canEdit && editingTagId !== tag.id" class="tag-stats">
+            <span class="tag-stat">{{ tag.publicationCount || 0 }} publications</span>
+            <span class="tag-separator">•</span>
+            <span class="tag-stat">{{ tag.subscriberCount || 0 }} subscribers</span>
+          </div>
         </div>
-
         <div class="tag-actions">
           <!-- Edit buttons (only for responsavel/administrador) -->
           <template v-if="canEdit">
@@ -154,6 +164,7 @@ async function loadData() {
 
 async function loadTags() {
   tags.value = await tagStore.getAll()
+  console.log(tags.value)
 }
 
 async function loadSubscribed() {
@@ -513,5 +524,33 @@ h1 {
 .btn-cancel:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.tag-hidden-badge {
+  display: inline-block;
+  margin-left: 10px;
+  padding: 2px 8px;
+  background: #ff6b6b;
+  color: white;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 3px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.tag-stats {
+  display: flex;
+  gap: 15px;
+  margin-top: 6px;
+  font-size: 13px;
+  color: #666;
+}
+
+.tag-stat {
+  color: #666;
+}
+
+.tag-separator {
+  color: #ccc;
 }
 </style>
