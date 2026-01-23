@@ -34,15 +34,12 @@ public class AIService {
             return "Resumo não disponível (documento vazio)";
         }
 
-        // Limitar o texto (modelos têm limites de contexto)
         String truncatedText = truncateText(documentText, 3000);
 
-        // Prompt do AI
         String prompt = "Faz um resumo conciso e informativo (máximo 150 palavras) do seguinte documento científico:\n\n"
                 + truncatedText
                 + "\n\nResumo:";
 
-        // Preparar o corpo do pedido JSON
         JsonObject requestBody = Json.createObjectBuilder()
                 .add("model", MODEL)
                 .add("prompt", prompt)
@@ -53,7 +50,6 @@ public class AIService {
                 )
                 .build();
 
-        // Fazer o pedido HTTP POST ao Ollama
         Client client = ClientBuilder.newBuilder()
                 .connectTimeout(CONNECT_TIMEOUT_SECONDS, TimeUnit.SECONDS)
                 .readTimeout(READ_TIMEOUT_SECONDS, TimeUnit.SECONDS)

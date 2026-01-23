@@ -68,7 +68,6 @@ public class AuthService {
                         .build();
             }
 
-            // Buscar user pelo email
             User user = userBean.findByMail(emailDTO.getEmail());
 
             if (user != null) {

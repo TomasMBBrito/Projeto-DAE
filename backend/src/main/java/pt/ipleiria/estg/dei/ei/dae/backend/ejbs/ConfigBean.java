@@ -44,7 +44,6 @@ public class ConfigBean {
         logger.info("========================================");
 
         try {
-            // ==================== USERS ====================
             logger.info("Creating users...");
 
             List<User> allUsers = new ArrayList<>();
@@ -52,7 +51,6 @@ public class ConfigBean {
             List<User> responsaveis = new ArrayList<>();
             List<User> colaboradores = new ArrayList<>();
 
-            // 3 ADMINISTRADORES
             User admin1 = userBean.create("admin1", "admin123", "admin1@research.pt", "Administrator One", Role.ADMINISTRADOR, null);
             User admin2 = userBean.create("admin2", "admin123", "admin2@research.pt", "Administrator Two", Role.ADMINISTRADOR, null);
             User admin3 = userBean.create("admin3", "admin123", "admin3@research.pt", "Administrator Three", Role.ADMINISTRADOR, null);
@@ -62,7 +60,6 @@ public class ConfigBean {
             admins.add(admin3);
             allUsers.addAll(admins);
 
-            // 7 RESPONSÁVEIS
             User resp1 = userBean.create("resp1", "password123", "resp1@research.pt", "Responsável One", Role.RESPONSAVEL, null);
             User resp2 = userBean.create("resp2", "password123", "resp2@research.pt", "Responsável Two", Role.RESPONSAVEL, null);
             User resp3 = userBean.create("resp3", "password123", "resp3@research.pt", "Responsável Three", Role.RESPONSAVEL, null);
@@ -74,7 +71,6 @@ public class ConfigBean {
             responsaveis.addAll(Arrays.asList(resp1, resp2, resp3, resp4, resp5, resp6, resp7));
             allUsers.addAll(responsaveis);
 
-            // 10 COLABORADORES
             User colab1 = userBean.create("colab1", "password123", "colab1@research.pt", "Colaborador One", Role.COLABORADOR, null);
             User colab2 = userBean.create("colab2", "password123", "colab2@research.pt", "Colaborador Two", Role.COLABORADOR, null);
             User colab3 = userBean.create("colab3", "password123", "colab3@research.pt", "Colaborador Three", Role.COLABORADOR, null);
@@ -91,7 +87,6 @@ public class ConfigBean {
 
             logger.info("✓ Created 20 users");
 
-            // ==================== TAGS ====================
             logger.info("Creating tags...");
 
             List<Tag> allTags = new ArrayList<>();
@@ -116,12 +111,10 @@ public class ConfigBean {
 
             logger.info("✓ Created 15 tags");
 
-            // ==================== SUBSCRIPTIONS ====================
             logger.info("Creating tag subscriptions...");
 
             int subscriptionCount = 0;
             for (User user : allUsers) {
-                // Selecionar 3 tags aleatórias diferentes
                 List<Tag> selectedTags = getRandomTags(allTags, 3);
                 for (Tag tag : selectedTags) {
                     userBean.subscribeTag(user.getUsername(), tag.getId());
@@ -131,7 +124,6 @@ public class ConfigBean {
 
             logger.info("✓ Created tag subscriptions");
 
-            // ==================== PUBLICATIONS ====================
             logger.info("Creating publications...");
 
             List<Publication> allPublications = new ArrayList<>();
@@ -184,21 +176,16 @@ public class ConfigBean {
             };
 
             for (int i = 0; i < 20; i++) {
-                // Selecionar autor aleatório
                 User author = allUsers.get(random.nextInt(allUsers.size()));
 
-                // Selecionar área científica (ciclando pelo enum)
                 ScientificArea area = areas[i % areas.length];
 
-                // Selecionar 2-4 tags aleatórias
                 int numTags = 2 + random.nextInt(3); // 2, 3 ou 4 tags
                 List<Tag> selectedTags = getRandomTags(allTags, numTags);
                 List<Long> tagIds = selectedTags.stream().map(Tag::getId).toList();
 
-                // Data aleatória nos últimos 6 meses
                 LocalDate date = LocalDate.now().minusDays(random.nextInt(180));
 
-                // Tipo de ficheiro aleatório
                 FileType fileType = random.nextBoolean() ? FileType.PDF : FileType.ZIP;
                 String extension = fileType == FileType.PDF ? ".pdf" : ".zip";
 
@@ -219,7 +206,6 @@ public class ConfigBean {
 
             logger.info("✓ Created 20 publications");
 
-            // ==================== COMMENTS ====================
             logger.info("Creating comments and ratings...");
 
             String[] commentTexts = {
@@ -249,22 +235,18 @@ public class ConfigBean {
             int totalRatings = 0;
 
             for (Publication pub : allPublications) {
-                // Cada publicação recebe entre 1 e 5 comentários
-                int numComments = 1 + random.nextInt(5); // 1 a 5
+                int numComments = 1 + random.nextInt(5);
 
-                // Selecionar users aleatórios para comentar (sem repetição na mesma pub)
                 List<User> commenters = getRandomUsers(allUsers, numComments);
 
                 for (int i = 0; i < numComments; i++) {
                     User commenter = commenters.get(i);
                     String commentText = commentTexts[random.nextInt(commentTexts.length)];
 
-                    // Criar comentário
                     commentBean.create(commentText, commenter, pub);
                     totalComments++;
 
-                    // O mesmo user que comentou dá um rating (1-5)
-                    int ratingValue = 1 + random.nextInt(5); // 1 a 5
+                    int ratingValue = 1 + random.nextInt(5);
                     ratingBean.createOrUpdate(ratingValue, commenter, pub.getId());
                     totalRatings++;
                 }
@@ -275,7 +257,6 @@ public class ConfigBean {
 
             logger.info("Hiding some content for testing...");
 
-            // Ocultar 2 publicações aleatórias
             List<Publication> pubsToHide = getRandomPublications(allPublications, 2);
             for (Publication pub : pubsToHide) {
                 publicationBean.hide(pub.getId(), pub.getAuthor());
@@ -294,7 +275,7 @@ public class ConfigBean {
             if (allComments.size() >= 2) {
                 List<Comment> commentsToHide = getRandomComments(allComments, 2);
                 for (Comment comment : commentsToHide) {
-                    commentBean.hide(comment.getId(), admin1);  // Admin pode ocultar comentários
+                    commentBean.hide(comment.getId(), admin1);
                 }
                 logger.info("✓ Hidden 2 comments");
             } else {

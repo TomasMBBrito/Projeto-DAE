@@ -13,7 +13,6 @@ public class CorsFilter implements ContainerResponseFilter {
     public void filter(ContainerRequestContext requestContext,
                        ContainerResponseContext responseContext) throws IOException {
 
-        // Handle preflight OPTIONS request first
         if (requestContext.getMethod().equalsIgnoreCase("OPTIONS")) {
             responseContext.setStatus(Response.Status.OK.getStatusCode());
             responseContext.getHeaders().putSingle("Access-Control-Allow-Origin", "*");
@@ -23,7 +22,6 @@ public class CorsFilter implements ContainerResponseFilter {
             return;
         }
 
-        // For all other requests
         responseContext.getHeaders().putSingle("Access-Control-Allow-Origin", "*");
         responseContext.getHeaders().putSingle("Access-Control-Allow-Credentials", "true");
         responseContext.getHeaders().putSingle("Access-Control-Expose-Headers", "Authorization");

@@ -39,7 +39,6 @@ public class CommentBean {
                 user
         );
 
-        // Notify subscribers of tags on this publication
         for (Tag tag : managedPublication.getTags()) {
             emailBean.notifyTagSubscribers(
                     tag,
@@ -119,7 +118,6 @@ public class CommentBean {
         );
     }
 
-    // DELETE
     public void delete(Long id, User performedBy) throws MyEntityNotFoundException {
         Comment comment = find(id);
         if (comment == null) {
@@ -145,7 +143,6 @@ public class CommentBean {
     }
 
     public boolean canDelete(Comment comment, User user) {
-        // Comment author, RESPONSAVEL, or ADMINISTRADOR can delete
         if (comment.getUser().getUsername().equals(user.getUsername())) {
             return true;
         }

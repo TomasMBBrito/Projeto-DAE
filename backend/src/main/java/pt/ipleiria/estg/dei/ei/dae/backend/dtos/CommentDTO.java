@@ -100,7 +100,7 @@ public class CommentDTO implements Serializable {
 
     public static List<CommentDTO> forCollaboratorList(List<Comment> comments) {
         return comments.stream()
-                .filter(Comment::isVisible)  // Colaborador só vê visíveis
+                .filter(Comment::isVisible)
                 .map(CommentDTO::forCollaborator)
                 .collect(Collectors.toList());
     }

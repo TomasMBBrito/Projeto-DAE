@@ -66,7 +66,6 @@ public class TagBean {
                 performedBy
         );
 
-        // Persist the change
         em.merge(tag);
 
         return tag;
@@ -129,7 +128,6 @@ public class TagBean {
 
     public List<Tag> getAll() {
         List<Tag> tags = em.createNamedQuery("getAllTags", Tag.class).getResultList();
-        // Inicializar as coleções para poder contar
         tags.forEach(tag -> {
             Hibernate.initialize(tag.getPublications());
             Hibernate.initialize(tag.getSubscribers());

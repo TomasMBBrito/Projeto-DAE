@@ -69,7 +69,6 @@ public class PublicationBean {
             finalDescription = "A gerar resumo... Por favor aguarde";
         }
 
-        // Create publication
         Publication publication = new Publication(
                 title,
                 finalDescription,
@@ -84,7 +83,7 @@ public class PublicationBean {
         document.setPublication(publication);
 
         em.persist(publication);
-        em.flush(); // Ensure publication gets an ID before creating document
+        em.flush();
 
         if (tagIds != null && !tagIds.isEmpty()) {
             for (Long tagId : tagIds) {
@@ -95,7 +94,6 @@ public class PublicationBean {
             }
         }
 
-        // Log activity
         historyBean.logActivity(
                 ActivityType.PUBLICATION_CREATED,
                 "Publication created: " + title + " with file: " + fileName,
@@ -112,7 +110,6 @@ public class PublicationBean {
         return publication;
     }
 
-    //Metodo apenas para criar publicações de teste sem ficheiro
     public Publication createWithoutFile(String title, String description, ScientificArea scientificArea,
                                          LocalDate publicationDate, List<String> authors, User submitter,
                                          String fileName, FileType fileType, List<Long> tagIds)
@@ -125,7 +122,6 @@ public class PublicationBean {
 
         Document document = new Document(fileName, "dummy_path", fileType);
 
-        // Criar publicação
         Publication publication = new Publication(
                 title,
                 description,
@@ -189,7 +185,6 @@ public class PublicationBean {
     public Publication findWithAllDetails(Long id) {
         Publication pub = find(id);
         if (pub != null) {
-            // Initialize all lazy-loaded collections to avoid LazyInitializationException
             Hibernate.initialize(pub.getTags());
             Hibernate.initialize(pub.getComments());
             Hibernate.initialize(pub.getRatings());
@@ -317,7 +312,6 @@ public class PublicationBean {
         if (tagIds == null || tagIds.isEmpty()) {
             return new ArrayList<>();
         }
-        // Retorna publicações que têm TODAS as tags selecionadas
         return em.createQuery(
                         "SELECT p FROM Publication p " +
                                 "JOIN p.tags t " +
@@ -336,7 +330,6 @@ public class PublicationBean {
         if (tagIds == null || tagIds.isEmpty()) {
             return new ArrayList<>();
         }
-        // Igual ao acima mas apenas publicações visíveis
         return em.createQuery(
                         "SELECT p FROM Publication p " +
                                 "JOIN p.tags t " +
@@ -366,7 +359,6 @@ public class PublicationBean {
         publication.setPublicationDate(publicationDate);
         publication.setAuthors(authors);
 
-        // Log activity
         historyBean.logActivity(
                 ActivityType.PUBLICATION_UPDATED,
                 "Publication updated: " + title,
@@ -384,18 +376,14 @@ public class PublicationBean {
             throw new MyEntityNotFoundException("Publication not found: " + publicationId);
         }
 
-        // Delete old document if exists
         if (publication.getDocument() != null) {
             Long oldDocId = publication.getDocument().getId();
-            //documentBean.delete(oldDocId);
 
         }
 
-        // Create new document
         Document newDocument = new Document(fileName, "home" ,fileType);
         publication.setDocument(newDocument);
 
-        // Log activity
         historyBean.logActivity(
                 ActivityType.PUBLICATION_UPDATED,
                 "Document replaced for publication: " + publication.getTitle(),
@@ -414,7 +402,6 @@ public class PublicationBean {
 
         publication.setVisible(false);
 
-        // Log activity
         historyBean.logActivity(
                 ActivityType.PUBLICATION_HIDDEN,
                 "Publication hidden: " + publication.getTitle(),
@@ -432,7 +419,6 @@ public class PublicationBean {
 
         publication.setVisible(true);
 
-        // Log activity
         historyBean.logActivity(
                 ActivityType.PUBLICATION_SHOWN,
                 "Publication shown: " + publication.getTitle(),
@@ -459,12 +445,6 @@ public class PublicationBean {
 
         String title = publication.getTitle();
 
-        // Delete document first (cascade will handle it, but we log it explicitly)
-        if (publication.getDocument() != null) {
-            //documentBean.delete(publication.getDocument().getId());
-        }
-
-        // Log activity BEFORE deletion
         historyBean.logActivity(
                 ActivityType.PUBLICATION_DELETED,
                 "Publication deleted: " + title,
@@ -490,7 +470,6 @@ public class PublicationBean {
 
         publication.addTag(tag);
 
-        // Log activity
         historyBean.logActivity(
                 ActivityType.TAG_ADDED_TO_PUBLICATION,
                 "Tag '" + tag.getName() + "' added to publication: " + publication.getTitle(),
@@ -499,7 +478,6 @@ public class PublicationBean {
                 performedBy
         );
 
-        // Notify subscribers of this tag
         emailBean.notifyTagSubscribers(tag, publication, "New publication with tag: " + tag.getName());
     }
 
@@ -513,7 +491,6 @@ public class PublicationBean {
 
         publication.removeTag(tag);
 
-        // Log activity
         historyBean.logActivity(
                 ActivityType.TAG_REMOVED_FROM_PUBLICATION,
                 "Tag '" + tag.getName() + "' removed from publication: " + publication.getTitle(),
@@ -534,21 +511,17 @@ public class PublicationBean {
     }
 
     public boolean canDelete(Publication publication, User user) {
-        // Only RESPONSAVEL and ADMINISTRADOR can delete or the submitter
         if (publication.getAuthor().getUsername().equals(user.getUsername())) {
             return true;
         }
-        //return false;
         return user.getRole() == Role.RESPONSAVEL || user.getRole() == Role.ADMINISTRADOR;
     }
 
     public boolean canView(Publication publication, User user) {
-        // If visible, anyone can view
         if (publication.isVisible()) {
             return true;
         }
 
-        // If not visible, only submitter, RESPONSAVEL, and ADMINISTRADOR can view
         if (publication.getAuthor().getUsername().equals(user.getUsername())) {
             return true;
         }
@@ -564,7 +537,6 @@ public class PublicationBean {
 
         publication.setDescription(newDescription);
 
-        // Log activity
         historyBean.logActivity(
                 ActivityType.PUBLICATION_UPDATED,
                 "Summary regenerated for publication: " + publication.getTitle(),
@@ -581,7 +553,6 @@ public class PublicationBean {
             String resumoAI = null;
             String textoDocumento = null;
 
-            // Extrair texto de ficheiros
             if (fileType == FileType.PDF) {
                 InputStream streamForAI = new ByteArrayInputStream(fileBytes);
                 textoDocumento = PdfTextExtractor.extractText(streamForAI);
@@ -591,12 +562,10 @@ public class PublicationBean {
                 textoDocumento = ZipTextExtractor.extractTextFromPDFs(streamForZip);
             }
 
-            // Gerar resumo
             if (textoDocumento != null && !textoDocumento.trim().isEmpty()) {
                 resumoAI = aiService.generateSummary(textoDocumento);
             }
 
-            // Atualizar a publicação com o resumo gerado
             Publication publication = find(publicationId);
             if (publication != null) {
                 if (resumoAI != null && !resumoAI.trim().isEmpty()) {
@@ -624,7 +593,6 @@ public class PublicationBean {
             logger.severe("Erro ao gerar resumo assíncrono para publicação ID " + publicationId + ": " + e.getMessage());
             e.printStackTrace();
 
-            // Atualizar com mensagem de erro
             try {
                 Publication publication = find(publicationId);
                 if (publication != null) {

@@ -38,7 +38,6 @@ public class UserBean {
             User user = new User(username, Hasher.hash(password), email, name, role);
             em.persist(user);
             em.flush();
-            // Log activity
             if (user_performing != null) {
                 historyBean.logActivity(
                         ActivityType.USER_CREATED,
@@ -92,7 +91,6 @@ public class UserBean {
         user.setName(name);
         em.merge(user);
 
-        // Log activity
         historyBean.logActivity(
                 ActivityType.USER_UPDATED,
                 "User updated: " + username,
@@ -115,7 +113,6 @@ public class UserBean {
         user.setPassword(Hasher.hash(newPassword));
         em.merge(user);
 
-        // Log activity
         historyBean.logActivity(
                 ActivityType.USER_UPDATED,
                 "Password changed for user: " + username,
@@ -138,7 +135,6 @@ public class UserBean {
         user.setPassword(Hasher.hash(newPassword));
         em.merge(user);
 
-        // Log activity
         historyBean.logActivity(
                 ActivityType.USER_PASSWORD_RESET,
                 "Password reset for user: " + username,
@@ -158,7 +154,6 @@ public class UserBean {
         user.setRole(newRole);
         em.merge(user);
 
-        // Log activity
         historyBean.logActivity(
                 ActivityType.USER_ROLE_CHANGED,
                 "User role changed from " + oldRole + " to " + newRole + " for: " + username,
@@ -177,7 +172,6 @@ public class UserBean {
         user.setBlocked(false);
         em.merge(user);
 
-        // Log activity
         historyBean.logActivity(
                 ActivityType.USER_ACTIVATED,
                 "User activated: " + username,
@@ -196,7 +190,6 @@ public class UserBean {
         user.setBlocked(true);
         em.merge(user);
 
-        // Log activity
         historyBean.logActivity(
                 ActivityType.USER_DEACTIVATED,
                 "User deactivated: " + username,
@@ -212,7 +205,6 @@ public class UserBean {
             throw new MyEntityNotFoundException("User not found: " + username);
         }
 
-        // Log activity BEFORE deletion
         historyBean.logActivity(
                 ActivityType.USER_DELETED,
                 "User deleted: " + username,
@@ -238,7 +230,6 @@ public class UserBean {
         user.subscribeTag(tag);
         em.merge(user);
 
-        // Log activity
         historyBean.logActivity(
                 ActivityType.TAG_SUBSCRIBED,
                 "User " + username + " subscribed to tag: " + tag.getName(),
@@ -262,7 +253,6 @@ public class UserBean {
         user.unsubscribeTag(tag);
         em.merge(user);
 
-        // Log activity
         historyBean.logActivity(
                 ActivityType.TAG_UNSUBSCRIBED,
                 "User " + username + " unsubscribed from tag: " + tag.getName(),

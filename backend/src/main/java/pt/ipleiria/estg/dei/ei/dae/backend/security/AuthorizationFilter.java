@@ -17,14 +17,6 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashSet;
 
-/**
- * Filtro que verifica se o utilizador autenticado tem permissão para aceder ao recurso
- * Executa após a autenticação (prioridade AUTHORIZATION)
- *
- * Regras de precedência:
- * - Anotações no metodo têm precedência sobre anotações na classe
- * - @PermitAll, @DenyAll, @RolesAllowed podem ser combinadas
- */
 @Provider
 @Authenticated
 @Priority(Priorities.AUTHORIZATION)
@@ -47,7 +39,6 @@ public class AuthorizationFilter implements ContainerRequestFilter {
         Method method = methodInvoker.getMethod();
         var resource = method.getDeclaringClass();
 
-        // Cenário 1: Classe com @PermitAll
         if (resource.isAnnotationPresent(PermitAll.class)) {
             if (method.isAnnotationPresent(DenyAll.class)) {
                 containerRequestContext.abortWith(ACCESS_DENIED);
@@ -64,10 +55,9 @@ public class AuthorizationFilter implements ContainerRequestFilter {
                 containerRequestContext.abortWith(ACCESS_FORBIDDEN);
                 return;
             }
-            return; // PermitAll - acesso concedido
+            return;
         }
 
-        // Cenário 2: Classe com @DenyAll
         if (resource.isAnnotationPresent(DenyAll.class)) {
             if (method.isAnnotationPresent(PermitAll.class)) {
                 return;
@@ -86,7 +76,6 @@ public class AuthorizationFilter implements ContainerRequestFilter {
             return;
         }
 
-        // Cenário 3: Classe com @RolesAllowed
         if (resource.isAnnotationPresent(RolesAllowed.class)) {
             if (method.isAnnotationPresent(DenyAll.class)) {
                 containerRequestContext.abortWith(ACCESS_DENIED);
@@ -100,7 +89,6 @@ public class AuthorizationFilter implements ContainerRequestFilter {
             RolesAllowed rolesAnnotation = resource.getAnnotation(RolesAllowed.class);
             HashSet<String> roles = new HashSet<>(Arrays.asList(rolesAnnotation.value()));
 
-            // Adicionar roles do metodo (se existirem)
             if (method.isAnnotationPresent(RolesAllowed.class)) {
                 rolesAnnotation = method.getAnnotation(RolesAllowed.class);
                 roles.addAll(Arrays.asList(rolesAnnotation.value()));
@@ -114,7 +102,6 @@ public class AuthorizationFilter implements ContainerRequestFilter {
             return;
         }
 
-        // Cenário 4: Sem anotações na classe, verificar método
         if (method.isAnnotationPresent(DenyAll.class)) {
             containerRequestContext.abortWith(ACCESS_DENIED);
             return;
