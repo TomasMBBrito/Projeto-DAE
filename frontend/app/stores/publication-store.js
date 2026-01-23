@@ -208,6 +208,7 @@ export const usePublicationStore = defineStore("publicationStore", () => {
         return response
     }
 
+    // ✅ CORRIGIDO - Método getHistory que decide qual endpoint usar
     async function getHistory(publicationId) {
         const authStore = useAuthStore()
 
@@ -219,7 +220,13 @@ export const usePublicationStore = defineStore("publicationStore", () => {
             throw new Error('Publication ID is required')
         }
 
-        const response = await $fetch(`${api}/history/posts/${publicationId}`, {
+        // Usa endpoint correto baseado no role
+        const isAdmin = authStore.user?.role === 'ADMINISTRADOR'
+        const endpoint = isAdmin
+            ? `${api}/history/posts/${publicationId}`
+            : `${api}/history/me/posts/${publicationId}`
+
+        const response = await $fetch(endpoint, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${authStore.token}`,
@@ -266,6 +273,27 @@ export const usePublicationStore = defineStore("publicationStore", () => {
         return response
     }
 
+    // 🆕 Mostrar/ocultar publicação
+    async function toggleVisibility(id, isVisible) {
+        const authStore = useAuthStore()
+
+        if (!authStore.token) {
+            throw new Error('Not authenticated')
+        }
+
+        const response = await $fetch(`${api}/posts/${id}/state`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${authStore.token}`,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: { visible: isVisible }
+        })
+
+        return response
+    }
+
     return {
         create,
         update,
@@ -279,6 +307,7 @@ export const usePublicationStore = defineStore("publicationStore", () => {
         addRating,
         getHistory,
         addTag,
-        removeTag
+        removeTag,
+        toggleVisibility
     }
 })

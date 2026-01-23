@@ -19,7 +19,7 @@
     <div class="search-controls">
       <div class="search-bar">
         <input v-model="searchQuery" type="text" placeholder="Search by ID, title, author..." class="search-input"
-          @keyup.enter="searchPublications" />
+               @keyup.enter="searchPublications" />
         <button @click="searchPublications" class="btn-search">Search</button>
       </div>
 
@@ -75,26 +75,43 @@
     </div>
 
     <div v-else class="publications-list">
-      <div v-for="pub in publications" :key="pub.id" class="publication-card" @click="goToDetails(pub.id)">
-        <h3>{{ pub.title }}</h3>
-        <p class="authors">Submitted by: {{ pub.submitterUsername }}</p>
-        <p class="summary">{{ truncate(pub.summary, 150) }}</p>
+      <div v-for="pub in publications" :key="pub.id" class="publication-card">
+        <div class="card-header">
+          <h3 @click="goToDetails(pub.id)">{{ pub.title }}</h3>
 
-        <span v-if="canEdit(pub)">
-          <button @click.stop="goToHistory(pub.id)" class="btn-history">View History</button>
-        </span>
+          <button
+              v-if="canEdit(pub)"
+              @click.stop="toggleVisibility(pub)"
+              class="btn-visibility-icon"
+              :title="pub.visible ? 'Hide publication' : 'Show publication'"
+          >
+            {{ pub.visible ? 'Hide' : 'Show' }}
+          </button>
+        </div>
 
-        <div class="publication-meta">
-          <span class="meta-item">
-            Area: {{ pub.scientificArea }}
+        <div v-if="pub.visible === false && canEdit(pub)" class="hidden-badge-card">
+          Hidden
+        </div>
+
+        <div @click="goToDetails(pub.id)" style="cursor: pointer;">
+          <p class="authors">Submitted by: {{ pub.submitterUsername }}</p>
+          <p class="summary">{{ truncate(pub.summary, 150) }}</p>
+
+          <span v-if="canEdit(pub)">
+            <button @click.stop="goToHistory(pub.id)" class="btn-history">View History</button>
           </span>
-          <span class="meta-item">
-            Comments: {{ pub.commentCount || 0 }}
-          </span>
-          <span class="meta-item">
-            Rating: {{ pub.averageRating ? pub.averageRating.toFixed(1) : 'N/A' }}
-          </span>
-          <span class="meta-item" v-if="pub.visible == false && canEdit(pub)"> <b>hidden</b> </span>
+
+          <div class="publication-meta">
+            <span class="meta-item">
+              Area: {{ pub.scientificArea }}
+            </span>
+            <span class="meta-item">
+              Comments: {{ pub.commentCount || 0 }}
+            </span>
+            <span class="meta-item">
+              Rating: {{ pub.averageRating ? pub.averageRating.toFixed(1) : 'N/A' }}
+            </span>
+          </div>
         </div>
       </div>
     </div>
@@ -132,6 +149,21 @@ function canEdit(publication){
   return role === 'responsavel' || role === 'administrador' || publication.submitterUsername === username
 }
 
+async function toggleVisibility(publication) {
+  if (!confirm(`Are you sure you want to ${publication.visible ? 'hide' : 'show'} this publication?`)) {
+    return
+  }
+
+  try {
+    const newVisibility = !publication.visible
+    await publicationStore.toggleVisibility(publication.id, newVisibility)
+    publication.visible = newVisibility
+    await loadPublications()
+  } catch (e) {
+    alert('Failed to toggle visibility: ' + e.message)
+  }
+}
+
 function goToTags() {
   router.push('/tags')
 }
@@ -141,7 +173,7 @@ function goToUsers() {
 }
 
 function goToHistory(id) {
-    router.push(`/publication/${id}-history`)
+  router.push(`/publication/${id}-history`)
 }
 
 function goToEmails() {
@@ -215,17 +247,12 @@ async function toggleTag(tagId) {
   const index = selectedTags.value.indexOf(tagId)
 
   if (index > -1) {
-    // Remove tag
     selectedTags.value.splice(index, 1)
   } else {
-    // Add tag
     selectedTags.value.push(tagId)
   }
 
-  // Clear search when using tag filter
   searchQuery.value = ''
-
-  // Filter publications
   await filterBySelectedTags()
 }
 
@@ -258,12 +285,10 @@ function goLogout() {
 </script>
 
 <style scoped>
-/* Global font */
 .search-publications {
   font-family: "Inter", sans-serif;
 }
 
-/* Navbar Styles */
 .navbar {
   display: flex;
   justify-content: space-between;
@@ -316,7 +341,6 @@ function goLogout() {
   background: #c82333;
 }
 
-/* Main Content */
 .search-publications {
   padding: 20px;
   max-width: 1200px;
@@ -486,7 +510,6 @@ function goLogout() {
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  cursor: pointer;
   transition: transform 0.2s, box-shadow 0.2s;
 }
 
@@ -495,10 +518,53 @@ function goLogout() {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
-.publication-card h3 {
-  margin: 0 0 10px 0;
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 15px;
+  margin-bottom: 10px;
+}
+
+.card-header h3 {
+  margin: 0;
   color: #0077cc;
   font-size: 18px;
+  flex: 1;
+  cursor: pointer;
+}
+
+.card-header h3:hover {
+  text-decoration: underline;
+}
+
+.btn-visibility-icon {
+  background: transparent;
+  border: 2px solid #ddd;
+  padding: 8px 12px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 18px;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.btn-visibility-icon:hover {
+  background: #f0f0f0;
+  border-color: #ffc107;
+  transform: scale(1.1);
+}
+
+.hidden-badge-card {
+  background: #fff3cd;
+  border: 1px solid #ffc107;
+  color: #856404;
+  padding: 6px 12px;
+  border-radius: 4px;
+  margin-bottom: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-block;
 }
 
 .authors {
