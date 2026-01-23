@@ -98,8 +98,24 @@
               >
                 {{ comment.visible ? 'Hide' : 'Show' }}
               </button>
+              <button
+                  v-if="canEditComment(comment)"
+                  @click="startEdit(comment)"
+                  class="btn-edit-comment"
+              >
+                Edit
+              </button>
             </div>
-            <p class="comment-content">{{ comment.content }}</p>
+            <div v-if="editingCommentId === comment.id" class="edit-comment">
+              <textarea
+                  v-model="editText"
+                  class="comment-input"
+                  rows="3"
+              ></textarea>
+              <button @click="saveEdit(comment)" class="btn-save">Save</button>
+              <button @click="cancelEdit" class="btn-cancel">Cancel</button>
+            </div>
+            <p v-else class="comment-content">{{ comment.content }}</p>
           </div>
         </div>
       </div>
@@ -123,6 +139,8 @@ const error = ref('')
 const newComment = ref('')
 const userRating = ref(0)
 const ratingMessage = ref('')
+const editingCommentId = ref(null)
+const editText = ref('')
 
 const publicationId = computed(() => parseInt(route.params.id))
 
@@ -194,6 +212,29 @@ async function toggleVisibility(comment) {
     comment.visible = newVisibility
   } catch (e) {
     alert('Failed to toggle comment visibility: ' + e.message)
+  }
+}
+
+function startEdit(comment) {
+  editingCommentId.value = comment.id
+  editText.value = comment.content
+}
+
+function cancelEdit() {
+  editingCommentId.value = null
+  editText.value = ''
+}
+
+async function saveEdit(comment) {
+  if (!editText.value.trim()) return
+
+  try {
+    await publicationStore.editComment(publicationId.value, comment.id, editText.value)
+    comment.content = editText.value
+    editingCommentId.value = null
+    editText.value = ''
+  } catch (e) {
+    alert('Failed to edit comment: ' + e.message)
   }
 }
 
@@ -528,5 +569,56 @@ function formatDate(date) {
 .btn-toggle-visibility:hover {
   background: #f0f0f0;
   border-color: #0077cc;
+}
+
+.btn-edit-comment {
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 4px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  margin-left: 5px;
+  transition: background 0.2s;
+}
+
+.btn-edit-comment:hover {
+  background: #218838;
+}
+
+.edit-comment {
+  margin-top: 10px;
+}
+
+.btn-save {
+  background: #0077cc;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  margin-right: 5px;
+  margin-top: 5px;
+}
+
+.btn-save:hover {
+  background: #005fa3;
+}
+
+.btn-cancel {
+  background: #6c757d;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+.btn-cancel:hover {
+  background: #545b62;
 }
 </style>
