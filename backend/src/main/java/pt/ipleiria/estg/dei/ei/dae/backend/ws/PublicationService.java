@@ -274,9 +274,9 @@ public class PublicationService {
                     id,
                     publicationDTO.getTitle(),
                     publicationDTO.getSummary(),
-                    publication.getScientificArea(),
-                    publication.getPublicationDate(),
-                    publication.getAuthors(),
+                    publicationDTO.getScientificArea(),
+                    LocalDate.parse(publicationDTO.getPublicationDate()),
+                    publicationDTO.getAuthors(),
                     user
             );
 

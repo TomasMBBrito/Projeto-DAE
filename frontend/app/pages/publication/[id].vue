@@ -9,12 +9,36 @@
 
     <div v-else-if="publication" class="publication-content">
       <div class="publication-header">
-        <h1>{{ publication.title }}</h1>
-        <p class="authors">By {{ publication.authors }}</p>
+        <div class="header-top">
+          <h1>{{ publication.title }}</h1>
+          <button
+              v-if="canEdit"
+              @click="goToEdit"
+              class="btn-edit-publication"
+          >
+            Edit Publication
+          </button>
+        </div>
+        <p class="authors">By {{ publication.authors && publication.authors.length > 0 ? publication.authors.join(', ') : (publication.authors || 'Unknown') }}</p>
         <div class="meta-info">
           <span>Area: {{ publication.scientificArea }}</span>
           <span>Date: {{ formatDate(publication.publicationDate) }}</span>
           <span>Average Rating: {{ publication.averageRating ? publication.averageRating.toFixed(1) : 'N/A' }}</span>
+        </div>
+
+        <!-- Tags Section -->
+        <div v-if="publication.tags && publication.tags.length > 0" class="tags-section">
+          <h3>Tags</h3>
+          <div class="tags-list">
+            <span
+                v-for="tag in publication.tags"
+                :key="tag.id"
+                class="tag-badge"
+                @click="filterByTag(tag.id)"
+            >
+              {{ tag.name }}
+            </span>
+          </div>
         </div>
       </div>
 
@@ -27,11 +51,11 @@
         <h2>Rate this Publication</h2>
         <div class="stars">
           <button
-            v-for="star in 5"
-            :key="star"
-            @click="ratePublication(star)"
-            class="star-btn"
-            :class="{ active: star <= userRating }"
+              v-for="star in 5"
+              :key="star"
+              @click="ratePublication(star)"
+              class="star-btn"
+              :class="{ active: star <= userRating }"
           >
             ★
           </button>
@@ -44,10 +68,10 @@
 
         <div class="add-comment">
           <textarea
-            v-model="newComment"
-            placeholder="Add a comment..."
-            class="comment-input"
-            rows="3"
+              v-model="newComment"
+              placeholder="Add a comment..."
+              class="comment-input"
+              rows="3"
           ></textarea>
           <button @click="postComment" class="btn-comment" :disabled="!newComment.trim()">
             Post Comment
@@ -66,10 +90,11 @@
                 <span class="comment-date">{{ formatDate(comment.createdAt) }}</span>
                 <span v-if="!comment.visible" class="hidden-badge">Hidden</span>
               </div>
-              <button 
-                @click="toggleVisibility(comment)" 
-                class="btn-toggle-visibility"
-                :title="comment.visible ? 'Hide comment' : 'Show comment'"
+              <button
+                  v-if="canEditComment(comment)"
+                  @click="toggleVisibility(comment)"
+                  class="btn-toggle-visibility"
+                  :title="comment.visible ? 'Hide comment' : 'Show comment'"
               >
                 {{ comment.visible ? 'Hide' : 'Show' }}
               </button>
@@ -101,9 +126,23 @@ const ratingMessage = ref('')
 
 const publicationId = computed(() => parseInt(route.params.id))
 
-const isAdmin = computed(() =>
-    authStore.user?.role === 'ADMINISTRADOR'
-)
+const canEdit = computed(() => {
+  if (!publication.value || !authStore.user) return false
+
+  const role = authStore.user.role
+  const isAuthor = publication.value.submitterUsername === authStore.user.username
+
+  return isAuthor || role === 'RESPONSAVEL' || role === 'ADMINISTRADOR'
+})
+
+const canEditComment = (comment) => {
+  if (!authStore.user) return false
+
+  const role = authStore.user.role
+  const isAuthor = comment.author === authStore.user.username
+
+  return isAuthor || role === 'RESPONSAVEL' || role === 'ADMINISTRADOR'
+}
 
 onMounted(() => {
   loadPublication()
@@ -113,7 +152,7 @@ onMounted(() => {
 async function loadPublication() {
   loading.value = true
   error.value = ''
-  
+
   try {
     publication.value = await publicationStore.getById(publicationId.value)
     console.log(publication.value)
@@ -127,7 +166,6 @@ async function loadPublication() {
 async function loadComments() {
   try {
     comments.value = await publicationStore.getComments(publicationId.value)
-    //console.log(comments.value)
   } catch (e) {
     console.error('Failed to load comments:', e)
   }
@@ -149,11 +187,10 @@ async function toggleVisibility(comment) {
   try {
     const newVisibility = !comment.visible
     await publicationStore.toggleCommentVisibility(
-      publicationId.value, 
-      comment.id, 
-      newVisibility
+        publicationId.value,
+        comment.id,
+        newVisibility
     )
-    // Atualiza localmente
     comment.visible = newVisibility
   } catch (e) {
     alert('Failed to toggle comment visibility: ' + e.message)
@@ -175,6 +212,17 @@ async function ratePublication(rating) {
 
 function goBack() {
   router.push('/publication/searchPublications')
+}
+
+function goToEdit() {
+  router.push(`/publication/details/${publicationId.value}`)
+}
+
+function filterByTag(tagId) {
+  router.push({
+    path: '/publication/searchPublications',
+    query: { tagId: tagId }
+  })
 }
 
 function formatDate(date) {
@@ -224,9 +272,32 @@ function formatDate(date) {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+.header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+}
+
 .publication-header h1 {
   margin: 0 0 10px 0;
   color: #333;
+  flex: 1;
+}
+
+.btn-edit-publication {
+  padding: 10px 20px;
+  background: #0077cc;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.btn-edit-publication:hover {
+  background: #005fa3;
 }
 
 .authors {
@@ -240,9 +311,41 @@ function formatDate(date) {
   gap: 20px;
   padding: 15px 0;
   border-bottom: 2px solid #eee;
-  margin-bottom: 30px;
+  margin-bottom: 20px;
   font-size: 14px;
   color: #666;
+}
+
+.tags-section {
+  margin-bottom: 30px;
+}
+
+.tags-section h3 {
+  font-size: 16px;
+  color: #333;
+  margin: 0 0 12px 0;
+}
+
+.tags-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tag-badge {
+  padding: 6px 14px;
+  background: #0077cc;
+  color: white;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tag-badge:hover {
+  background: #005fa3;
+  transform: translateY(-1px);
 }
 
 .publication-body {

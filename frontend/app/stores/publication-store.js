@@ -17,8 +17,6 @@ export const usePublicationStore = defineStore("publicationStore", () => {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${authStore.token}`,
-                // ⚠️ NÃO definir Content-Type aqui
-                // o browser trata automaticamente o multipart/form-data
                 'Accept': 'application/json'
             },
             body: formData
@@ -27,16 +25,39 @@ export const usePublicationStore = defineStore("publicationStore", () => {
         return response
     }
 
-    async function getAll(sortBy = '') {
+    async function update(id, data) {
         const authStore = useAuthStore()
-        
-        // Debug: verifica se tem token
-        //console.log('Token:', authStore.token)
-        
+
         if (!authStore.token) {
             throw new Error('Not authenticated')
         }
-        
+
+        const response = await $fetch(`${api}/posts/${id}`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${authStore.token}`,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: {
+                title: data.title,
+                summary: data.summary,
+                scientificArea: data.scientificArea,
+                publicationDate: data.publicationDate,
+                authors: data.authors
+            }
+        })
+
+        return response
+    }
+
+    async function getAll(sortBy = '') {
+        const authStore = useAuthStore()
+
+        if (!authStore.token) {
+            throw new Error('Not authenticated')
+        }
+
         const url = sortBy ? `${api}/posts/?sort=${sortBy}` : `${api}/posts/`
 
         const response = await $fetch(url, {
@@ -52,7 +73,7 @@ export const usePublicationStore = defineStore("publicationStore", () => {
 
     async function getById(id) {
         const authStore = useAuthStore()
-        
+
         if (!authStore.token) {
             throw new Error('Not authenticated')
         }
@@ -70,7 +91,7 @@ export const usePublicationStore = defineStore("publicationStore", () => {
 
     async function search(searchTerm) {
         const authStore = useAuthStore()
-        
+
         if (!authStore.token) {
             throw new Error('Not authenticated')
         }
@@ -111,7 +132,7 @@ export const usePublicationStore = defineStore("publicationStore", () => {
 
     async function getComments(publicationId) {
         const authStore = useAuthStore()
-        
+
         if (!authStore.token) {
             throw new Error('Not authenticated')
         }
@@ -129,7 +150,7 @@ export const usePublicationStore = defineStore("publicationStore", () => {
 
     async function toggleCommentVisibility(publicationId, commentId, isVisible) {
         const authStore = useAuthStore()
-        
+
         if (!authStore.token) {
             throw new Error('Not authenticated')
         }
@@ -149,7 +170,7 @@ export const usePublicationStore = defineStore("publicationStore", () => {
 
     async function addComment(publicationId, content) {
         const authStore = useAuthStore()
-        
+
         if (!authStore.token) {
             throw new Error('Not authenticated')
         }
@@ -167,29 +188,9 @@ export const usePublicationStore = defineStore("publicationStore", () => {
         return response
     }
 
-    async function toggleCommentVisibility(publicationId, commentId, isVisible) {
-        const authStore = useAuthStore()
-        
-        if (!authStore.token) {
-            throw new Error('Not authenticated')
-        }
-
-        const response = await $fetch(`${api}/posts/${publicationId}/comments/${commentId}`, {
-            method: 'PUT',
-            headers: {
-                'Authorization': `Bearer ${authStore.token}`,
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            body: { visible: isVisible }
-        })
-
-        return response
-    }
-
     async function addRating(publicationId, rating) {
         const authStore = useAuthStore()
-        
+
         if (!authStore.token) {
             throw new Error('Not authenticated')
         }
@@ -208,29 +209,66 @@ export const usePublicationStore = defineStore("publicationStore", () => {
     }
 
     async function getHistory(publicationId) {
-    const authStore = useAuthStore()
+        const authStore = useAuthStore()
 
-    if (!authStore.token) {
-        throw new Error('Not authenticated')
-    }
-
-    if (!publicationId) {
-        throw new Error('Publication ID is required')
-    }
-
-    const response = await $fetch(`${api}/history/posts/${publicationId}`, {
-        method: 'GET',
-        headers: {
-            'Authorization': `Bearer ${authStore.token}`,
-            'Accept': 'application/json'
+        if (!authStore.token) {
+            throw new Error('Not authenticated')
         }
-    })
 
-    return response
-}
+        if (!publicationId) {
+            throw new Error('Publication ID is required')
+        }
+
+        const response = await $fetch(`${api}/history/posts/${publicationId}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${authStore.token}`,
+                'Accept': 'application/json'
+            }
+        })
+
+        return response
+    }
+
+    async function addTag(publicationId, tagId) {
+        const authStore = useAuthStore()
+
+        if (!authStore.token) {
+            throw new Error('Not authenticated')
+        }
+
+        const response = await $fetch(`${api}/posts/${publicationId}/tags/${tagId}`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${authStore.token}`,
+                'Accept': 'application/json'
+            }
+        })
+
+        return response
+    }
+
+    async function removeTag(publicationId, tagId) {
+        const authStore = useAuthStore()
+
+        if (!authStore.token) {
+            throw new Error('Not authenticated')
+        }
+
+        const response = await $fetch(`${api}/posts/${publicationId}/tags/${tagId}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${authStore.token}`,
+                'Accept': 'application/json'
+            }
+        })
+
+        return response
+    }
 
     return {
         create,
+        update,
         getAll,
         getById,
         search,
@@ -240,6 +278,7 @@ export const usePublicationStore = defineStore("publicationStore", () => {
         addComment,
         addRating,
         getHistory,
-        toggleCommentVisibility
+        addTag,
+        removeTag
     }
 })
